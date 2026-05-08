@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Reports — Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
+  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
+  --crimson:#C0392B;--crimson-l:#FDECEA;
+  --green:#1E7A1E;--green-l:#EBF5EB;
+  --orange:#E67E22;--orange-l:#FEF0E6;
+  --purple:#6C3483;--purple-l:#F5EEF8;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select{font-family:inherit;outline:0}
+
+/* ── Top bar ── */
+.back-bar{background:var(--teal);padding:14px 24px;display:flex;align-items:center;
+  gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
+  border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:6px;transition:background .15s}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.bar-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1}
+
+/* ── Tabs ── */
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 20px;position:sticky;top:53px;z-index:40;overflow-x:auto}
+.tab{padding:14px 16px;font-size:13px;font-weight:500;color:var(--ink-60);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+
+/* ── Filter bar ── */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);
+  padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  position:sticky;top:101px;z-index:39}
+.filter-select,.filter-input{padding:7px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:12px;color:var(--ink);background:var(--white)}
+.filter-select{appearance:none;padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center}
+.filter-input{width:120px}
+.filter-select:focus,.filter-input:focus{border-color:var(--teal);outline:none}
+.filter-label{font-size:12px;color:var(--ink-60);font-weight:500}
+.filter-sep{width:1px;height:20px;background:var(--border)}
+.btn-apply{padding:7px 16px;border-radius:var(--radius-sm);background:var(--teal);
+  color:#fff;font-size:12px;font-weight:500;border:0;cursor:pointer}
+.btn-apply:hover{background:var(--teal-d)}
+
+/* ── Main ── */
+.main{max-width:960px;margin:0 auto;padding:24px 20px 60px}
+
+/* ── Stat cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-bottom:24px}
+.stat-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:18px;box-shadow:var(--shadow)}
+.stat-label{font-size:10px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.stat-val{font-family:'DM Serif Display',serif;font-size:30px;line-height:1;color:var(--ink)}
+.stat-val.gold{color:var(--saffron-d)}
+.stat-val.teal{color:var(--teal)}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--crimson)}
+.stat-val.orange{color:var(--orange)}
+.stat-val.purple{color:var(--purple)}
+.stat-sub{font-size:11px;color:var(--ink-30);margin-top:4px}
+
+/* ── Report card ── */
+.report-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  margin-bottom:16px;overflow:hidden}
+.report-card-header{padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.report-card-title{font-size:14px;font-weight:500}
+.report-card-sub{font-size:12px;color:var(--ink-60);margin-top:2px}
+.report-card-body{padding:20px}
+
+/* ── Bar chart ── */
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--ink-60);width:90px;text-align:right;flex-shrink:0}
+.bar-label.wide{width:140px}
+.bar-track{flex:1;height:24px;background:var(--surface);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s ease;min-width:2px}
+.bar-val{font-size:12px;font-weight:500;color:var(--ink);width:44px;flex-shrink:0}
+
+/* ── Horizontal bar colors ── */
+.bar-teal{background:var(--teal)}
+.bar-saffron{background:var(--saffron)}
+.bar-green{background:var(--green)}
+.bar-crimson{background:var(--crimson)}
+.bar-orange{background:var(--orange)}
+.bar-purple{background:var(--purple)}
+.bar-gray{background:var(--ink-30)}
+
+/* ── Trend chart (SVG inline) ── */
+.trend-wrap{width:100%;overflow-x:auto}
+.trend-wrap svg{min-width:360px}
+
+/* ── Score grid ── */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.score-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px}
+.score-q{font-size:11px;color:var(--ink-60);margin-bottom:8px;line-height:1.4}
+.score-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--teal)}
+.score-out{font-size:11px;color:var(--ink-30);margin-left:4px}
+.score-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.score-fill{height:100%;border-radius:3px;background:var(--teal)}
+
+/* ── Table ── */
+.rep-table{width:100%;border-collapse:collapse}
+.rep-table thead th{font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;padding:9px 12px;
+  text-align:left;border-bottom:1px solid var(--border);background:var(--surface)}
+.rep-table tbody tr{border-bottom:1px solid var(--border)}
+.rep-table tbody tr:last-child{border-bottom:none}
+.rep-table tbody tr:hover{background:var(--ivory)}
+.rep-table tbody td{padding:10px 12px;font-size:13px}
+.td-muted{color:var(--ink-60)}
+
+/* ── Status pills ── */
+.pill{padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500}
+.pill-open{background:var(--crimson-l);color:var(--crimson)}
+.pill-sourcing{background:var(--orange-l);color:var(--orange)}
+.pill-available{background:var(--teal-l);color:var(--teal)}
+.pill-closed{background:var(--green-l);color:var(--green)}
+.pill-cannot{background:var(--surface);color:var(--ink-60)}
+
+/* ── Aging badge ── */
+.aging-ok{color:var(--green);font-weight:500}
+.aging-warn{color:var(--orange);font-weight:500}
+.aging-danger{color:var(--crimson);font-weight:500}
+
+/* ── Two col layout ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+
+/* ── Voice list ── */
+.voice-list{display:flex;flex-direction:column;gap:8px}
+.voice-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px}
+.voice-text{font-size:13px;color:var(--ink);line-height:1.5}
+.voice-meta{font-size:11px;color:var(--ink-30);margin-top:5px}
+
+/* ── Peak hour heatmap ── */
+.heatmap{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.hm-cell{border-radius:4px;padding:6px 2px;text-align:center;cursor:default}
+.hm-label{font-size:9px;color:var(--ink-60);margin-bottom:3px;font-weight:500}
+.hm-val{font-size:11px;font-weight:600}
+@media(max-width:560px){.heatmap{grid-template-columns:repeat(6,1fr)}}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:36px 24px;color:var(--ink-60)}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.empty p{font-size:13px}
+
+/* ── Loading ── */
+.loading{text-align:center;padding:40px;color:var(--ink-60);font-size:14px}
+
+.fade-in{animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── Divider ── */
+.sec-divider{font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.1em;margin:20px 0 12px;
+  display:flex;align-items:center;gap:8px}
+.sec-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <div class="bar-title">Reports</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab_summary"   onclick="showTab('summary')">📊 Summary</div>
+  <div class="tab"        id="tab_footfall"  onclick="showTab('footfall')">👣 Footfall</div>
+  <div class="tab"        id="tab_feedback"  onclick="showTab('feedback')">💬 Feedback</div>
+  <div class="tab"        id="tab_divert"    onclick="showTab('divert')">↩️ Diverts</div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Period:</span>
+  <select class="filter-select" id="filterPeriod" onchange="onPeriodChange()">
+    <option value="today">Today</option>
+    <option value="week" selected>This Week</option>
+    <option value="month">This Month</option>
+    <option value="custom">Custom Range</option>
+  </select>
+  <div id="customRange" style="display:none;gap:6px;align-items:center;display:none">
+    <input type="date" class="filter-input" id="dateFrom"/>
+    <span style="font-size:12px;color:var(--ink-30)">to</span>
+    <input type="date" class="filter-input" id="dateTo"/>
+  </div>
+  <button class="btn-apply" onclick="loadData()">Apply</button>
+</div>
+
+<div class="main" id="mainContent">
+  <div class="loading">⏳ Loading reports…</div>
+</div>
+
+<script>
+/* ── Config ── */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ── Session ── */
+var SESSION = null;
+function getSession(){
+  var t=sessionStorage.getItem("crm_token"),u=sessionStorage.getItem("crm_user");
+  if(!t||!u) return null;
+  try{return{token:t,user:JSON.parse(u)};}catch(e){return null;}
+}
+
+/* ── API ── */
+function api(body){
+  body.token=SESSION.token;
+  return fetch(API_URL,{method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+/* ── State ── */
+var DATA = { footfall:[], daily:[], feedback:[], diverts:[], questions:[] };
+var currentTab = "summary";
+
+/* ── IST helpers ── */
+function nowIST(){
+  var d=new Date(),utc=d.getTime()+d.getTimezoneOffset()*60000;
+  return new Date(utc+330*60000);
+}
+function toDateKey(d){
+  return String(d.getDate()).padStart(2,"0")+"/"+
+    String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+function parseDate(str){
+  // DD/MM/YYYY
+  if(!str) return null;
+  var s = String(str);
+  if(s.indexOf("/")!==-1){
+    var p=s.split("/");
+    if(p.length===3) return new Date(p[2],p[1]-1,p[0]);
+  }
+  return new Date(str);
+}
+function fmtDisplay(str){
+  var d=parseDate(str);
+  if(!d||isNaN(d)) return str;
+  return d.toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+}
+
+/* ── Date range ── */
+function getRange(){
+  var period = document.getElementById("filterPeriod").value;
+  var now    = nowIST();
+  var from, to;
+  to = new Date(now); to.setHours(23,59,59,0);
+
+  if(period==="today"){
+    from = new Date(now); from.setHours(0,0,0,0);
+  } else if(period==="week"){
+    from = new Date(now);
+    from.setDate(now.getDate() - 6);
+    from.setHours(0,0,0,0);
+  } else if(period==="month"){
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else {
+    var df = document.getElementById("dateFrom").value;
+    var dt = document.getElementById("dateTo").value;
+    from = df ? new Date(df) : new Date(now.getFullYear(), now.getMonth(), 1);
+    to   = dt ? new Date(dt) : now;
+    to.setHours(23,59,59,0);
+  }
+  return {from:from, to:to};
+}
+
+function inRange(dateStr){
+  var d = parseDate(dateStr);
+  if(!d||isNaN(d)) return false;
+  var r = getRange();
+  return d >= r.from && d <= r.to;
+}
+
+function onPeriodChange(){
+  var period = document.getElementById("filterPeriod").value;
+  var cr = document.getElementById("customRange");
+  if(cr) cr.style.display = period==="custom" ? "flex" : "none";
+}
+
+/* ── Boot ── */
+function boot(){
+  SESSION = getSession();
+  if(!SESSION){ window.location.href="index.html"; return; }
+  loadData();
+}
+
+function goBack(){ window.location.href="app.html"; }
+
+function loadData(){
+  document.getElementById("mainContent").innerHTML =
+    '<div class="loading">⏳ Loading reports…</div>';
+
+  Promise.all([
+    api({action:"get_footfall",   date:"all"}),
+    api({action:"get_feedback"}),
+    api({action:"get_diverts"}),
+    api({action:"get_feedback_questions"}),
+  ]).then(function(res){
+    // Footfall returns only one day — we need all entries
+    // Re-fetch without date filter using a trick: send empty date
+    DATA.footfall  = res[0].entries       || [];
+    DATA.daily     = [res[0].daily_summary].filter(Boolean);
+    DATA.feedback  = res[1].feedback      || [];
+    DATA.diverts   = res[2].diverts       || [];
+    DATA.questions = res[3].questions     || [];
+    showTab(currentTab);
+  }).catch(function(e){
+    document.getElementById("mainContent").innerHTML =
+      '<div class="empty"><div class="empty-icon">⚠️</div><p>'+e.message+'</p></div>';
+  });
+}
+
+/* ── Since footfall API returns one day, re-fetch all ── */
+function loadAllFootfall(){
+  return api({action:"get_footfall"}).then(function(r){
+    DATA.footfall = r.entries || [];
+    DATA.daily    = r.daily_summary ? [r.daily_summary] : [];
+  });
+}
+
+/* ── Tabs ── */
+function showTab(tab){
+  currentTab = tab;
+  document.querySelectorAll(".tab").forEach(function(el){
+    el.classList.toggle("active", el.id==="tab_"+tab);
+  });
+  if(tab==="summary")  renderSummary();
+  else if(tab==="footfall") renderFootfall();
+  else if(tab==="feedback") renderFeedback();
+  else if(tab==="divert")   renderDivert();
+}
+
+/* ── Filter data ── */
+function filteredFF()  { return DATA.footfall.filter(function(r){ return inRange(r.date); }); }
+function filteredFB()  { return DATA.feedback.filter(function(r){ return inRange(r.date); }); }
+function filteredDiv() { return DATA.diverts.filter(function(r){  return inRange(r.date); }); }
+
+/* ============================================================
+   SUMMARY TAB
+   ============================================================ */
+function renderSummary(){
+  var ff  = filteredFF();
+  var fb  = filteredFB();
+  var div = filteredDiv();
+
+  var totalFF   = ff.reduce(function(s,r){return s+(Number(r.count)||0);},0);
+  var openDiv   = div.filter(function(d){return d.status==="open";}).length;
+  var closedDiv = div.filter(function(d){return d.status==="closed"||d.status==="cannot_fulfill";}).length;
+  var fbCount   = fb.length;
+
+  /* Loyalty score from Q6 */
+  var loyaltyQ  = DATA.questions.find(function(q){return q.display_order==6||q.q_id==="Q6";});
+  var loyaltyKey= loyaltyQ ? "q6" : null;
+  var loyalMap  = {};
+  if(loyaltyKey){
+    fb.forEach(function(f){
+      var v=f[loyaltyKey]||"";
+      if(v) loyalMap[v]=(loyalMap[v]||0)+1;
+    });
+  }
+
+  var html = '<div class="fade-in">';
+
+  /* Top stats */
+  html += '<div class="stats-grid">' +
+    sCard("Total Footfall",   totalFF,  "gold",   "visitors") +
+    sCard("Feedbacks",        fbCount,  "teal",   "collected") +
+    sCard("Open Diverts",     openDiv,  "red",    "pending action") +
+    sCard("Resolved Diverts", closedDiv,"green",  "closed") +
+  '</div>';
+
+  /* Two col — footfall trend + divert status */
+  html += '<div class="two-col">';
+
+  /* Footfall by day */
+  var dayMap = {};
+  ff.forEach(function(r){
+    dayMap[r.date]=(dayMap[r.date]||0)+(Number(r.count)||0);
+  });
+  var days  = Object.keys(dayMap).sort(function(a,b){
+    return (parseDate(a)||0)-(parseDate(b)||0);
+  });
+  var maxFF = Math.max.apply(null, days.map(function(d){return dayMap[d];})||[1]);
+
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Footfall by Day</div>' +
+      '<div class="report-card-sub">'+days.length+' days in period</div>' +
+    '</div></div>' +
+    '<div class="report-card-body">';
+
+  if(days.length===0){
+    html += '<div class="empty"><div class="empty-icon">📊</div><p>No data for this period</p></div>';
+  } else {
+    html += '<div class="bar-chart">';
+    days.forEach(function(d){
+      var pct = maxFF>0 ? Math.round((dayMap[d]/maxFF)*100) : 0;
+      html += barRow(fmtDisplay(d), dayMap[d], pct, "bar-teal");
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  /* Divert status breakdown */
+  var divStatus = {open:0,sourcing:0,available:0,closed:0,cannot_fulfill:0};
+  div.forEach(function(d){ if(divStatus[d.status]!==undefined) divStatus[d.status]++; });
+  var maxDiv = Math.max.apply(null, Object.values(divStatus));
+
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Diverts by Status</div>' +
+      '<div class="report-card-sub">'+div.length+' total in period</div>' +
+    '</div></div>' +
+    '<div class="report-card-body"><div class="bar-chart">';
+
+  var divColors = {open:"bar-crimson",sourcing:"bar-orange",
+    available:"bar-teal",closed:"bar-green",cannot_fulfill:"bar-gray"};
+  var divLabels = {open:"Open",sourcing:"Sourcing",
+    available:"Available",closed:"Closed",cannot_fulfill:"Cannot Fulfill"};
+  Object.keys(divStatus).forEach(function(s){
+    var pct = maxDiv>0 ? Math.round((divStatus[s]/maxDiv)*100) : 0;
+    html += barRow(divLabels[s], divStatus[s], pct, divColors[s]);
+  });
+  html += '</div></div></div>';
+
+  html += '</div>'; // two-col
+
+  /* Loyalty summary */
+  if(Object.keys(loyalMap).length>0){
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Will Visit Again / Recommend?</div>' +
+        '<div class="report-card-sub">Based on '+fb.length+' feedback responses</div>' +
+      '</div></div>' +
+      '<div class="report-card-body"><div class="bar-chart">';
+    var maxL = Math.max.apply(null, Object.values(loyalMap));
+    var lColors = ["bar-green","bar-teal","bar-orange","bar-crimson"];
+    Object.keys(loyalMap).forEach(function(k,i){
+      var pct = maxL>0?Math.round((loyalMap[k]/maxL)*100):0;
+      html += barRow(k, loyalMap[k], pct, lColors[i%lColors.length]);
+    });
+    html += '</div></div></div>';
+  }
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ============================================================
+   FOOTFALL TAB
+   ============================================================ */
+function renderFootfall(){
+  var ff = filteredFF();
+
+  /* Group by date */
+  var dayMap = {};
+  ff.forEach(function(r){
+    if(!dayMap[r.date]) dayMap[r.date]={total:0,slots:[]};
+    dayMap[r.date].total += Number(r.count)||0;
+    dayMap[r.date].slots.push(r);
+  });
+
+  /* Slot totals for heatmap */
+  var slotMap = {};
+  ff.forEach(function(r){
+    var h = Number(r.slot_start);
+    slotMap[h] = (slotMap[h]||0) + (Number(r.count)||0);
+  });
+
+  /* Daily bills */
+  var billsMap = {};
+  DATA.daily.forEach(function(r){ if(r&&r.date) billsMap[r.date]=r.bills_count; });
+
+  var days   = Object.keys(dayMap).sort(function(a,b){
+    return (parseDate(a)||0)-(parseDate(b)||0);
+  });
+  var totalFF  = ff.reduce(function(s,r){return s+(Number(r.count)||0);},0);
+  var avgDaily = days.length>0 ? Math.round(totalFF/days.length) : 0;
+  var maxDay   = Math.max.apply(null,days.map(function(d){return dayMap[d].total;})||[1]);
+  var peakDay  = days.reduce(function(a,b){return dayMap[a].total>dayMap[b].total?a:b},days[0]||"—");
+
+  /* Peak slot */
+  var slotHours = Object.keys(slotMap).map(Number);
+  var peakSlot  = slotHours.length>0
+    ? slotHours.reduce(function(a,b){return slotMap[a]>slotMap[b]?a:b})
+    : null;
+
+  var html = '<div class="fade-in">';
+
+  html += '<div class="stats-grid">' +
+    sCard("Total Footfall",  totalFF,  "gold",  "for period") +
+    sCard("Avg Daily",       avgDaily, "teal",  "visitors/day") +
+    sCard("Peak Day",        peakDay ? fmtDisplay(peakDay) : "—", "",  "highest traffic") +
+    sCard("Peak Slot",       peakSlot!==null ? fmtTime(peakSlot) : "—", "purple", "busiest hour") +
+  '</div>';
+
+  /* Daily trend */
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Daily Footfall Trend</div>' +
+      '<div class="report-card-sub">'+days.length+' days · '+totalFF+' total visitors</div>' +
+    '</div></div>' +
+    '<div class="report-card-body">';
+
+  if(days.length===0){
+    html += empty("No footfall data for this period");
+  } else {
+    html += '<div class="bar-chart">';
+    days.forEach(function(d){
+      var pct = maxDay>0?Math.round((dayMap[d].total/maxDay)*100):0;
+      html += barRow(fmtDisplay(d), dayMap[d].total, pct, "bar-teal");
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  /* Peak hour heatmap */
+  if(slotHours.length>0){
+    var maxSlot = Math.max.apply(null, Object.values(slotMap));
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Peak Hour Analysis</div>' +
+        '<div class="report-card-sub">Visitor count by hour slot</div>' +
+      '</div></div>' +
+      '<div class="report-card-body"><div class="heatmap">';
+
+    for(var h=10;h<=21;h++){
+      var count = slotMap[h]||0;
+      var intensity = maxSlot>0 ? count/maxSlot : 0;
+      var bg = intensityColor(intensity);
+      var textColor = intensity>0.5 ? "#fff" : "var(--ink)";
+      html += '<div class="hm-cell" style="background:'+bg+';color:'+textColor+'">' +
+        '<div class="hm-label">'+fmtTime(h)+'</div>' +
+        '<div class="hm-val">'+count+'</div>' +
+      '</div>';
+    }
+    html += '</div></div></div>';
+  }
+
+  /* Daily table with bills */
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Daily Summary</div>' +
+      '<div class="report-card-sub">Footfall vs Bills count per day</div>' +
+    '</div></div>' +
+    '<div class="report-card-body" style="padding:0">';
+
+  if(days.length===0){
+    html += '<div style="padding:20px">'+empty("No data")+'</div>';
+  } else {
+    html += '<div style="overflow-x:auto"><table class="rep-table">' +
+      '<thead><tr><th>Date</th><th>Total Footfall</th><th>Bills Count</th>' +
+      '<th>Conversion %</th><th>Slots Submitted</th></tr></thead><tbody>';
+
+    days.forEach(function(d){
+      var total  = dayMap[d].total;
+      var bills  = Number(billsMap[d]||0);
+      var conv   = total>0 && bills>0 ? ((bills/total)*100).toFixed(1)+"%" : "—";
+      var slots  = dayMap[d].slots.length;
+      html += '<tr>' +
+        '<td><strong>'+fmtDisplay(d)+'</strong></td>' +
+        '<td>'+total+'</td>' +
+        '<td>'+(bills||"—")+'</td>' +
+        '<td>'+conv+'</td>' +
+        '<td class="td-muted">'+slots+' slots</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '</div></div>';
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ============================================================
+   FEEDBACK TAB
+   ============================================================ */
+function renderFeedback(){
+  var fb = filteredFB();
+
+  var staffCount = fb.filter(function(f){return f.source==="staff"||f.source==="walk_in";}).length;
+  var qrCount    = fb.filter(function(f){return f.source==="qr_self";}).length;
+  var firstVisit = fb.filter(function(f){return String(f.q0_visit_type||f.q0)==="First Visit";}).length;
+  var regular    = fb.filter(function(f){return String(f.q0_visit_type||f.q0)==="Regular Customer";}).length;
+
+  var html = '<div class="fade-in">';
+
+  html += '<div class="stats-grid">' +
+    sCard("Total Feedback",  fb.length,   "teal",  "responses") +
+    sCard("Staff Collected", staffCount,  "",      "by CRM team") +
+    sCard("QR Self-fill",    qrCount,     "purple","by customers") +
+    sCard("First Visitors",  firstVisit,  "saffron","new customers") +
+  '</div>';
+
+  /* Source split */
+  html += '<div class="two-col">';
+
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Source Split</div>' +
+      '<div class="report-card-sub">How feedback was collected</div>' +
+    '</div></div>' +
+    '<div class="report-card-body"><div class="bar-chart">';
+  var maxSrc = Math.max(staffCount, qrCount, 1);
+  html += barRow("Staff",   staffCount, Math.round(staffCount/maxSrc*100), "bar-teal");
+  html += barRow("QR Code", qrCount,    Math.round(qrCount/maxSrc*100),    "bar-purple");
+  html += '</div></div></div>';
+
+  /* Visit type */
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Visit Type</div>' +
+      '<div class="report-card-sub">First visit vs regular customers</div>' +
+    '</div></div>' +
+    '<div class="report-card-body"><div class="bar-chart">';
+  var maxVT = Math.max(firstVisit, regular, 1);
+  html += barRow("First Visit", firstVisit, Math.round(firstVisit/maxVT*100), "bar-saffron");
+  html += barRow("Regular",     regular,    Math.round(regular/maxVT*100),    "bar-green");
+  html += '</div></div></div>';
+
+  html += '</div>'; // two-col
+
+  /* Q-wise score analysis */
+  if(DATA.questions.length>0 && fb.length>0){
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Question-wise Response Analysis</div>' +
+        '<div class="report-card-sub">Top answer for each question</div>' +
+      '</div></div>' +
+      '<div class="report-card-body"><div class="score-grid">';
+
+    DATA.questions.forEach(function(q, qi){
+      var key  = "q"+qi;
+      var answers = {};
+      fb.forEach(function(f){
+        var v = String(f[key]||"").trim();
+        if(v) answers[v]=(answers[v]||0)+1;
+      });
+      var total   = Object.values(answers).reduce(function(s,v){return s+v;},0);
+      var topAns  = Object.keys(answers).sort(function(a,b){return answers[b]-answers[a];})[0]||"—";
+      var topPct  = total>0 ? Math.round((answers[topAns]||0)/total*100) : 0;
+
+      html += '<div class="score-card">' +
+        '<div class="score-q">'+esc(q.q_text)+'</div>' +
+        '<div style="font-size:13px;font-weight:500;color:var(--teal);margin-bottom:4px">'+esc(topAns)+'</div>' +
+        '<div style="font-size:11px;color:var(--ink-30)">'+topPct+'% of responses · '+total+' answered</div>' +
+        '<div class="score-bar"><div class="score-fill" style="width:'+topPct+'%"></div></div>' +
+        '</div>';
+    });
+
+    html += '</div></div></div>';
+  }
+
+  /* Q-wise full breakdown */
+  if(DATA.questions.length>0 && fb.length>0){
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Detailed Answer Breakdown</div>' +
+        '<div class="report-card-sub">All options per question</div>' +
+      '</div></div>' +
+      '<div class="report-card-body">';
+
+    DATA.questions.forEach(function(q, qi){
+      var key     = "q"+qi;
+      var answers = {};
+      fb.forEach(function(f){
+        var v=String(f[key]||"").trim();
+        if(v) answers[v]=(answers[v]||0)+1;
+      });
+      var total = Object.values(answers).reduce(function(s,v){return s+v;},0);
+      if(total===0) return;
+
+      var maxA  = Math.max.apply(null, Object.values(answers));
+      html += '<div class="sec-divider">Q'+(qi+1)+' · '+esc(q.q_text)+'</div>';
+      html += '<div class="bar-chart" style="margin-bottom:16px">';
+      Object.keys(answers).sort(function(a,b){return answers[b]-answers[a];}).forEach(function(ans){
+        var pct = Math.round((answers[ans]/maxA)*100);
+        html += barRow(ans, answers[ans], pct, "bar-teal", true);
+      });
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+  }
+
+  /* Your Voice */
+  var voices = fb.filter(function(f){return String(f.your_voice||"").trim();});
+  if(voices.length>0){
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Your Voice</div>' +
+        '<div class="report-card-sub">'+voices.length+' open feedback entries</div>' +
+      '</div></div>' +
+      '<div class="report-card-body"><div class="voice-list">';
+    voices.slice(0,20).forEach(function(f){
+      html += '<div class="voice-item">' +
+        '<div class="voice-text">'+esc(f.your_voice)+'</div>' +
+        '<div class="voice-meta">'+fmtDisplay(f.date)+' · '+esc(f.area||"—")+
+          (f.cust_name?' · '+esc(f.cust_name):'')+
+        '</div></div>';
+    });
+    if(voices.length>20){
+      html += '<div style="text-align:center;font-size:12px;color:var(--ink-30);padding:8px">'+
+        '+'+(voices.length-20)+' more entries</div>';
+    }
+    html += '</div></div></div>';
+  }
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ============================================================
+   DIVERT TAB
+   ============================================================ */
+function renderDivert(){
+  var div = filteredDiv();
+
+  var open      = div.filter(function(d){return d.status==="open";}).length;
+  var sourcing  = div.filter(function(d){return d.status==="sourcing";}).length;
+  var available = div.filter(function(d){return d.status==="available";}).length;
+  var closed    = div.filter(function(d){return d.status==="closed";}).length;
+  var cannot    = div.filter(function(d){return d.status==="cannot_fulfill";}).length;
+  var comingBack= div.filter(function(d){return d.coming_back==="Yes";}).length;
+
+  /* Avg resolution time for closed diverts */
+  var resolved = div.filter(function(d){return d.status==="closed"&&d.raised_at&&d.closed_at;});
+  var avgRes   = "—";
+  if(resolved.length>0){
+    var totalMs = resolved.reduce(function(s,d){
+      var raised  = new Date(d.raised_at);
+      var closed_ = new Date(d.closed_at);
+      return s + (isNaN(raised)||isNaN(closed_) ? 0 : closed_-raised);
+    },0);
+    var avgHrs = Math.round(totalMs/resolved.length/3600000);
+    avgRes = avgHrs < 24 ? avgHrs+"h" : Math.round(avgHrs/24)+"d";
+  }
+
+  var html = '<div class="fade-in">';
+
+  html += '<div class="stats-grid">' +
+    sCard("Total Diverts", div.length,   "",      "in period") +
+    sCard("Open",          open,         "red",   "pending") +
+    sCard("Coming Back",   comingBack,   "teal",  "customers") +
+    sCard("Avg Resolution",avgRes,       "green", "time to close") +
+  '</div>';
+
+  html += '<div class="two-col">';
+
+  /* Status breakdown */
+  var maxSt = Math.max(open,sourcing,available,closed,cannot,1);
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Status Breakdown</div>' +
+    '</div></div>' +
+    '<div class="report-card-body"><div class="bar-chart">';
+  html += barRow("Open",          open,     Math.round(open/maxSt*100),     "bar-crimson");
+  html += barRow("Sourcing",      sourcing, Math.round(sourcing/maxSt*100), "bar-orange");
+  html += barRow("Available",     available,Math.round(available/maxSt*100),"bar-teal");
+  html += barRow("Closed",        closed,   Math.round(closed/maxSt*100),   "bar-green");
+  html += barRow("Cannot Fulfill",cannot,   Math.round(cannot/maxSt*100),   "bar-gray");
+  html += '</div></div></div>';
+
+  /* Section-wise count */
+  var sectMap = {};
+  div.forEach(function(d){
+    var s=d.section_name||"Unknown";
+    sectMap[s]=(sectMap[s]||0)+1;
+  });
+  var sectKeys = Object.keys(sectMap).sort(function(a,b){return sectMap[b]-sectMap[a];});
+  var maxSect  = Math.max.apply(null,sectKeys.map(function(k){return sectMap[k];})||[1]);
+
+  html += '<div class="report-card">' +
+    '<div class="report-card-header"><div>' +
+      '<div class="report-card-title">Diverts by Section</div>' +
+    '</div></div>' +
+    '<div class="report-card-body"><div class="bar-chart">';
+  if(sectKeys.length===0){
+    html += empty("No data");
+  } else {
+    sectKeys.slice(0,8).forEach(function(k){
+      var pct = Math.round(sectMap[k]/maxSect*100);
+      html += barRow(k, sectMap[k], pct, "bar-saffron", true);
+    });
+  }
+  html += '</div></div></div>';
+
+  html += '</div>'; // two-col
+
+  /* Top products */
+  var prodMap = {};
+  div.forEach(function(d){
+    var p=d.product_wanted||"Unknown";
+    prodMap[p]=(prodMap[p]||0)+1;
+  });
+  var prodKeys=Object.keys(prodMap).sort(function(a,b){return prodMap[b]-prodMap[a];});
+  var maxProd=Math.max.apply(null,prodKeys.map(function(k){return prodMap[k];})||[1]);
+
+  if(prodKeys.length>0){
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Top Diverted Products</div>' +
+        '<div class="report-card-sub">Most frequently unavailable items</div>' +
+      '</div></div>' +
+      '<div class="report-card-body"><div class="bar-chart">';
+    prodKeys.slice(0,10).forEach(function(k){
+      var pct=Math.round(prodMap[k]/maxProd*100);
+      html += barRow(k, prodMap[k], pct, "bar-purple", true);
+    });
+    html += '</div></div></div>';
+  }
+
+  /* Coming back ratio */
+  var notComing = div.filter(function(d){return d.coming_back==="No";}).length;
+  if(comingBack+notComing>0){
+    var maxCB = Math.max(comingBack, notComing, 1);
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title">Coming Back vs Not</div>' +
+        '<div class="report-card-sub">Customer return intent</div>' +
+      '</div></div>' +
+      '<div class="report-card-body"><div class="bar-chart">';
+    html += barRow("Will Return",  comingBack, Math.round(comingBack/maxCB*100), "bar-green");
+    html += barRow("Not Sure/No",  notComing,  Math.round(notComing/maxCB*100),  "bar-crimson");
+    html += '</div></div></div>';
+  }
+
+  /* Aging — open diverts older than 3 days */
+  var aged = DATA.diverts.filter(function(d){
+    if(d.status!=="open"&&d.status!=="sourcing") return false;
+    var r = parseDate(d.date);
+    if(!r||isNaN(r)) return false;
+    var diff = (nowIST()-r)/86400000;
+    return diff>=3;
+  });
+
+  if(aged.length>0){
+    html += '<div class="report-card">' +
+      '<div class="report-card-header"><div>' +
+        '<div class="report-card-title" style="color:var(--crimson)">⚠️ Aging Diverts</div>' +
+        '<div class="report-card-sub">Open diverts older than 3 days — needs attention</div>' +
+      '</div></div>' +
+      '<div class="report-card-body" style="padding:0">' +
+      '<div style="overflow-x:auto"><table class="rep-table">' +
+      '<thead><tr><th>ID</th><th>Product</th><th>Section</th>' +
+      '<th>Raised On</th><th>Days Open</th><th>Status</th><th>Customer</th></tr></thead><tbody>';
+
+    aged.sort(function(a,b){return (parseDate(a.date)||0)-(parseDate(b.date)||0);})
+      .forEach(function(d){
+        var r   = parseDate(d.date);
+        var days= r&&!isNaN(r) ? Math.floor((nowIST()-r)/86400000) : "?";
+        var ageCls = days>=7?"aging-danger":days>=5?"aging-warn":"aging-ok";
+        html += '<tr>' +
+          '<td class="td-muted" style="font-size:11px">'+esc(d.divert_id)+'</td>' +
+          '<td><strong>'+esc(d.product_wanted)+'</strong></td>' +
+          '<td class="td-muted">'+esc(d.section_name)+'</td>' +
+          '<td class="td-muted">'+fmtDisplay(d.date)+'</td>' +
+          '<td class="'+ageCls+'">'+days+' days</td>' +
+          '<td><span class="pill pill-'+(d.status==="sourcing"?"sourcing":"open")+'">'+d.status+'</span></td>' +
+          '<td class="td-muted">'+(d.cust_mobile?'📞 '+esc(d.cust_mobile):"—")+'</td>' +
+        '</tr>';
+      });
+    html += '</tbody></table></div></div></div>';
+  }
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ============================================================
+   SHARED RENDER HELPERS
+   ============================================================ */
+function sCard(label,val,color,sub){
+  return '<div class="stat-card">' +
+    '<div class="stat-label">'+label+'</div>' +
+    '<div class="stat-val'+(color?" "+color:"")+'">'+val+'</div>' +
+    '<div class="stat-sub">'+sub+'</div>' +
+  '</div>';
+}
+
+function barRow(label, val, pct, colorCls, wide){
+  return '<div class="bar-row">' +
+    '<div class="bar-label'+(wide?" wide":"")+'">'+esc(String(label))+'</div>' +
+    '<div class="bar-track">' +
+      '<div class="bar-fill '+colorCls+'" style="width:'+Math.max(pct,1)+'%"></div>' +
+    '</div>' +
+    '<div class="bar-val">'+val+'</div>' +
+  '</div>';
+}
+
+function empty(msg){
+  return '<div class="empty"><div class="empty-icon">📊</div><p>'+msg+'</p></div>';
+}
+
+function fmtTime(h){
+  var s=h%12||12, suffix=h>=12?"PM":"AM";
+  return String(s).padStart(2,"0")+":00 "+suffix;
+}
+
+function intensityColor(v){
+  if(v===0) return "var(--surface)";
+  var r=13,g=110,b=110;
+  var alpha = 0.15 + v*0.85;
+  return "rgba("+r+","+g+","+b+","+alpha.toFixed(2)+")";
+}
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ── Start ── */
+boot();
+</script>
+</body>
+</html>
