@@ -543,6 +543,9 @@ function navigate(page) {
   if (page === "footfall") renderFootfall();
   else if (page === "feedback") { window.location.href = "feedback.html"; }
   else if (page === "divert") { window.location.href = "divert.html"; }
+  else if (page === "settings") { window.location.href = "admin.html"; }
+  else if (page === "users")    { window.location.href = "admin.html"; }
+  else if (page === "sections") { window.location.href = "admin.html"; }
   else {
     content.innerHTML = '<div class="empty fade-in">' +
       '<div class="empty-icon">🚧</div>' +
