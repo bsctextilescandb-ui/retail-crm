@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Feedback — Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
+  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
+  --crimson:#C0392B;--crimson-l:#FDECEA;
+  --green:#1E7A1E;--green-l:#EBF5EB;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
+
+/* ── Layout ── */
+.app-wrap{display:flex;min-height:100vh}
+.back-bar{
+  background:var(--teal);padding:14px 24px;
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:50;
+}
+.back-btn{
+  background:rgba(255,255,255,.15);color:#fff;
+  padding:7px 14px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:6px;
+  transition:background .15s;
+}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.back-bar-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1}
+.back-bar-date{font-size:12px;color:rgba(255,255,255,.6)}
+
+.main{flex:1;max-width:720px;margin:0 auto;padding:28px 20px 60px}
+
+/* ── Form card ── */
+.form-card{
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  overflow:hidden;margin-bottom:16px;
+}
+.form-card-header{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.form-card-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.icon-teal{background:var(--teal-l)}
+.icon-saffron{background:var(--saffron-l)}
+.icon-green{background:var(--green-l)}
+.form-card-title{font-size:14px;font-weight:500}
+.form-card-sub{font-size:12px;color:var(--ink-60);margin-top:2px}
+.form-card-body{padding:20px 22px}
+
+/* ── Questions ── */
+.q-block{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--border)}
+.q-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.q-label{
+  font-size:13px;font-weight:500;color:var(--ink);
+  margin-bottom:10px;display:flex;align-items:flex-start;gap:6px;
+  line-height:1.4;
+}
+.q-num{
+  font-size:10px;font-weight:600;color:var(--teal);
+  background:var(--teal-l);padding:2px 7px;
+  border-radius:999px;margin-top:1px;flex-shrink:0;
+}
+.q-optional{font-size:10px;color:var(--ink-30);margin-left:4px;font-weight:400}
+.req{color:var(--crimson)}
+
+/* ── Options ── */
+.options-grid{display:flex;flex-wrap:wrap;gap:8px}
+.opt-btn{
+  padding:8px 16px;border-radius:999px;
+  font-size:13px;border:1.5px solid var(--border);
+  background:var(--white);color:var(--ink-60);
+  transition:all .15s;cursor:pointer;
+}
+.opt-btn:hover{border-color:var(--teal);color:var(--teal)}
+.opt-btn.selected{
+  background:var(--teal);border-color:var(--teal);
+  color:#fff;font-weight:500;
+}
+.opt-btn.others-btn.selected{
+  background:var(--saffron);border-color:var(--saffron);color:var(--ink);
+}
+.others-input{
+  margin-top:10px;width:100%;padding:10px 14px;
+  border:1.5px solid var(--saffron);border-radius:var(--radius-sm);
+  font-size:13px;color:var(--ink);background:var(--saffron-l);
+  display:none;transition:border .15s;
+}
+.others-input:focus{border-color:var(--saffron-d);outline:none;
+  box-shadow:0 0 0 3px rgba(244,160,23,.15)}
+.others-input.show{display:block}
+
+/* ── Regular inputs ── */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{
+  display:block;font-size:11px;font-weight:500;
+  color:var(--ink-60);text-transform:uppercase;
+  letter-spacing:.09em;margin-bottom:6px;
+}
+.field input,.field textarea{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-size:14px;color:var(--ink);background:var(--white);
+  transition:border .15s,box-shadow .15s;
+}
+.field input:focus,.field textarea:focus{
+  border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-l);outline:none}
+.field textarea{resize:vertical;min-height:80px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.field-row{grid-template-columns:1fr}}
+
+/* ── Source toggle ── */
+.source-toggle{display:flex;gap:8px;margin-bottom:20px}
+.source-btn{
+  flex:1;padding:10px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:500;border:1.5px solid var(--border);
+  background:var(--white);color:var(--ink-60);
+  transition:all .15s;text-align:center;cursor:pointer;
+}
+.source-btn.active{background:var(--teal);border-color:var(--teal);color:#fff}
+
+/* ── Personal details toggle ── */
+.personal-toggle{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;background:var(--surface);
+  border-radius:var(--radius-sm);cursor:pointer;
+  margin-bottom:14px;border:1.5px solid var(--border);
+  transition:border .15s;
+}
+.personal-toggle:hover{border-color:var(--teal)}
+.personal-toggle-label{font-size:13px;font-weight:500;flex:1}
+.personal-toggle-sub{font-size:11px;color:var(--ink-60)}
+.toggle-arrow{font-size:16px;color:var(--ink-30);transition:transform .2s}
+.toggle-arrow.open{transform:rotate(180deg)}
+.personal-fields{display:none}
+.personal-fields.show{display:block}
+
+/* ── Alert ── */
+.alert{padding:10px 14px;border-radius:var(--radius-sm);
+  font-size:13px;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-error{background:var(--crimson-l);color:var(--crimson)}
+.alert-success{background:var(--green-l);color:var(--green)}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 22px;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:500;
+  transition:transform .15s,filter .15s;cursor:pointer;border:0;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none;filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 3px 10px rgba(13,110,110,.2)}
+.btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-full{width:100%;padding:13px}
+
+/* ── Spinner ── */
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Footer actions ── */
+.form-actions{
+  display:flex;gap:10px;justify-content:flex-end;
+  padding-top:20px;
+}
+
+/* ── Success ── */
+.success-wrap{
+  text-align:center;padding:48px 24px;
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.success-icon{
+  width:64px;height:64px;background:var(--green-l);
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;margin:0 auto 16px;font-size:30px;
+}
+
+/* ── Loading ── */
+.loading{text-align:center;padding:48px;color:var(--ink-60);font-size:14px}
+
+.fade-in{animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- Back bar -->
+<div class="back-bar">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <div class="back-bar-title">New Feedback</div>
+  <div class="back-bar-date" id="topDate"></div>
+</div>
+
+<div class="main" id="mainContent">
+  <div class="loading">⏳ Loading feedback form…</div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ============================================================
+   SESSION
+   ============================================================ */
+var SESSION = null;
+
+function getSession() {
+  var token = sessionStorage.getItem("crm_token");
+  var user  = sessionStorage.getItem("crm_user");
+  if (!token || !user) return null;
+  try { return { token:token, user:JSON.parse(user) }; }
+  catch(e) { return null; }
+}
+
+function apiPost(body) {
+  body.token = SESSION ? SESSION.token : "";
+  return fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body),
+  }).then(function(r){ return r.json(); });
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var QUESTIONS  = [];
+var formState  = {
+  source:   "staff",
+  answers:  {}, // q_id → selected option
+  others:   {}, // q_id → open text if "Others" selected
+  area:     "",
+  your_voice:"",
+  cust_name:"", cust_mobile:"", cust_dob:"",
+  personalOpen: false,
+};
+
+/* ============================================================
+   IST HELPERS
+   ============================================================ */
+function nowIST() {
+  var d=new Date(); var utc=d.getTime()+d.getTimezoneOffset()*60000;
+  return new Date(utc+330*60000);
+}
+function dateKeyIST() {
+  var d=nowIST();
+  return String(d.getDate()).padStart(2,"0")+"/"+
+         String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+function fmtDateDisplay() {
+  return nowIST().toLocaleDateString("en-US",{
+    weekday:"short",day:"numeric",month:"short",year:"numeric",
+    timeZone:"Asia/Kolkata"
+  });
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot() {
+  SESSION = getSession();
+  if (!SESSION) { window.location.href = "index.html"; return; }
+  document.getElementById("topDate").textContent = fmtDateDisplay();
+
+  // Load feedback questions
+  apiPost({ action:"get_feedback_questions" }).then(function(res) {
+    if (!res.ok) { showError("Failed to load questions: " + res.error); return; }
+    QUESTIONS = res.questions || [];
+    renderForm();
+  }).catch(function(e) {
+    showError("Connection error: " + e.message);
+  });
+}
+
+function goBack() { window.location.href = "app.html"; }
+
+function showError(msg) {
+  document.getElementById("mainContent").innerHTML =
+    '<div style="text-align:center;padding:48px;color:var(--crimson)">' +
+    '<div style="font-size:32px;margin-bottom:12px">⚠️</div><p>' + msg + '</p>' +
+    '<button class="btn btn-ghost" style="margin-top:20px" onclick="boot()">Retry</button></div>';
+}
+
+/* ============================================================
+   RENDER FORM
+   ============================================================ */
+function renderForm() {
+  var html = '<div class="fade-in">';
+
+  // ── Source toggle ──
+  html += '<div class="form-card">' +
+    '<div class="form-card-header">' +
+      '<div class="form-card-icon icon-teal">📋</div>' +
+      '<div><div class="form-card-title">Feedback Entry</div>' +
+      '<div class="form-card-sub">Collected by staff or customer self-fill</div></div>' +
+    '</div>' +
+    '<div class="form-card-body">' +
+      '<div class="source-toggle">' +
+        '<div class="source-btn' + (formState.source==="staff" ? " active" : "") +
+          '" onclick="setSource(\'staff\')">👤 Staff Collected</div>' +
+        '<div class="source-btn' + (formState.source==="walk_in" ? " active" : "") +
+          '" onclick="setSource(\'walk_in\')">🚶 Walk-in Entry</div>' +
+      '</div>' +
+      '<div class="field"><label>Area / Zone <span class="req">*</span></label>' +
+        '<input id="areaInput" type="text" placeholder="e.g. Ground Floor, Sarees Section…" ' +
+        'value="' + esc(formState.area) + '" oninput="formState.area=this.value"/>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  // ── Questions ──
+  html += '<div class="form-card">' +
+    '<div class="form-card-header">' +
+      '<div class="form-card-icon icon-saffron">💬</div>' +
+      '<div><div class="form-card-title">Customer Feedback</div>' +
+      '<div class="form-card-sub">Select the most appropriate option for each question</div></div>' +
+    '</div>' +
+    '<div class="form-card-body">';
+
+  QUESTIONS.forEach(function(q, qi) {
+    var isMandatory = String(q.is_mandatory).toUpperCase() === "TRUE";
+    html += '<div class="q-block">' +
+      '<div class="q-label">' +
+        '<span class="q-num">Q' + (qi + 1) + '</span>' +
+        esc(q.q_text) +
+        (isMandatory
+          ? ' <span class="req">*</span>'
+          : ' <span class="q-optional">(Optional)</span>') +
+      '</div>' +
+      '<div class="options-grid">';
+
+    q.options.forEach(function(opt) {
+      var isOthers  = opt.toLowerCase() === "others";
+      var isSelected = formState.answers[q.q_id] === opt;
+      html += '<button class="opt-btn' +
+        (isOthers ? " others-btn" : "") +
+        (isSelected ? " selected" : "") +
+        '" onclick="selectOption(\'' + esc(q.q_id) + '\',\'' + esc(opt) + '\')">' +
+        esc(opt) + '</button>';
+    });
+
+    html += '</div>';
+
+    // Others open text box — shown if "Others" is selected
+    var othersSelected = formState.answers[q.q_id] === "Others" ||
+      q.options.some(function(o){ return o.toLowerCase() === "others" && formState.answers[q.q_id] === o; });
+
+    html += '<input type="text" class="others-input' + (othersSelected ? " show" : "") +
+      '" id="others_' + q.q_id + '" placeholder="Please specify…" ' +
+      'value="' + esc(formState.others[q.q_id] || "") + '" ' +
+      'oninput="formState.others[\'' + q.q_id + '\']=this.value"/>';
+
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+
+  // ── Your Voice ──
+  html += '<div class="form-card">' +
+    '<div class="form-card-header">' +
+      '<div class="form-card-icon icon-saffron">✍️</div>' +
+      '<div><div class="form-card-title">Your Voice</div>' +
+      '<div class="form-card-sub">Any additional feedback or suggestions</div></div>' +
+    '</div>' +
+    '<div class="form-card-body">' +
+      '<div class="field">' +
+        '<textarea id="yourVoice" placeholder="Share any specific feedback, suggestions or concerns…" ' +
+        'oninput="formState.your_voice=this.value">' + esc(formState.your_voice) + '</textarea>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  // ── Personal Details ──
+  html += '<div class="form-card">' +
+    '<div class="form-card-header">' +
+      '<div class="form-card-icon icon-green">👤</div>' +
+      '<div><div class="form-card-title">Personal Details</div>' +
+      '<div class="form-card-sub">All fields optional — only if customer is willing to share</div></div>' +
+    '</div>' +
+    '<div class="form-card-body">' +
+      '<div class="personal-toggle" onclick="togglePersonal()">' +
+        '<div><div class="personal-toggle-label">Add customer details</div>' +
+        '<div class="personal-toggle-sub">Name, mobile, date of birth</div></div>' +
+        '<div class="toggle-arrow' + (formState.personalOpen ? " open" : "") +
+          '" id="toggleArrow">▾</div>' +
+      '</div>' +
+      '<div class="personal-fields' + (formState.personalOpen ? " show" : "") +
+        '" id="personalFields">' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Name</label>' +
+            '<input type="text" id="custName" placeholder="Customer name" ' +
+            'value="' + esc(formState.cust_name) + '" oninput="formState.cust_name=this.value"/></div>' +
+          '<div class="field"><label>Mobile</label>' +
+            '<input type="tel" id="custMobile" placeholder="10-digit mobile" maxlength="10" ' +
+            'value="' + esc(formState.cust_mobile) + '" oninput="formState.cust_mobile=this.value"/></div>' +
+        '</div>' +
+        '<div class="field"><label>Date of Birth</label>' +
+          '<input type="date" id="custDob" value="' + esc(formState.cust_dob) + '" ' +
+          'oninput="formState.cust_dob=this.value"/></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  // ── Alert + Actions ──
+  html += '<div id="formAlert" class="alert alert-error"></div>';
+  html += '<div class="form-actions">' +
+    '<button class="btn btn-ghost" onclick="resetForm()">🔄 Reset</button>' +
+    '<button id="submitBtn" class="btn btn-teal" onclick="submitFeedback()" style="min-width:160px">' +
+      '<span id="submitSpin" class="spinner"></span> Submit Feedback' +
+    '</button>' +
+  '</div>';
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ============================================================
+   INTERACTIONS
+   ============================================================ */
+function setSource(src) {
+  formState.source = src;
+  renderForm();
+}
+
+function selectOption(qId, opt) {
+  // Toggle off if same option clicked
+  if (formState.answers[qId] === opt) {
+    delete formState.answers[qId];
+    delete formState.others[qId];
+  } else {
+    formState.answers[qId] = opt;
+    if (opt.toLowerCase() !== "others") delete formState.others[qId];
+  }
+
+  // Update button styles without full re-render
+  var q = QUESTIONS.find(function(q){ return q.q_id === qId; });
+  if (!q) return;
+
+  q.options.forEach(function(o) {
+    var btns = document.querySelectorAll(".opt-btn");
+    btns.forEach(function(btn) {
+      if (btn.textContent === o && btn.closest(".q-block") &&
+          btn.closest(".q-block").querySelector(".q-num") &&
+          btn.closest(".q-block").querySelector(".q-num").textContent === "Q" + (QUESTIONS.indexOf(q)+1)) {
+        btn.classList.toggle("selected", o === formState.answers[qId]);
+      }
+    });
+  });
+
+  // Show/hide Others input
+  var othersInput = document.getElementById("others_" + qId);
+  if (othersInput) {
+    var isOthers = opt.toLowerCase() === "others" && formState.answers[qId] === opt;
+    othersInput.classList.toggle("show", isOthers);
+    if (isOthers) othersInput.focus();
+  }
+
+  // Full re-render to be safe
+  renderForm();
+}
+
+function togglePersonal() {
+  formState.personalOpen = !formState.personalOpen;
+  var fields = document.getElementById("personalFields");
+  var arrow  = document.getElementById("toggleArrow");
+  if (fields) fields.classList.toggle("show", formState.personalOpen);
+  if (arrow)  arrow.classList.toggle("open",  formState.personalOpen);
+}
+
+function resetForm() {
+  if (!confirm("Reset all answers?")) return;
+  formState.answers      = {};
+  formState.others       = {};
+  formState.area         = "";
+  formState.your_voice   = "";
+  formState.cust_name    = "";
+  formState.cust_mobile  = "";
+  formState.cust_dob     = "";
+  formState.personalOpen = false;
+  renderForm();
+}
+
+/* ============================================================
+   SUBMIT
+   ============================================================ */
+function submitFeedback() {
+  var alert = document.getElementById("formAlert");
+
+  // Validate area
+  var area = document.getElementById("areaInput") ?
+    document.getElementById("areaInput").value.trim() : formState.area;
+  if (!area) { showAlert(alert, "Area / Zone is required."); return; }
+
+  // Validate mandatory questions
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var q = QUESTIONS[i];
+    if (String(q.is_mandatory).toUpperCase() === "TRUE" && !formState.answers[q.q_id]) {
+      showAlert(alert, "Please answer: " + q.q_text);
+      return;
+    }
+  }
+
+  // Validate Others text boxes
+  for (var qId in formState.answers) {
+    if (formState.answers[qId] === "Others") {
+      var inp = document.getElementById("others_" + qId);
+      if (inp && !inp.value.trim()) {
+        showAlert(alert, "Please specify your answer for the \"Others\" option.");
+        inp.focus();
+        return;
+      }
+      formState.others[qId] = inp ? inp.value.trim() : "";
+    }
+  }
+
+  var your_voice = document.getElementById("yourVoice") ?
+    document.getElementById("yourVoice").value.trim() : "";
+
+  // Build payload — map q_id to q0..q7 keys
+  var payload = {
+    action:     "save_feedback",
+    date:       dateKeyIST(),
+    source:     formState.source,
+    area:       area,
+    your_voice: your_voice,
+    cust_name:   document.getElementById("custName")   ? document.getElementById("custName").value.trim()   : "",
+    cust_mobile: document.getElementById("custMobile") ? document.getElementById("custMobile").value.trim() : "",
+    cust_dob:    document.getElementById("custDob")    ? document.getElementById("custDob").value            : "",
+  };
+
+  // Map answers to q0..q7
+  QUESTIONS.forEach(function(q, i) {
+    var key     = "q" + i;
+    var ans     = formState.answers[q.q_id] || "";
+    var otherKey = "q" + i + "_other";
+    payload[key]      = ans;
+    payload[otherKey] = formState.others[q.q_id] || "";
+  });
+
+  // Rename q0_other → q1_other for backend compatibility (Q1 is index 0 after Q0)
+  // Backend expects q1_other specifically for Q1 Others
+  if (payload.q1_other === undefined) payload.q1_other = payload.q0_other || "";
+
+  var btn  = document.getElementById("submitBtn");
+  var spin = document.getElementById("submitSpin");
+  if (btn)  btn.disabled = true;
+  if (spin) spin.classList.add("show");
+  hideAlert(alert);
+
+  apiPost(payload).then(function(res) {
+    if (btn)  btn.disabled = false;
+    if (spin) spin.classList.remove("show");
+
+    if (res.ok) {
+      showSuccess(res.feedback_id);
+    } else {
+      showAlert(alert, res.error || "Failed to submit. Please try again.");
+    }
+  }).catch(function(e) {
+    if (btn)  btn.disabled = false;
+    if (spin) spin.classList.remove("show");
+    showAlert(alert, "Connection error. Please try again.");
+  });
+}
+
+function showSuccess(fbId) {
+  document.getElementById("mainContent").innerHTML =
+    '<div class="success-wrap fade-in">' +
+      '<div class="success-icon">✓</div>' +
+      '<h2 class="serif" style="font-size:24px;margin-bottom:8px">Feedback Submitted!</h2>' +
+      '<p style="color:var(--ink-60);font-size:14px;margin-bottom:6px">Thank you for the feedback.</p>' +
+      '<p style="color:var(--ink-30);font-size:12px;margin-bottom:28px">ID: ' + fbId + '</p>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-teal" onclick="newEntry()">+ New Feedback</button>' +
+        '<button class="btn btn-ghost" onclick="goBack()">← Back to CRM</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function newEntry() {
+  formState = {
+    source:"staff", answers:{}, others:{},
+    area:"", your_voice:"",
+    cust_name:"", cust_mobile:"", cust_dob:"",
+    personalOpen:false,
+  };
+  renderForm();
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function showAlert(el, msg) {
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+  el.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+function hideAlert(el) { if (el) el.classList.remove("show"); }
+function esc(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+boot();
+</script>
+</body>
+</html>
