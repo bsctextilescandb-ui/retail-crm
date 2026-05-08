@@ -10,22 +10,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --saffron:#F4A017;
-  --saffron-d:#C47F0A;
-  --saffron-l:#FEF3DC;
-  --teal:#0D6E6E;
-  --teal-d:#084E4E;
-  --teal-l:#E6F4F4;
-  --crimson:#C0392B;
-  --crimson-l:#FDECEA;
-  --ink:#1A1A2E;
-  --ink-60:rgba(26,26,46,.6);
-  --ink-30:rgba(26,26,46,.3);
-  --ink-10:rgba(26,26,46,.06);
-  --ivory:#FAFAF7;
-  --white:#FFFFFF;
-  --surface:#F3F2EE;
-  --border:#E4E2DC;
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8
   --radius:14px;
   --radius-sm:8px;
   --shadow:0 4px 24px rgba(26,26,46,.08);
@@ -65,7 +56,7 @@ input,select,textarea{font-family:inherit;outline:0}
 
 /* ── Brand strip ──────────────────────────── */
 .brand-strip{
-  background:var(--teal);
+  background:var(--navy);
   padding:28px 36px;
   display:flex;
   align-items:center;
@@ -73,7 +64,7 @@ input,select,textarea{font-family:inherit;outline:0}
 }
 .brand-icon{
   width:46px;height:46px;
-  background:var(--saffron);
+  background:var(--gold);
   border-radius:12px;
   display:flex;align-items:center;justify-content:center;
   font-size:22px;flex-shrink:0;
@@ -104,7 +95,7 @@ input,select,textarea{font-family:inherit;outline:0}
   letter-spacing:.09em;margin-bottom:7px;
 }
 .req{color:var(--crimson);margin-left:2px}
-.opt{font-size:11px;color:var(--saffron-d);font-weight:500;margin-left:6px;text-transform:none;letter-spacing:0}
+.opt{font-size:11px;color:var(--gold-d);font-weight:500;margin-left:6px;text-transform:none;letter-spacing:0}
 .field input,.field select,.field textarea{
   width:100%;padding:12px 15px;
   border:1.5px solid var(--border);
@@ -114,8 +105,8 @@ input,select,textarea{font-family:inherit;outline:0}
   transition:border .15s,box-shadow .15s;
 }
 .field input:focus,.field select:focus,.field textarea:focus{
-  border-color:var(--teal);
-  box-shadow:0 0 0 3px var(--teal-l);
+  border-color:var(--navy);
+  box-shadow:0 0 0 3px var(--navy-l);
 }
 .field select{
   appearance:none;
@@ -142,10 +133,10 @@ input,select,textarea{font-family:inherit;outline:0}
 .btn:hover{transform:translateY(-1px)}
 .btn:active{transform:none;filter:brightness(.95)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-.btn-primary{background:var(--saffron);color:var(--ink);box-shadow:0 4px 12px rgba(244,160,23,.28)}
+.btn-primary{background:var(--gold);color:var(--ink);box-shadow:0 4px 12px rgba(184,134,11,.28)}
 .btn-primary:hover{background:#f7b030}
-.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(13,110,110,.22)}
-.btn-teal:hover{background:var(--teal-d)}
+.btn-teal{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(30,45,90,.22)}
+.btn-teal:hover{background:var(--navy-d)}
 .btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
 .btn-ghost:hover{background:var(--surface);color:var(--ink)}
 .btn-full{width:100%;padding:14px}
@@ -160,15 +151,15 @@ input,select,textarea{font-family:inherit;outline:0}
   width:100%;height:2px;background:var(--border);z-index:0;
   transition:background .3s;
 }
-.step-item.done:not(:last-child)::after{background:var(--teal)}
+.step-item.done:not(:last-child)::after{background:var(--navy)}
 .step-dot{
   width:30px;height:30px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:600;z-index:1;
   transition:background .3s,color .3s;
 }
-.step-dot.done{background:var(--teal);color:#fff}
-.step-dot.active{background:var(--saffron);color:var(--ink)}
+.step-dot.done{background:var(--navy);color:#fff}
+.step-dot.active{background:var(--gold);color:var(--ink)}
 .step-dot.pending{background:var(--surface);color:var(--ink-30);border:1.5px solid var(--border)}
 .step-lbl{font-size:10px;color:var(--ink-60);margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
 
@@ -184,7 +175,7 @@ input,select,textarea{font-family:inherit;outline:0}
 }
 .section-tag{flex:1;font-size:13px;font-weight:500}
 .section-tag span{font-size:11px;font-weight:400;color:var(--ink-60);margin-left:6px}
-.section-tag em{font-style:normal;font-size:11px;color:var(--teal);margin-left:4px}
+.section-tag em{font-style:normal;font-size:11px;color:var(--navy);margin-left:4px}
 .section-del{
   width:26px;height:26px;border-radius:6px;
   background:var(--crimson-l);color:var(--crimson);
@@ -192,12 +183,12 @@ input,select,textarea{font-family:inherit;outline:0}
   cursor:pointer;border:0;font-size:15px;flex-shrink:0;
 }
 .add-box{
-  background:var(--teal-l);border-radius:var(--radius-sm);
+  background:var(--navy-l);border-radius:var(--radius-sm);
   padding:16px;margin-bottom:20px;
   border:1px solid rgba(13,110,110,.12);
 }
 .add-box-title{
-  font-size:11px;font-weight:500;color:var(--teal);
+  font-size:11px;font-weight:500;color:var(--navy);
   text-transform:uppercase;letter-spacing:.09em;margin-bottom:12px;
 }
 
@@ -245,7 +236,7 @@ input,select,textarea{font-family:inherit;outline:0}
 
 /* ── Forgot / links ───────────────────────── */
 .link-sm{
-  font-size:12px;color:var(--teal);font-weight:500;
+  font-size:12px;color:var(--navy);font-weight:500;
   cursor:pointer;display:block;text-align:right;margin-top:5px;
 }
 .link-sm:hover{text-decoration:underline}
@@ -256,7 +247,7 @@ input,select,textarea{font-family:inherit;outline:0}
 
 /* ── Success screen ───────────────────────── */
 .success-icon{
-  width:64px;height:64px;background:var(--teal-l);
+  width:64px;height:64px;background:var(--navy-l);
   border-radius:50%;display:flex;align-items:center;
   justify-content:center;margin:0 auto 20px;font-size:30px;
 }
@@ -354,7 +345,7 @@ function render(screen) {
    ============================================================ */
 function tplLoading() {
   return '<div class="page"><div style="text-align:center">' +
-    '<div style="width:46px;height:46px;background:var(--teal);border-radius:12px;' +
+    '<div style="width:46px;height:46px;background:var(--navy);border-radius:12px;' +
     'display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" style="width:100%;height:100%;object-fit:contain;border-radius:12px"/></div>' +
     '<p style="font-size:13px;color:var(--ink-60)">Starting CRM…</p></div></div>';
 }
