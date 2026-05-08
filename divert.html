@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Divert Register — Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
+  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
+  --crimson:#C0392B;--crimson-l:#FDECEA;
+  --green:#1E7A1E;--green-l:#EBF5EB;
+  --orange:#E67E22;--orange-l:#FEF0E6;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
+
+/* ── Top bar ── */
+.back-bar{background:var(--teal);padding:14px 24px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
+  border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:6px;transition:background .15s}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.bar-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1}
+.bar-actions{display:flex;gap:8px}
+
+/* ── Tabs ── */
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 24px;position:sticky;top:53px;z-index:40}
+.tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--ink-60);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-badge{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;background:var(--crimson);color:#fff;
+  font-size:10px;font-weight:600;border-radius:50%;margin-left:6px}
+
+/* ── Main ── */
+.main{max-width:900px;margin:0 auto;padding:24px 20px 60px}
+
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;margin-bottom:20px}
+.stat-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:16px;box-shadow:var(--shadow)}
+.stat-label{font-size:10px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.stat-val{font-family:'DM Serif Display',serif;font-size:28px;line-height:1}
+.stat-val.red{color:var(--crimson)}
+.stat-val.orange{color:var(--orange)}
+.stat-val.green{color:var(--green)}
+.stat-val.teal{color:var(--teal)}
+
+/* ── Divert cards ── */
+.divert-list{display:flex;flex-direction:column;gap:12px}
+.divert-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;
+  transition:box-shadow .15s}
+.divert-card:hover{box-shadow:var(--shadow-md)}
+.divert-card-header{padding:14px 18px;display:flex;align-items:flex-start;
+  gap:12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.divert-id{font-size:10px;font-weight:600;color:var(--ink-30);font-variant-numeric:tabular-nums}
+.divert-main{flex:1;min-width:0}
+.divert-product{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.divert-meta{font-size:12px;color:var(--ink-60);display:flex;flex-wrap:wrap;gap:8px}
+.divert-meta span{display:flex;align-items:center;gap:3px}
+.status-pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;flex-shrink:0}
+.pill-open{background:var(--crimson-l);color:var(--crimson)}
+.pill-sourcing{background:var(--orange-l);color:var(--orange)}
+.pill-available{background:var(--teal-l);color:var(--teal)}
+.pill-closed{background:var(--green-l);color:var(--green)}
+.pill-cannot{background:var(--surface);color:var(--ink-60)}
+
+.divert-card-body{padding:16px 18px;display:none}
+.divert-card-body.open{display:block}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:10px;margin-bottom:16px}
+.detail-item{background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px}
+.detail-label{font-size:10px;font-weight:500;color:var(--ink-30);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.detail-val{font-size:13px;font-weight:500;color:var(--ink)}
+
+.timeline{border-left:2px solid var(--border);padding-left:16px;
+  margin-bottom:16px;display:flex;flex-direction:column;gap:10px}
+.tl-item{position:relative}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);
+  position:absolute;left:-20px;top:4px}
+.tl-text{font-size:12px;color:var(--ink-60);line-height:1.4}
+.tl-text strong{color:var(--ink);font-weight:500}
+
+.action-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.action-field{flex:1;min-width:160px}
+.action-field label{display:block;font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.action-field select,.action-field input,.action-field textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:13px;color:var(--ink);background:var(--white)}
+.action-field select:focus,.action-field input:focus,.action-field textarea:focus{
+  border-color:var(--teal);outline:none;box-shadow:0 0 0 3px var(--teal-l)}
+.action-field textarea{resize:none;height:68px}
+
+/* ── New divert form ── */
+.form-wrap{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.form-section{padding:20px 22px;border-bottom:1px solid var(--border)}
+.form-section:last-child{border-bottom:none}
+.form-section-title{font-size:12px;font-weight:600;color:var(--teal);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.form-section-title::after{content:'';flex:1;height:1px;background:var(--teal-l)}
+
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:14px;color:var(--ink);background:var(--white);
+  transition:border .15s,box-shadow .15s}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-l);outline:none}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.field textarea{resize:vertical;min-height:72px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.field-row{grid-template-columns:1fr}}
+.req{color:var(--crimson)}
+.opt{font-size:10px;color:var(--ink-30);font-weight:400;text-transform:none;
+  letter-spacing:0;margin-left:4px}
+
+/* ── Coming back toggle ── */
+.coming-back-row{display:flex;gap:8px;margin-bottom:14px}
+.cb-btn{flex:1;padding:10px;border-radius:var(--radius-sm);font-size:13px;
+  font-weight:500;border:1.5px solid var(--border);background:var(--white);
+  color:var(--ink-60);transition:all .15s;text-align:center;cursor:pointer}
+.cb-btn.yes{border-color:var(--teal);background:var(--teal);color:#fff}
+.cb-btn.no{border-color:var(--crimson);background:var(--crimson-l);color:var(--crimson)}
+.coming-back-fields{display:none}
+.coming-back-fields.show{display:block}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  transition:transform .15s,filter .15s;cursor:pointer;border:0;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none;filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-primary{background:var(--saffron);color:var(--ink);box-shadow:0 3px 10px rgba(244,160,23,.25)}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 3px 10px rgba(13,110,110,.2)}
+.btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-danger{background:var(--crimson);color:#fff}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%;padding:13px}
+
+/* ── Alert ── */
+.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;
+  margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-error{background:var(--crimson-l);color:var(--crimson)}
+.alert-success{background:var(--green-l);color:var(--green)}
+
+/* ── Spinner ── */
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spinner.show{display:inline-block}
+.spinner.dark{border-color:rgba(26,26,46,.15);border-top-color:var(--ink)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:48px 24px;color:var(--ink-60)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty h3{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:6px}
+
+/* ── Filter bar ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-select{padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:12px;color:var(--ink);background:var(--white);appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.filter-label{font-size:12px;color:var(--ink-60);font-weight:500}
+.filter-count{font-size:12px;color:var(--ink-30);margin-left:auto}
+
+.fade-in{animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <div class="bar-title">Divert Register</div>
+  <div class="bar-actions">
+    <button class="btn btn-sm" style="background:var(--saffron);color:var(--ink);font-weight:500"
+      onclick="showTab('new')">+ New Divert</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab_list"   onclick="showTab('list')">All Diverts</div>
+  <div class="tab"        id="tab_open"   onclick="showTab('open')">Open <span class="tab-badge" id="openCount">0</span></div>
+  <div class="tab"        id="tab_new"    onclick="showTab('new')">+ New Entry</div>
+</div>
+
+<div class="main" id="mainContent">
+  <div style="text-align:center;padding:48px;color:var(--ink-60)">⏳ Loading…</div>
+</div>
+
+<script>
+/* ── Config ── */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ── Session ── */
+var SESSION = null;
+function getSession() {
+  var t=sessionStorage.getItem("crm_token"), u=sessionStorage.getItem("crm_user");
+  if(!t||!u) return null;
+  try{return{token:t,user:JSON.parse(u)};}catch(e){return null;}
+}
+
+/* ── API ── */
+function api(body) {
+  body.token = SESSION.token;
+  return fetch(API_URL,{
+    method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body)
+  }).then(function(r){return r.json();});
+}
+
+/* ── State ── */
+var SECTIONS = [];
+var REASONS  = [];
+var DIVERTS  = [];
+var currentTab = "list";
+var expandedId = null;
+
+/* ── Role helpers ── */
+function isRole(roles){ return roles.indexOf(SESSION.user.role)!==-1; }
+function canCreate(){ return isRole(["super_admin","admin","crm_manager","crm_staff"]); }
+function canUpdate(){ return isRole(["super_admin","admin","crm_manager","crm_staff","purchase_manager"]); }
+function isPM()     { return SESSION.user.role==="purchase_manager"; }
+
+/* ── IST helpers ── */
+function nowIST(){
+  var d=new Date(),utc=d.getTime()+d.getTimezoneOffset()*60000;
+  return new Date(utc+330*60000);
+}
+function dateKeyIST(){
+  var d=nowIST();
+  return String(d.getDate()).padStart(2,"0")+"/"+
+    String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+function fmtDate(str){
+  if(!str) return "—";
+  return String(str);
+}
+
+/* ── Boot ── */
+function boot(){
+  SESSION = getSession();
+  if(!SESSION){ window.location.href="index.html"; return; }
+
+  Promise.all([
+    api({action:"get_sections"}),
+    api({action:"get_divert_reasons"}),
+    api({action:"get_diverts"}),
+  ]).then(function(res){
+    if(res[0].ok) SECTIONS = res[0].sections || [];
+    if(res[1].ok) REASONS  = res[1].reasons  || [];
+    if(res[2].ok) DIVERTS  = res[2].diverts  || [];
+
+    updateOpenCount();
+    showTab("list");
+  }).catch(function(e){
+    document.getElementById("mainContent").innerHTML =
+      '<div class="empty"><div class="empty-icon">⚠️</div><p>'+e.message+'</p></div>';
+  });
+}
+
+function goBack(){ window.location.href="app.html"; }
+
+function updateOpenCount(){
+  var count = DIVERTS.filter(function(d){
+    return d.status==="open"||d.status==="sourcing";
+  }).length;
+  var el = document.getElementById("openCount");
+  if(el) el.textContent = count;
+}
+
+/* ── Tabs ── */
+function showTab(tab){
+  currentTab = tab;
+  ["list","open","new"].forEach(function(t){
+    var el = document.getElementById("tab_"+t);
+    if(el) el.classList.toggle("active", t===tab);
+  });
+  if(tab==="list") renderList(DIVERTS);
+  else if(tab==="open") renderList(DIVERTS.filter(function(d){
+    return d.status==="open"||d.status==="sourcing";
+  }));
+  else if(tab==="new") renderNewForm();
+}
+
+/* ── Render list ── */
+function renderList(list){
+  var html = '<div class="fade-in">';
+
+  /* Stats */
+  var open      = DIVERTS.filter(function(d){return d.status==="open";}).length;
+  var sourcing  = DIVERTS.filter(function(d){return d.status==="sourcing";}).length;
+  var available = DIVERTS.filter(function(d){return d.status==="available";}).length;
+  var closed    = DIVERTS.filter(function(d){
+    return d.status==="closed"||d.status==="cannot_fulfill";}).length;
+
+  html += '<div class="stats-row">' +
+    sCard("Open",open,"red") +
+    sCard("Sourcing",sourcing,"orange") +
+    sCard("Available",available,"teal") +
+    sCard("Resolved",closed,"green") +
+  '</div>';
+
+  /* Filter bar */
+  html += '<div class="filter-bar">' +
+    '<span class="filter-label">Filter:</span>' +
+    '<select class="filter-select" onchange="filterDiverts(this.value)">' +
+      '<option value="">All Status</option>' +
+      '<option value="open">Open</option>' +
+      '<option value="sourcing">Sourcing</option>' +
+      '<option value="available">Available</option>' +
+      '<option value="closed">Closed</option>' +
+      '<option value="cannot_fulfill">Cannot Fulfill</option>' +
+    '</select>' +
+    '<span class="filter-count">'+list.length+' entries</span>' +
+  '</div>';
+
+  if(list.length===0){
+    html += '<div class="empty"><div class="empty-icon">📋</div>' +
+      '<h3>No diverts found</h3><p>Use "+ New Divert" to raise one.</p></div>';
+  } else {
+    html += '<div class="divert-list">';
+    /* Sort newest first */
+    var sorted = list.slice().reverse();
+    sorted.forEach(function(d){
+      html += renderDivertCard(d);
+    });
+    html += '</div>';
+  }
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+
+  /* Re-expand if one was open */
+  if(expandedId){
+    var body = document.getElementById("db_"+expandedId);
+    if(body) body.classList.add("open");
+  }
+}
+
+function sCard(label,val,color){
+  return '<div class="stat-card">' +
+    '<div class="stat-label">'+label+'</div>' +
+    '<div class="stat-val '+color+'">'+val+'</div>' +
+  '</div>';
+}
+
+function filterDiverts(status){
+  var list = status ? DIVERTS.filter(function(d){return d.status===status;}) : DIVERTS;
+  renderList(list);
+}
+
+/* ── Divert card ── */
+function renderDivertCard(d){
+  var pillCls = {
+    open:"pill-open", sourcing:"pill-sourcing",
+    available:"pill-available", closed:"pill-closed",
+    cannot_fulfill:"pill-cannot"
+  }[d.status] || "pill-open";
+
+  var pillLabel = {
+    open:"Open", sourcing:"Sourcing",
+    available:"Available ✓", closed:"Closed",
+    cannot_fulfill:"Cannot Fulfill"
+  }[d.status] || d.status;
+
+  /* Coming back badge */
+  var cbBadge = d.coming_back==="Yes"
+    ? '<span style="font-size:10px;background:var(--teal-l);color:var(--teal);' +
+      'padding:2px 8px;border-radius:999px;font-weight:500">Coming Back</span>'
+    : '';
+
+  var html = '<div class="divert-card">' +
+    '<div class="divert-card-header" onclick="toggleCard(\''+esc(d.divert_id)+'\')">' +
+      '<div class="divert-main">' +
+        '<div class="divert-id">'+esc(d.divert_id)+'</div>' +
+        '<div class="divert-product">'+esc(d.product_wanted)+'</div>' +
+        '<div class="divert-meta">' +
+          '<span>📦 '+esc(d.section_name)+'</span>' +
+          '<span>📅 '+esc(fmtDate(d.date))+'</span>' +
+          (d.cust_name ? '<span>👤 '+esc(d.cust_name)+'</span>' : '') +
+          (d.cust_mobile ? '<span>📞 '+esc(d.cust_mobile)+'</span>' : '') +
+          cbBadge +
+        '</div>' +
+      '</div>' +
+      '<span class="status-pill '+pillCls+'">'+pillLabel+'</span>' +
+    '</div>' +
+    '<div class="divert-card-body" id="db_'+esc(d.divert_id)+'">' +
+      renderDivertBody(d) +
+    '</div>' +
+  '</div>';
+
+  return html;
+}
+
+function renderDivertBody(d){
+  var html = '';
+
+  /* Detail grid */
+  html += '<div class="detail-grid">';
+  html += detailItem("Section",      d.section_name);
+  html += detailItem("Product",      d.product_wanted);
+  html += detailItem("Qty",          d.qty||"—");
+  html += detailItem("Price Range",  d.price_range||"—");
+  html += detailItem("Fabric/Occ.",  d.fabric_occasion||"—");
+  html += detailItem("Reason",       d.reason_code||"—");
+  html += detailItem("Coming Back",  d.coming_back||"—");
+  if(d.coming_back==="Yes"){
+    html += detailItem("Expected Date", d.expected_date||"—");
+  }
+  html += detailItem("Raised By",    d.raised_by||"—");
+  html += detailItem("Raised At",    d.raised_at ? String(d.raised_at).slice(0,16).replace("T"," ") : "—");
+  if(d.detailed_remarks){
+    html += detailItem("Remarks",    d.detailed_remarks);
+  }
+  html += '</div>';
+
+  /* PM action */
+  if(d.pm_action){
+    html += '<div style="background:var(--teal-l);border-radius:var(--radius-sm);' +
+      'padding:10px 14px;margin-bottom:12px;font-size:13px">' +
+      '<span style="font-weight:500;color:var(--teal)">PM Action: </span>' +
+      esc(d.pm_action) + '</div>';
+  }
+
+  /* Admin remark */
+  if(d.admin_remark){
+    html += '<div style="background:var(--saffron-l);border-radius:var(--radius-sm);' +
+      'padding:10px 14px;margin-bottom:12px;font-size:13px">' +
+      '<span style="font-weight:500;color:var(--saffron-d)">Admin Remark: </span>' +
+      esc(d.admin_remark) + '</div>';
+  }
+
+  /* Timeline */
+  if(d.updates && d.updates.length > 0){
+    html += '<div style="font-size:11px;font-weight:500;color:var(--ink-60);' +
+      'text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Activity Log</div>';
+    html += '<div class="timeline">';
+    d.updates.forEach(function(u){
+      html += '<div class="tl-item"><div class="tl-dot"></div>' +
+        '<div class="tl-text">' +
+        '<strong>'+esc(u.updated_by)+'</strong> ('+esc(u.role)+') — '+esc(u.note) +
+        (u.new_status ? ' → <strong>'+esc(u.new_status)+'</strong>' : '') +
+        '<br><span style="color:var(--ink-30)">'+
+        String(u.timestamp).slice(0,16).replace("T"," ")+'</span>' +
+        '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  /* Update action area — only if not closed */
+  var isClosed = d.status==="closed"||d.status==="cannot_fulfill";
+  if(!isClosed && canUpdate()){
+    html += '<div id="updAlert_'+esc(d.divert_id)+'" class="alert alert-error"></div>';
+    html += '<div class="action-row">';
+
+    /* Status dropdown */
+    var statusOptions = "";
+    if(isPM()){
+      statusOptions =
+        '<option value="">— Update Status —</option>' +
+        '<option value="sourcing">Sourcing</option>' +
+        '<option value="available">Available</option>' +
+        '<option value="cannot_fulfill">Cannot Fulfill</option>';
+    } else {
+      statusOptions =
+        '<option value="">— Update Status —</option>' +
+        '<option value="sourcing">Sourcing</option>' +
+        '<option value="available">Available</option>' +
+        '<option value="closed">Closed</option>' +
+        '<option value="cannot_fulfill">Cannot Fulfill</option>';
+    }
+
+    html += '<div class="action-field">' +
+      '<label>Status</label>' +
+      '<select id="st_'+esc(d.divert_id)+'">' + statusOptions + '</select>' +
+    '</div>';
+
+    /* Note field */
+    if(isPM()){
+      html += '<div class="action-field">' +
+        '<label>PM Action Note</label>' +
+        '<textarea id="note_'+esc(d.divert_id)+'" placeholder="What action did you take?"></textarea>' +
+      '</div>';
+    } else {
+      html += '<div class="action-field">' +
+        '<label>Remark / Note</label>' +
+        '<textarea id="note_'+esc(d.divert_id)+'" placeholder="Add a remark or note…"></textarea>' +
+      '</div>';
+    }
+
+    html += '<div style="padding-top:18px">' +
+      '<button class="btn btn-teal btn-sm" onclick="updateDivert(\''+esc(d.divert_id)+'\')">' +
+        '<span id="usp_'+esc(d.divert_id)+'" class="spinner"></span> Update' +
+      '</button></div>';
+
+    html += '</div>';
+  }
+
+  if(isClosed){
+    html += '<div style="text-align:center;padding:10px;font-size:13px;color:var(--green);font-weight:500">' +
+      '✓ This divert is ' + d.status.replace("_"," ") + (d.closed_at ? ' · '+String(d.closed_at).slice(0,10) : '') +
+    '</div>';
+  }
+
+  return html;
+}
+
+function detailItem(label, val){
+  return '<div class="detail-item">' +
+    '<div class="detail-label">'+esc(label)+'</div>' +
+    '<div class="detail-val">'+esc(String(val))+'</div>' +
+  '</div>';
+}
+
+function toggleCard(id){
+  expandedId = expandedId===id ? null : id;
+  var bodies = document.querySelectorAll(".divert-card-body");
+  bodies.forEach(function(b){ b.classList.remove("open"); });
+  if(expandedId){
+    var el = document.getElementById("db_"+expandedId);
+    if(el) el.classList.add("open");
+  }
+}
+
+/* ── Update divert ── */
+function updateDivert(id){
+  var status = document.getElementById("st_"+id).value;
+  var note   = document.getElementById("note_"+id).value.trim();
+  var alert  = document.getElementById("updAlert_"+id);
+  var spin   = document.getElementById("usp_"+id);
+
+  if(!status && !note){
+    showAlert(alert,"Please select a status or add a note."); return;
+  }
+
+  var body = { action:"update_divert", divert_id:id };
+  if(status) body.status = status;
+  if(isPM()) body.pm_action    = note;
+  else       body.admin_remark = note;
+  body.note = note;
+
+  var btn = document.querySelector('[onclick="updateDivert(\''+id+'\')"]');
+  if(btn) btn.disabled=true;
+  if(spin) spin.classList.add("show");
+
+  api(body).then(function(res){
+    if(btn) btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    if(res.ok){
+      /* Refresh diverts */
+      api({action:"get_diverts"}).then(function(r){
+        if(r.ok){
+          DIVERTS = r.diverts||[];
+          updateOpenCount();
+          showTab(currentTab);
+          toast("Divert updated","Status: "+(status||"note added"),"success");
+        }
+      });
+    } else {
+      showAlert(alert, res.error||"Update failed.");
+    }
+  }).catch(function(){
+    if(btn) btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    showAlert(alert,"Connection error.");
+  });
+}
+
+/* ── New divert form ── */
+var cbState = ""; // "Yes" | "No" | ""
+
+function renderNewForm(){
+  if(!canCreate()){
+    document.getElementById("mainContent").innerHTML =
+      '<div class="empty"><div class="empty-icon">🔒</div>' +
+      '<h3>Access Denied</h3><p>You do not have permission to raise diverts.</p></div>';
+    return;
+  }
+
+  var sectOptions = '<option value="">— Select Section —</option>';
+  SECTIONS.forEach(function(s){
+    sectOptions += '<option value="'+esc(s.section_id)+'">'+esc(s.section_name)+
+      ' ('+esc(s.type)+')</option>';
+  });
+
+  var reasonOptions = '<option value="">— Select Reason —</option>';
+  REASONS.forEach(function(r){
+    reasonOptions += '<option value="'+esc(r.reason_text)+'">'+esc(r.reason_text)+'</option>';
+  });
+
+  var html = '<div class="fade-in">' +
+  '<div class="form-wrap">' +
+
+  /* Product info */
+  '<div class="form-section">' +
+    '<div class="form-section-title">Product Details</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Section <span class="req">*</span></label>' +
+        '<select id="f_section">'+sectOptions+'</select></div>' +
+      '<div class="field"><label>Product Wanted <span class="req">*</span></label>' +
+        '<input id="f_product" type="text" placeholder="Product name or description"/></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Quantity <span class="opt">Optional</span></label>' +
+        '<input id="f_qty" type="number" min="1" placeholder="Qty needed"/></div>' +
+      '<div class="field"><label>Price Range <span class="opt">Optional</span></label>' +
+        '<select id="f_price">' +
+          '<option value="">— Select —</option>' +
+          '<option>Low</option><option>Mid</option><option>Premium</option>' +
+        '</select></div>' +
+    '</div>' +
+    '<div class="field"><label>Fabric / Occasion <span class="opt">Optional</span></label>' +
+      '<input id="f_fabric" type="text" placeholder="e.g. Cotton, Silk, Wedding, Casual…"/></div>' +
+  '</div>' +
+
+  /* Reason */
+  '<div class="form-section">' +
+    '<div class="form-section-title">Reason for Divert</div>' +
+    '<div class="field"><label>Reason <span class="req">*</span></label>' +
+      '<select id="f_reason">'+reasonOptions+'</select></div>' +
+    '<div class="field"><label>Detailed Remarks <span class="opt">Optional</span></label>' +
+      '<textarea id="f_remarks" placeholder="Any specific details about what the customer wanted…"></textarea></div>' +
+  '</div>' +
+
+  /* Coming back */
+  '<div class="form-section">' +
+    '<div class="form-section-title">Customer — Coming Back?</div>' +
+    '<div class="coming-back-row">' +
+      '<div class="cb-btn'+(cbState==="Yes"?" yes":"")+'" onclick="setCB(\'Yes\')">✓ Yes, will return</div>' +
+      '<div class="cb-btn'+(cbState==="No"?" no":"")+'"  onclick="setCB(\'No\')">✗ No / Not sure</div>' +
+    '</div>' +
+
+    '<div class="coming-back-fields'+(cbState==="Yes"?" show":"")+'" id="cbYesFields">' +
+      '<div class="field-row">' +
+        '<div class="field"><label>Customer Name <span class="req">*</span></label>' +
+          '<input id="f_cname" type="text" placeholder="Full name"/></div>' +
+        '<div class="field"><label>Mobile <span class="req">*</span></label>' +
+          '<input id="f_cmobile" type="tel" placeholder="10-digit number" maxlength="10"/></div>' +
+      '</div>' +
+      '<div class="field"><label>Expected Return Date <span class="req">*</span></label>' +
+        '<input id="f_cdate" type="date"/></div>' +
+      '<div class="field"><label>Quantity Wanted <span class="opt">Optional</span></label>' +
+        '<input id="f_cqty" type="number" min="1" placeholder="Qty"/></div>' +
+    '</div>' +
+
+    '<div class="coming-back-fields'+(cbState==="No"?" show":"")+'" id="cbNoFields">' +
+      '<div class="field-row">' +
+        '<div class="field"><label>Customer Name <span class="opt">Optional</span></label>' +
+          '<input id="f_ncname" type="text" placeholder="Name if given"/></div>' +
+        '<div class="field"><label>Mobile <span class="opt">Optional</span></label>' +
+          '<input id="f_ncmobile" type="tel" placeholder="Mobile if given" maxlength="10"/></div>' +
+      '</div>' +
+    '</div>' +
+
+  '</div>' +
+
+  /* Submit */
+  '<div class="form-section">' +
+    '<div id="newAlert" class="alert alert-error"></div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+      '<button class="btn btn-ghost" onclick="showTab(\'list\')">Cancel</button>' +
+      '<button id="createBtn" class="btn btn-teal" onclick="createDivert()">' +
+        '<span id="createSpin" class="spinner"></span> Raise Divert' +
+      '</button>' +
+    '</div>' +
+  '</div>' +
+
+  '</div></div>';
+
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+function setCB(val){
+  cbState = cbState===val ? "" : val;
+  renderNewForm();
+}
+
+/* ── Create divert ── */
+function createDivert(){
+  var alert  = document.getElementById("newAlert");
+  var sectEl = document.getElementById("f_section");
+  var sectId = gv("f_section");
+  var prod   = gv("f_product");
+  var reason = gv("f_reason");
+
+  if(!sectId) { showAlert(alert,"Please select a section."); return; }
+  if(!prod)   { showAlert(alert,"Product name is required."); return; }
+  if(!reason) { showAlert(alert,"Please select a reason."); return; }
+  if(!cbState){ showAlert(alert,"Please select if the customer is coming back or not."); return; }
+
+  var body = {
+    action:           "create_divert",
+    date:             dateKeyIST(),
+    section_id:       sectId,
+    section_name:     sectEl.options[sectEl.selectedIndex].text.split(" (")[0],
+    product_wanted:   prod,
+    qty:              gv("f_qty"),
+    price_range:      gv("f_price"),
+    fabric_occasion:  gv("f_fabric"),
+    reason_code:      reason,
+    detailed_remarks: gv("f_remarks"),
+    coming_back:      cbState,
+  };
+
+  if(cbState==="Yes"){
+    var cname = gv("f_cname"), cmobile = gv("f_cmobile"), cdate = gv("f_cdate");
+    if(!cname)   { showAlert(alert,"Customer name is required when coming back."); return; }
+    if(!cmobile) { showAlert(alert,"Customer mobile is required when coming back."); return; }
+    if(!cdate)   { showAlert(alert,"Expected return date is required."); return; }
+    body.cust_name    = cname;
+    body.cust_mobile  = cmobile;
+    body.expected_date= cdate;
+    body.qty          = gv("f_cqty")||gv("f_qty");
+  } else {
+    body.cust_name   = gv("f_ncname");
+    body.cust_mobile = gv("f_ncmobile");
+  }
+
+  var btn  = document.getElementById("createBtn");
+  var spin = document.getElementById("createSpin");
+  if(btn)  btn.disabled=true;
+  if(spin) spin.classList.add("show");
+  hideAlert(alert);
+
+  api(body).then(function(res){
+    if(btn)  btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    if(res.ok){
+      toast("Divert raised","ID: "+res.divert_id+
+        (body.section_id && SECTIONS.find(function(s){return s.section_id===body.section_id;}) &&
+         SECTIONS.find(function(s){return s.section_id===body.section_id;}).manager_email
+          ? " · PM notified by email" : ""),"success");
+      cbState = "";
+      /* Refresh */
+      api({action:"get_diverts"}).then(function(r){
+        if(r.ok){ DIVERTS=r.diverts||[]; updateOpenCount(); }
+        showTab("list");
+      });
+    } else {
+      showAlert(alert, res.error||"Failed to raise divert.");
+    }
+  }).catch(function(){
+    if(btn)  btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    showAlert(alert,"Connection error. Please try again.");
+  });
+}
+
+/* ── Toast ── */
+function toast(title,sub,type){
+  var host = document.getElementById("toastHost")||document.body;
+  var el   = document.createElement("div");
+  el.style.cssText = "position:fixed;top:16px;right:16px;z-index:999;" +
+    "background:"+(type==="success"?"var(--green)":"var(--crimson)")+";color:#fff;" +
+    "padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;" +
+    "box-shadow:0 4px 20px rgba(0,0,0,.2);animation:slideIn .25s ease;" +
+    "max-width:300px;font-family:'DM Sans',sans-serif";
+  el.innerHTML = title+(sub?'<div style="font-size:11px;opacity:.8;margin-top:3px">'+sub+'</div>':"");
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.opacity="0";el.style.transition="opacity .3s";
+    setTimeout(function(){el.remove();},300);},3000);
+}
+
+/* ── Helpers ── */
+function gv(id){var e=document.getElementById(id);return e?e.value.trim():"";}
+function showAlert(el,msg){
+  if(!el)return; el.textContent=msg; el.classList.add("show");
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function hideAlert(el){if(el)el.classList.remove("show");}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ── Start ── */
+boot();
+</script>
+</body>
+</html>
