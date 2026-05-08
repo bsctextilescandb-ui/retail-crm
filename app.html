@@ -541,6 +541,7 @@ function navigate(page) {
   content.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
 
   if (page === "footfall") renderFootfall();
+  else if (page === "feedback") { window.location.href = "feedback.html"; }
   else {
     content.innerHTML = '<div class="empty fade-in">' +
       '<div class="empty-icon">🚧</div>' +
