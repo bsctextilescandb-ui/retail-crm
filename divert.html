@@ -10,13 +10,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
-  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
-  --crimson:#C0392B;--crimson-l:#FDECEA;
-  --green:#1E7A1E;--green-l:#EBF5EB;
-  --orange:#E67E22;--orange-l:#FEF0E6;
-  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
-  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8
   --radius:12px;--radius-sm:8px;
   --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
 }
@@ -27,7 +27,7 @@ button{font-family:inherit;cursor:pointer;border:0;outline:0}
 input,select,textarea{font-family:inherit;outline:0}
 
 /* ── Top bar ── */
-.back-bar{background:var(--teal);padding:14px 24px;
+.back-bar{background:var(--navy);padding:14px 24px;
   display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
 .back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
   border-radius:var(--radius-sm);font-size:13px;font-weight:500;
@@ -42,7 +42,7 @@ input,select,textarea{font-family:inherit;outline:0}
 .tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--ink-60);
   cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab:hover{color:var(--ink)}
-.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
 .tab-badge{display:inline-flex;align-items:center;justify-content:center;
   width:18px;height:18px;background:var(--crimson);color:#fff;
   font-size:10px;font-weight:600;border-radius:50%;margin-left:6px}
@@ -61,7 +61,7 @@ input,select,textarea{font-family:inherit;outline:0}
 .stat-val.red{color:var(--crimson)}
 .stat-val.orange{color:var(--orange)}
 .stat-val.green{color:var(--green)}
-.stat-val.teal{color:var(--teal)}
+.stat-val.teal{color:var(--navy)}
 
 /* ── Divert cards ── */
 .divert-list{display:flex;flex-direction:column;gap:12px}
@@ -80,7 +80,7 @@ input,select,textarea{font-family:inherit;outline:0}
   text-transform:uppercase;letter-spacing:.06em;flex-shrink:0}
 .pill-open{background:var(--crimson-l);color:var(--crimson)}
 .pill-sourcing{background:var(--orange-l);color:var(--orange)}
-.pill-available{background:var(--teal-l);color:var(--teal)}
+.pill-available{background:var(--navy-l);color:var(--navy)}
 .pill-closed{background:var(--green-l);color:var(--green)}
 .pill-cannot{background:var(--surface);color:var(--ink-60)}
 
@@ -96,7 +96,7 @@ input,select,textarea{font-family:inherit;outline:0}
 .timeline{border-left:2px solid var(--border);padding-left:16px;
   margin-bottom:16px;display:flex;flex-direction:column;gap:10px}
 .tl-item{position:relative}
-.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--navy);
   position:absolute;left:-20px;top:4px}
 .tl-text{font-size:12px;color:var(--ink-60);line-height:1.4}
 .tl-text strong{color:var(--ink);font-weight:500}
@@ -109,7 +109,7 @@ input,select,textarea{font-family:inherit;outline:0}
   width:100%;padding:9px 12px;border:1.5px solid var(--border);
   border-radius:var(--radius-sm);font-size:13px;color:var(--ink);background:var(--white)}
 .action-field select:focus,.action-field input:focus,.action-field textarea:focus{
-  border-color:var(--teal);outline:none;box-shadow:0 0 0 3px var(--teal-l)}
+  border-color:var(--navy);outline:none;box-shadow:0 0 0 3px var(--navy-l)}
 .action-field textarea{resize:none;height:68px}
 
 /* ── New divert form ── */
@@ -117,10 +117,10 @@ input,select,textarea{font-family:inherit;outline:0}
   border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
 .form-section{padding:20px 22px;border-bottom:1px solid var(--border)}
 .form-section:last-child{border-bottom:none}
-.form-section-title{font-size:12px;font-weight:600;color:var(--teal);
+.form-section-title{font-size:12px;font-weight:600;color:var(--navy);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;
   display:flex;align-items:center;gap:8px}
-.form-section-title::after{content:'';flex:1;height:1px;background:var(--teal-l)}
+.form-section-title::after{content:'';flex:1;height:1px;background:var(--navy-l)}
 
 .field{margin-bottom:14px}
 .field:last-child{margin-bottom:0}
@@ -131,7 +131,7 @@ input,select,textarea{font-family:inherit;outline:0}
   border-radius:var(--radius-sm);font-size:14px;color:var(--ink);background:var(--white);
   transition:border .15s,box-shadow .15s}
 .field input:focus,.field select:focus,.field textarea:focus{
-  border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-l);outline:none}
+  border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-l);outline:none}
 .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
 .field textarea{resize:vertical;min-height:72px}
@@ -146,7 +146,7 @@ input,select,textarea{font-family:inherit;outline:0}
 .cb-btn{flex:1;padding:10px;border-radius:var(--radius-sm);font-size:13px;
   font-weight:500;border:1.5px solid var(--border);background:var(--white);
   color:var(--ink-60);transition:all .15s;text-align:center;cursor:pointer}
-.cb-btn.yes{border-color:var(--teal);background:var(--teal);color:#fff}
+.cb-btn.yes{border-color:var(--navy);background:var(--navy);color:#fff}
 .cb-btn.no{border-color:var(--crimson);background:var(--crimson-l);color:var(--crimson)}
 .coming-back-fields{display:none}
 .coming-back-fields.show{display:block}
@@ -158,8 +158,8 @@ input,select,textarea{font-family:inherit;outline:0}
 .btn:hover{transform:translateY(-1px)}
 .btn:active{transform:none;filter:brightness(.95)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-.btn-primary{background:var(--saffron);color:var(--ink);box-shadow:0 3px 10px rgba(244,160,23,.25)}
-.btn-teal{background:var(--teal);color:#fff;box-shadow:0 3px 10px rgba(13,110,110,.2)}
+.btn-primary{background:var(--gold);color:var(--ink);box-shadow:0 3px 10px rgba(184,134,11,.25)}
+.btn-teal{background:var(--navy);color:#fff;box-shadow:0 3px 10px rgba(30,45,90,.2)}
 .btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
 .btn-ghost:hover{background:var(--surface)}
 .btn-danger{background:var(--crimson);color:#fff}
@@ -204,7 +204,7 @@ input,select,textarea{font-family:inherit;outline:0}
   <button class="back-btn" onclick="goBack()">← Back</button>
   <div class="bar-title">Divert Register</div>
   <div class="bar-actions">
-    <button class="btn btn-sm" style="background:var(--saffron);color:var(--ink);font-weight:500"
+    <button class="btn btn-sm" style="background:var(--gold);color:var(--ink);font-weight:500"
       onclick="showTab('new')">+ New Divert</button>
   </div>
 </div>
@@ -397,7 +397,7 @@ function renderDivertCard(d){
 
   /* Coming back badge */
   var cbBadge = d.coming_back==="Yes"
-    ? '<span style="font-size:10px;background:var(--teal-l);color:var(--teal);' +
+    ? '<span style="font-size:10px;background:var(--navy-l);color:var(--navy);' +
       'padding:2px 8px;border-radius:999px;font-weight:500">Coming Back</span>'
     : '';
 
@@ -448,17 +448,17 @@ function renderDivertBody(d){
 
   /* PM action */
   if(d.pm_action){
-    html += '<div style="background:var(--teal-l);border-radius:var(--radius-sm);' +
+    html += '<div style="background:var(--navy-l);border-radius:var(--radius-sm);' +
       'padding:10px 14px;margin-bottom:12px;font-size:13px">' +
-      '<span style="font-weight:500;color:var(--teal)">PM Action: </span>' +
+      '<span style="font-weight:500;color:var(--navy)">PM Action: </span>' +
       esc(d.pm_action) + '</div>';
   }
 
   /* Admin remark */
   if(d.admin_remark){
-    html += '<div style="background:var(--saffron-l);border-radius:var(--radius-sm);' +
+    html += '<div style="background:var(--gold-l);border-radius:var(--radius-sm);' +
       'padding:10px 14px;margin-bottom:12px;font-size:13px">' +
-      '<span style="font-weight:500;color:var(--saffron-d)">Admin Remark: </span>' +
+      '<span style="font-weight:500;color:var(--gold-d)">Admin Remark: </span>' +
       esc(d.admin_remark) + '</div>';
   }
 
