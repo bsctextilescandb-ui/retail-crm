@@ -10,12 +10,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
-  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
-  --crimson:#C0392B;--crimson-l:#FDECEA;
-  --green:#1E7A1E;--green-l:#EBF5EB;
-  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
-  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8
   --radius:12px;--radius-sm:8px;
   --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
 }
@@ -26,7 +27,7 @@ button{font-family:inherit;cursor:pointer;border:0;outline:0}
 input,select,textarea{font-family:inherit;outline:0}
 
 /* ── Top bar ── */
-.back-bar{background:var(--teal);padding:14px 24px;
+.back-bar{background:var(--navy);padding:14px 24px;
   display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
 .back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
   border-radius:var(--radius-sm);font-size:13px;font-weight:500;
@@ -40,7 +41,7 @@ input,select,textarea{font-family:inherit;outline:0}
 .tab{padding:14px 16px;font-size:13px;font-weight:500;color:var(--ink-60);
   cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab:hover{color:var(--ink)}
-.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
 
 /* ── Main ── */
 .main{max-width:880px;margin:0 auto;padding:24px 20px 60px}
@@ -69,9 +70,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
 /* ── Role badges ── */
 .role-badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500}
 .role-super_admin{background:#1A1A2E;color:#fff}
-.role-admin{background:var(--teal);color:#fff}
-.role-crm_manager{background:var(--saffron-l);color:var(--saffron-d)}
-.role-crm_staff{background:var(--teal-l);color:var(--teal)}
+.role-admin{background:var(--navy);color:#fff}
+.role-crm_manager{background:var(--gold-l);color:var(--gold-d)}
+.role-crm_staff{background:var(--navy-l);color:var(--navy)}
 .role-purchase_manager{background:var(--green-l);color:var(--green)}
 
 /* ── Status badge ── */
@@ -81,9 +82,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
   padding:3px 10px;border-radius:999px;font-size:11px}
 
 /* ── Type badge ── */
-.badge-sales{background:var(--teal-l);color:var(--teal);
+.badge-sales{background:var(--navy-l);color:var(--navy);
   padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500}
-.badge-non_sales{background:var(--saffron-l);color:var(--saffron-d);
+.badge-non_sales{background:var(--gold-l);color:var(--gold-d);
   padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500}
 
 /* ── Buttons ── */
@@ -93,8 +94,8 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
 .btn:hover{transform:translateY(-1px)}
 .btn:active{transform:none;filter:brightness(.95)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-.btn-teal{background:var(--teal);color:#fff;box-shadow:0 3px 10px rgba(13,110,110,.2)}
-.btn-primary{background:var(--saffron);color:var(--ink)}
+.btn-teal{background:var(--navy);color:#fff;box-shadow:0 3px 10px rgba(30,45,90,.2)}
+.btn-primary{background:var(--gold);color:var(--ink)}
 .btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
 .btn-ghost:hover{background:var(--surface)}
 .btn-danger{background:var(--crimson-l);color:var(--crimson);border:1px solid rgba(192,57,43,.2)}
@@ -110,7 +111,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
 .modal{background:var(--white);border-radius:16px;width:100%;max-width:480px;
   box-shadow:0 20px 60px rgba(26,26,46,.2);animation:slideUp .25s ease;overflow:hidden}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.modal-header{background:var(--teal);padding:18px 22px;
+.modal-header{background:var(--navy);padding:18px 22px;
   display:flex;align-items:center;justify-content:space-between}
 .modal-header h3{font-family:'DM Serif Display',serif;font-size:19px;color:#fff}
 .modal-header p{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
@@ -131,7 +132,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
   border-radius:var(--radius-sm);font-size:14px;color:var(--ink);
   background:var(--white);transition:border .15s,box-shadow .15s}
 .field input:focus,.field select:focus,.field textarea:focus{
-  border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-l);outline:none}
+  border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-l);outline:none}
 .field select{appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
@@ -165,7 +166,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
 .opt-row{display:flex;gap:6px;align-items:center}
 .opt-row input{flex:1;padding:8px 12px;border:1.5px solid var(--border);
   border-radius:var(--radius-sm);font-size:13px}
-.opt-row input:focus{border-color:var(--teal);outline:none}
+.opt-row input:focus{border-color:var(--navy);outline:none}
 .opt-del{width:26px;height:26px;border-radius:6px;background:var(--crimson-l);
   color:var(--crimson);display:flex;align-items:center;justify-content:center;
   cursor:pointer;border:0;font-size:14px;flex-shrink:0}
