@@ -133,7 +133,7 @@ input,select,textarea{font-family:inherit;outline:0}
 <body>
 
 <div class="header">
-  <div class="header-logo">🏪</div>
+  <div class="header-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" style="width:100%;height:100%;object-fit:contain;border-radius:14px"/></div>
   <h1>Share Your Feedback</h1>
   <p>Help us serve you better</p>
   <div class="company-name" id="companyName">Loading…</div>
@@ -240,9 +240,9 @@ function renderForm() {
   /* Area */
   html += '<div class="q-card">' +
     '<div class="q-num-tag">Zone</div>' +
-    '<div class="q-text">Area/Zone <span class="req">*</span></div>' +
+    '<div class="q-text">Which area or section are you visiting? <span class="req">*</span></div>' +
     '<div class="field" style="margin-bottom:0">' +
-    '<input type="text" id="areaInput" placeholder="e.g. Tilakwadi" ' +
+    '<input type="text" id="areaInput" placeholder="e.g. Ground Floor, Sarees Section…" ' +
     'style="font-size:15px" value="'+esc(window._area||'')+'"/>' +
     '</div></div>';
 
