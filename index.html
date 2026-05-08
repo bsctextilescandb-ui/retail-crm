@@ -1,1 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --saffron:#F4A017;
+  --saffron-d:#C47F0A;
+  --saffron-l:#FEF3DC;
+  --teal:#0D6E6E;
+  --teal-d:#084E4E;
+  --teal-l:#E6F4F4;
+  --crimson:#C0392B;
+  --crimson-l:#FDECEA;
+  --ink:#1A1A2E;
+  --ink-60:rgba(26,26,46,.6);
+  --ink-30:rgba(26,26,46,.3);
+  --ink-10:rgba(26,26,46,.06);
+  --ivory:#FAFAF7;
+  --white:#FFFFFF;
+  --surface:#F3F2EE;
+  --border:#E4E2DC;
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow:0 4px 24px rgba(26,26,46,.08);
+  --shadow-md:0 8px 40px rgba(26,26,46,.13);
+}
+html,body{
+  min-height:100%;
+  background:var(--ivory);
+  color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
 
+/* ── Page wrapper ─────────────────────────── */
+.page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px 16px;
+}
+.page-top{align-items:flex-start;padding-top:40px}
+
+/* ── Card ─────────────────────────────────── */
+.card{
+  background:var(--white);
+  border-radius:24px;
+  box-shadow:var(--shadow-md);
+  width:100%;
+  max-width:500px;
+  overflow:hidden;
+}
+.card-wide{max-width:700px}
+
+/* ── Brand strip ──────────────────────────── */
+.brand-strip{
+  background:var(--teal);
+  padding:28px 36px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.brand-icon{
+  width:46px;height:46px;
+  background:var(--saffron);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.brand-text h1{
+  font-family:'DM Serif Display',serif;
+  font-size:21px;color:#fff;
+  letter-spacing:-.01em;line-height:1;
+}
+.brand-text p{
+  font-size:11px;color:rgba(255,255,255,.6);
+  margin-top:5px;letter-spacing:.1em;text-transform:uppercase;
+}
+
+/* ── Card body ────────────────────────────── */
+.card-body{padding:36px}
+.card-title{
+  font-family:'DM Serif Display',serif;
+  font-size:26px;letter-spacing:-.02em;margin-bottom:6px;
+}
+.card-sub{font-size:14px;color:var(--ink-60);margin-bottom:28px;line-height:1.55}
+
+/* ── Form ─────────────────────────────────── */
+.field{margin-bottom:18px}
+.field label{
+  display:block;font-size:11px;font-weight:500;
+  color:var(--ink-60);text-transform:uppercase;
+  letter-spacing:.09em;margin-bottom:7px;
+}
+.req{color:var(--crimson);margin-left:2px}
+.opt{font-size:11px;color:var(--saffron-d);font-weight:500;margin-left:6px;text-transform:none;letter-spacing:0}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 15px;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-size:14px;color:var(--ink);
+  background:var(--white);
+  transition:border .15s,box-shadow .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px var(--teal-l);
+}
+.field select{
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 13px center;
+  padding-right:36px;
+}
+.field textarea{resize:vertical;min-height:72px}
+.field-note{font-size:12px;color:var(--ink-30);margin-top:5px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.field-row{grid-template-columns:1fr}}
+.time-row{display:grid;grid-template-columns:1fr 32px 1fr;gap:8px;align-items:center}
+.time-sep{text-align:center;color:var(--ink-30);padding-top:22px;font-size:14px}
+
+/* ── Buttons ──────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 22px;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:500;
+  transition:transform .15s,filter .15s;
+  white-space:nowrap;cursor:pointer;border:0;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none;filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-primary{background:var(--saffron);color:var(--ink);box-shadow:0 4px 12px rgba(244,160,23,.28)}
+.btn-primary:hover{background:#f7b030}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(13,110,110,.22)}
+.btn-teal:hover{background:var(--teal-d)}
+.btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface);color:var(--ink)}
+.btn-full{width:100%;padding:14px}
+.btn-sm{padding:8px 14px;font-size:13px}
+
+/* ── Steps ────────────────────────────────── */
+.steps-wrap{position:relative;margin-bottom:32px}
+.steps{display:flex;align-items:flex-start}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.step-item:not(:last-child)::after{
+  content:'';position:absolute;top:15px;left:50%;
+  width:100%;height:2px;background:var(--border);z-index:0;
+  transition:background .3s;
+}
+.step-item.done:not(:last-child)::after{background:var(--teal)}
+.step-dot{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;z-index:1;
+  transition:background .3s,color .3s;
+}
+.step-dot.done{background:var(--teal);color:#fff}
+.step-dot.active{background:var(--saffron);color:var(--ink)}
+.step-dot.pending{background:var(--surface);color:var(--ink-30);border:1.5px solid var(--border)}
+.step-lbl{font-size:10px;color:var(--ink-60);margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── Section list ─────────────────────────── */
+.section-list{
+  display:flex;flex-direction:column;gap:8px;
+  max-height:240px;overflow-y:auto;margin-bottom:14px;
+}
+.section-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:10px 14px;
+}
+.section-tag{flex:1;font-size:13px;font-weight:500}
+.section-tag span{font-size:11px;font-weight:400;color:var(--ink-60);margin-left:6px}
+.section-tag em{font-style:normal;font-size:11px;color:var(--teal);margin-left:4px}
+.section-del{
+  width:26px;height:26px;border-radius:6px;
+  background:var(--crimson-l);color:var(--crimson);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:0;font-size:15px;flex-shrink:0;
+}
+.add-box{
+  background:var(--teal-l);border-radius:var(--radius-sm);
+  padding:16px;margin-bottom:20px;
+  border:1px solid rgba(13,110,110,.12);
+}
+.add-box-title{
+  font-size:11px;font-weight:500;color:var(--teal);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:12px;
+}
+
+/* ── Summary box ──────────────────────────── */
+.summary-box{
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:16px;margin-bottom:20px;
+  border:1.5px solid var(--border);
+}
+.summary-row{
+  display:flex;justify-content:space-between;
+  font-size:13px;padding:4px 0;
+}
+.summary-row span:first-child{color:var(--ink-60)}
+.summary-row span:last-child{font-weight:500}
+
+/* ── Alerts ───────────────────────────────── */
+.alert{
+  padding:11px 14px;border-radius:var(--radius-sm);
+  font-size:13px;margin-bottom:16px;display:none;
+}
+.alert.show{display:block}
+.alert-error{background:var(--crimson-l);color:var(--crimson);border:1px solid rgba(192,57,43,.18)}
+.alert-success{background:#ebf5eb;color:#1a6e1a;border:1px solid rgba(26,110,26,.18)}
+
+/* ── Password strength ────────────────────── */
+.pwd-bar{height:3px;border-radius:2px;background:var(--border);margin-top:7px;overflow:hidden}
+.pwd-fill{height:100%;border-radius:2px;width:0;transition:width .3s,background .3s}
+
+/* ── Spinner ──────────────────────────────── */
+.spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(26,26,46,.15);
+  border-top-color:currentColor;
+  border-radius:50%;
+  animation:spin .65s linear infinite;
+  display:none;
+}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Animations ───────────────────────────── */
+.fade-in{animation:fadeIn .35s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── Forgot / links ───────────────────────── */
+.link-sm{
+  font-size:12px;color:var(--teal);font-weight:500;
+  cursor:pointer;display:block;text-align:right;margin-top:5px;
+}
+.link-sm:hover{text-decoration:underline}
+.footer-note{
+  text-align:center;font-size:11px;
+  color:var(--ink-30);margin-top:20px;
+}
+
+/* ── Success screen ───────────────────────── */
+.success-icon{
+  width:64px;height:64px;background:var(--teal-l);
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;margin:0 auto 20px;font-size:30px;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var state = {
+  screen:   "boot",
+  step:     1,
+  company:  {},
+  sections: [],
+  admin:    {},
+};
+
+/* ============================================================
+   API
+   ============================================================ */
+function apiGet(action) {
+  return fetch(API_URL + "?action=" + action).then(function(r){ return r.json(); });
+}
+
+function apiPost(body) {
+  return fetch(API_URL, {
+    method:  "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body:    JSON.stringify(body),
+  }).then(function(r){ return r.json(); });
+}
+
+/* ============================================================
+   SESSION
+   ============================================================ */
+function saveSession(data) {
+  sessionStorage.setItem("crm_token", data.token);
+  sessionStorage.setItem("crm_user",  JSON.stringify(data.user));
+}
+
+function getSession() {
+  var token = sessionStorage.getItem("crm_token");
+  var user  = sessionStorage.getItem("crm_user");
+  if (!token || !user) return null;
+  return { token: token, user: JSON.parse(user) };
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot() {
+  render("loading");
+
+  // Already logged in?
+  var session = getSession();
+  if (session) {
+    window.location.href = "app.html";
+    return;
+  }
+
+  // Check if first-time setup needed
+  apiGet("setup_check").then(function(res) {
+    if (res.ok && res.setup_complete) {
+      render("login");
+    } else {
+      render("onboard");
+    }
+  }).catch(function() {
+    render("login"); // fallback
+  });
+}
+
+/* ============================================================
+   RENDER ROUTER
+   ============================================================ */
+function render(screen) {
+  state.screen = screen;
+  var root = document.getElementById("root");
+  if (screen === "loading")  { root.innerHTML = tplLoading();  return; }
+  if (screen === "login")    { root.innerHTML = tplLogin();    bindLogin();    return; }
+  if (screen === "onboard")  { root.innerHTML = tplOnboard();  bindOnboard();  return; }
+  if (screen === "success")  { root.innerHTML = tplSuccess();  return; }
+}
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+function tplLoading() {
+  return '<div class="page"><div style="text-align:center">' +
+    '<div style="width:46px;height:46px;background:var(--teal);border-radius:12px;' +
+    'display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px">🏪</div>' +
+    '<p style="font-size:13px;color:var(--ink-60)">Starting CRM…</p></div></div>';
+}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+function tplLogin() {
+  return '<div class="page fade-in">' +
+    '<div class="card">' +
+      brandStrip("Staff Portal") +
+      '<div class="card-body">' +
+        '<h2 class="card-title serif">Welcome back</h2>' +
+        '<p class="card-sub">Sign in to access your CRM dashboard</p>' +
+        '<div id="loginAlert" class="alert alert-error"></div>' +
+        '<div class="field"><label>Email Address</label>' +
+          '<input id="lemail" type="email" placeholder="you@company.com" autocomplete="email"/></div>' +
+        '<div class="field"><label>Password</label>' +
+          '<input id="lpwd" type="password" placeholder="Enter your password" autocomplete="current-password"/>' +
+          '<span class="link-sm" onclick="forgotPwd()">Forgot password?</span></div>' +
+        '<button id="loginBtn" class="btn btn-teal btn-full" onclick="doLogin()">' +
+          '<span id="loginSpin" class="spinner"></span> Sign In</button>' +
+        '<p class="footer-note">Authorized personnel only · Access is logged</p>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function bindLogin() {
+  var el = document.getElementById("lpwd");
+  if (el) el.addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
+  var el2 = document.getElementById("lemail");
+  if (el2) el2.addEventListener("keydown", function(e){
+    if(e.key==="Enter") document.getElementById("lpwd").focus();
+  });
+}
+
+function doLogin() {
+  var email = val("lemail");
+  var pwd   = val("lpwd");
+  var alert = document.getElementById("loginAlert");
+
+  if (!email || !pwd) { showAlert(alert, "Please enter your email and password."); return; }
+
+  setLoading("loginBtn","loginSpin", true);
+  hideAlert(alert);
+
+  apiPost({ action:"login", email:email, password:pwd }).then(function(res) {
+    setLoading("loginBtn","loginSpin", false);
+    if (res.ok) {
+      saveSession(res);
+      document.getElementById("loginBtn").textContent = "✓ Signed in";
+      setTimeout(function(){ window.location.href = "app.html"; }, 500);
+    } else {
+      showAlert(alert, res.error || "Invalid credentials. Please try again.");
+      document.getElementById("lpwd").value = "";
+      document.getElementById("lpwd").focus();
+    }
+  }).catch(function(err) {
+    setLoading("loginBtn","loginSpin", false);
+    showAlert(alert, "Connection error. Please check your internet and try again.");
+  });
+}
+
+function forgotPwd() {
+  alert("Please contact your Super Admin to reset your password.");
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+function tplOnboard() {
+  return '<div class="page page-top fade-in">' +
+    '<div class="card card-wide">' +
+      brandStrip("First-time Setup") +
+      '<div class="card-body">' +
+        stepsHtml() +
+        '<div id="onboardAlert" class="alert alert-error"></div>' +
+        '<div id="stepPanel">' + tplStep1() + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function bindOnboard() { /* onclick handles all */ }
+
+function stepsHtml() {
+  var labels = ["Company", "Sections", "Admin"];
+  var html = '<div class="steps-wrap"><div class="steps">';
+  labels.forEach(function(lbl, i) {
+    var n    = i + 1;
+    var cls  = n < state.step ? "done" : n === state.step ? "active" : "pending";
+    var icls = n < state.step ? "done" : n === state.step ? "active" : "pending";
+    html += '<div class="step-item ' + cls + '">' +
+      '<div class="step-dot ' + icls + '">' + (n < state.step ? "✓" : n) + '</div>' +
+      '<div class="step-lbl">' + lbl + '</div>' +
+    '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function refreshSteps() {
+  var wrap = document.querySelector(".steps-wrap");
+  if (wrap) wrap.outerHTML = stepsHtml();
+}
+
+/* ── Step 1 — Company ── */
+function tplStep1() {
+  return '<h2 class="card-title serif">Company Details</h2>' +
+    '<p class="card-sub">Set up your store profile and operating hours</p>' +
+    '<div class="field"><label>Company / Store Name <span class="req">*</span></label>' +
+      '<input id="cname" type="text" placeholder="e.g. BSC The Textile Mall" value="' + esc(state.company.name||'') + '"/></div>' +
+    '<div class="field"><label>Logo URL <span class="opt">Optional</span></label>' +
+      '<input id="clogo" type="url" placeholder="https://..." value="' + esc(state.company.logo_url||'') + '"/>' +
+      '<p class="field-note">Direct image link — shown on the login page</p></div>' +
+    '<div class="field"><label>Operating Hours <span class="req">*</span></label>' +
+      '<div class="time-row">' +
+        '<div><div style="font-size:11px;color:var(--ink-60);margin-bottom:5px">Opens at</div>' +
+          '<input id="cstart" type="time" value="' + (state.company.op_start||'10:00') + '"/></div>' +
+        '<div class="time-sep">→</div>' +
+        '<div><div style="font-size:11px;color:var(--ink-60);margin-bottom:5px">Closes at</div>' +
+          '<input id="cend" type="time" value="' + (state.company.op_end||'22:00') + '"/></div>' +
+      '</div></div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Footfall Entry Grace (minutes)</label>' +
+        '<input id="cgrace" type="number" min="0" max="60" value="' + (state.company.grace_min||'30') + '"/>' +
+        '<p class="field-note">How long after a slot ends staff can submit</p></div>' +
+      '<div class="field"><label>Edit Cutoff Time (next day)</label>' +
+        '<input id="ccutoff" type="time" value="' + (state.company.edit_cutoff||'10:30') + '"/>' +
+        '<p class="field-note">Admin edit window next morning</p></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:flex-end;margin-top:6px">' +
+      '<button class="btn btn-primary" onclick="nextStep1()">Continue to Sections →</button>' +
+    '</div>';
+}
+
+function nextStep1() {
+  var name  = val("cname");
+  var start = val("cstart");
+  var end   = val("cend");
+  var alert = document.getElementById("onboardAlert");
+  if (!name)         { showAlert(alert,"Company name is required."); return; }
+  if (!start||!end)  { showAlert(alert,"Please set operating hours."); return; }
+  if (start >= end)  { showAlert(alert,"Opening time must be before closing time."); return; }
+  state.company = {
+    name:       name,
+    logo_url:   val("clogo"),
+    op_start:   start,
+    op_end:     end,
+    grace_min:  val("cgrace")||"30",
+    edit_cutoff:val("ccutoff")||"10:30",
+    last_cutoff:val("ccutoff")||"10:30",
+  };
+  goStep(2);
+}
+
+/* ── Step 2 — Sections ── */
+function tplStep2() {
+  var listHtml = state.sections.length
+    ? state.sections.map(function(s,i){
+        return '<div class="section-row">' +
+          '<div class="section-tag">' + esc(s.name) +
+            '<span>(' + (s.type==='sales'?'Sales':'Non-Sales') + ')</span>' +
+            (s.manager_email ? '<em>· ' + esc(s.manager_email) + '</em>' : '') +
+          '</div>' +
+          '<button class="section-del" onclick="removeSection(' + i + ')">×</button>' +
+        '</div>';
+      }).join('')
+    : '<p style="color:var(--ink-30);font-size:13px;text-align:center;padding:16px">No sections added yet</p>';
+
+  return '<h2 class="card-title serif">Departments & Sections</h2>' +
+    '<p class="card-sub">Add all sales and non-sales sections. You can add more later from Admin settings.</p>' +
+    '<div class="section-list" id="sectionList">' + listHtml + '</div>' +
+    '<div class="add-box">' +
+      '<p class="add-box-title">Add New Section</p>' +
+      '<div class="field-row" style="margin-bottom:10px">' +
+        '<div class="field" style="margin-bottom:0"><label>Section Name</label>' +
+          '<input id="nsname" type="text" placeholder="e.g. Sarees, Kids Wear…"/></div>' +
+        '<div class="field" style="margin-bottom:0"><label>Type</label>' +
+          '<select id="nstype"><option value="sales">Sales</option><option value="non_sales">Non-Sales</option></select></div>' +
+      '</div>' +
+      '<div class="field-row" style="margin-bottom:10px">' +
+        '<div class="field" style="margin-bottom:0"><label>Manager Name <span class="opt">Optional</span></label>' +
+          '<input id="nsmgr" type="text" placeholder="Purchase Manager name"/></div>' +
+        '<div class="field" style="margin-bottom:0"><label>Manager Email <span class="opt">For divert alerts</span></label>' +
+          '<input id="nsemail" type="email" placeholder="pm@store.com"/></div>' +
+      '</div>' +
+      '<button class="btn btn-teal btn-sm" onclick="addSection()">+ Add Section</button>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between">' +
+      '<button class="btn btn-ghost" onclick="goStep(1)">← Back</button>' +
+      '<button class="btn btn-primary" onclick="nextStep2()">Continue to Admin →</button>' +
+    '</div>';
+}
+
+function addSection() {
+  var name  = val("nsname");
+  var type  = val("nstype");
+  var mgr   = val("nsmgr");
+  var email = val("nsemail");
+  var alert = document.getElementById("onboardAlert");
+  if (!name) { showAlert(alert,"Section name is required."); return; }
+  var dup = state.sections.some(function(s){ return s.name.toLowerCase()===name.toLowerCase(); });
+  if (dup)  { showAlert(alert,"A section with this name already exists."); return; }
+  state.sections.push({ name:name, type:type, manager_name:mgr, manager_email:email });
+  document.getElementById("stepPanel").innerHTML = stepsHtml() + tplStep2();
+  hideAlert(document.getElementById("onboardAlert"));
+}
+
+function removeSection(i) {
+  state.sections.splice(i,1);
+  document.getElementById("stepPanel").innerHTML = stepsHtml() + tplStep2();
+}
+
+function nextStep2() {
+  if (state.sections.length === 0) {
+    showAlert(document.getElementById("onboardAlert"),"Please add at least one section before continuing.");
+    return;
+  }
+  goStep(3);
+}
+
+/* ── Step 3 — Admin ── */
+function tplStep3() {
+  return '<h2 class="card-title serif">Create Super Admin</h2>' +
+    '<p class="card-sub">This account has full access to manage users, settings, and all data.</p>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Full Name <span class="req">*</span></label>' +
+        '<input id="aname" type="text" placeholder="Admin full name" value="' + esc(state.admin.name||'') + '"/></div>' +
+      '<div class="field"><label>Email <span class="req">*</span></label>' +
+        '<input id="aemail" type="email" placeholder="admin@store.com" value="' + esc(state.admin.email||'') + '"/></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Password <span class="req">*</span></label>' +
+        '<input id="apwd" type="password" placeholder="Min. 8 characters" oninput="checkPwd()"/>' +
+        '<div class="pwd-bar"><div class="pwd-fill" id="pwdFill"></div></div></div>' +
+      '<div class="field"><label>Confirm Password <span class="req">*</span></label>' +
+        '<input id="apwd2" type="password" placeholder="Repeat password"/></div>' +
+    '</div>' +
+    '<div class="summary-box">' +
+      '<p style="font-size:11px;font-weight:500;color:var(--ink-60);text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px">Setup Summary</p>' +
+      '<div class="summary-row"><span>Company</span><span>' + esc(state.company.name||'—') + '</span></div>' +
+      '<div class="summary-row"><span>Operating Hours</span><span>' + (state.company.op_start||'—') + ' → ' + (state.company.op_end||'—') + '</span></div>' +
+      '<div class="summary-row"><span>Sections Added</span><span>' + state.sections.length + '</span></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between">' +
+      '<button class="btn btn-ghost" onclick="goStep(2)">← Back</button>' +
+      '<button id="submitBtn" class="btn btn-teal" onclick="doOnboard()">' +
+        '<span id="submitSpin" class="spinner"></span> 🚀 Complete Setup</button>' +
+    '</div>';
+}
+
+function checkPwd() {
+  var pwd  = document.getElementById("apwd").value;
+  var fill = document.getElementById("pwdFill");
+  if (!fill) return;
+  var score = [pwd.length>=8, /[A-Z]/.test(pwd), /[0-9]/.test(pwd), /[^A-Za-z0-9]/.test(pwd)].filter(Boolean).length;
+  var colors = ["#e74c3c","#e67e22","#f1c40f","#2ecc71"];
+  fill.style.width  = (score*25)+"%";
+  fill.style.background = colors[score-1]||"var(--border)";
+}
+
+function doOnboard() {
+  var name  = val("aname");
+  var email = val("aemail");
+  var pwd   = val("apwd");
+  var pwd2  = val("apwd2");
+  var alert = document.getElementById("onboardAlert");
+
+  if (!name||!email||!pwd)    { showAlert(alert,"All fields are required."); return; }
+  if (pwd.length < 8)         { showAlert(alert,"Password must be at least 8 characters."); return; }
+  if (pwd !== pwd2)           { showAlert(alert,"Passwords do not match."); return; }
+  if (!validEmail(email))     { showAlert(alert,"Please enter a valid email address."); return; }
+
+  state.admin = { name:name, email:email, password:pwd };
+  setLoading("submitBtn","submitSpin",true);
+  hideAlert(alert);
+
+  apiPost({
+    action:     "onboard",
+    company:    state.company,
+    sections:   state.sections,
+    admin_user: state.admin,
+  }).then(function(res) {
+    setLoading("submitBtn","submitSpin",false);
+    if (res.ok) {
+      render("success");
+    } else {
+      showAlert(alert, res.error || "Setup failed. Please check your Apps Script deployment.");
+    }
+  }).catch(function() {
+    setLoading("submitBtn","submitSpin",false);
+    showAlert(alert,"Connection error. Please try again.");
+  });
+}
+
+/* ── Step navigation ── */
+function goStep(n) {
+  state.step = n;
+  var html = stepsHtml();
+  if (n===1) html += tplStep1();
+  if (n===2) html += tplStep2();
+  if (n===3) html += tplStep3();
+  document.getElementById("stepPanel").innerHTML = html;
+  hideAlert(document.getElementById("onboardAlert"));
+}
+
+/* ============================================================
+   SUCCESS
+   ============================================================ */
+function tplSuccess() {
+  return '<div class="page fade-in">' +
+    '<div class="card" style="max-width:440px;text-align:center">' +
+      '<div class="card-body" style="padding:48px 36px">' +
+        '<div class="success-icon">✓</div>' +
+        '<h2 class="card-title serif" style="margin-bottom:10px">Setup Complete!</h2>' +
+        '<p style="font-size:14px;color:var(--ink-60);margin-bottom:28px;line-height:1.6">' +
+          'Your CRM is ready. Sign in with the Super Admin account you just created.' +
+        '</p>' +
+        '<button class="btn btn-teal btn-full" onclick="render(\'login\')">Go to Sign In →</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ============================================================
+   SHARED HELPERS
+   ============================================================ */
+function brandStrip(subtitle) {
+  return '<div class="brand-strip">' +
+    '<div class="brand-icon">🏪</div>' +
+    '<div class="brand-text">' +
+      '<h1>Retail CRM</h1>' +
+      '<p>' + subtitle + '</p>' +
+    '</div>' +
+  '</div>';
+}
+
+function val(id) {
+  var el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+}
+
+function validEmail(e) { return /\S+@\S+\.\S+/.test(e); }
+
+function showAlert(el, msg) {
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+  el.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+
+function hideAlert(el) {
+  if (el) el.classList.remove("show");
+}
+
+function setLoading(btnId, spinId, loading) {
+  var btn  = document.getElementById(btnId);
+  var spin = document.getElementById(spinId);
+  if (btn)  btn.disabled = loading;
+  if (spin) spin.classList.toggle("show", loading);
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+boot();
+</script>
+</body>
+</html>
