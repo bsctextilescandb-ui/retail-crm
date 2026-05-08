@@ -623,38 +623,7 @@ function renderNewForm(){
   var html = '<div class="fade-in">' +
   '<div class="form-wrap">' +
 
-  /* Product info */
-  '<div class="form-section">' +
-    '<div class="form-section-title">Product Details</div>' +
-    '<div class="field-row">' +
-      '<div class="field"><label>Section <span class="req">*</span></label>' +
-        '<select id="f_section">'+sectOptions+'</select></div>' +
-      '<div class="field"><label>Product Wanted <span class="req">*</span></label>' +
-        '<input id="f_product" type="text" placeholder="Product name or description"/></div>' +
-    '</div>' +
-    '<div class="field-row">' +
-      '<div class="field"><label>Quantity <span class="opt">Optional</span></label>' +
-        '<input id="f_qty" type="number" min="1" placeholder="Qty needed"/></div>' +
-      '<div class="field"><label>Price Range <span class="opt">Optional</span></label>' +
-        '<select id="f_price">' +
-          '<option value="">— Select —</option>' +
-          '<option>Low</option><option>Mid</option><option>Premium</option>' +
-        '</select></div>' +
-    '</div>' +
-    '<div class="field"><label>Fabric / Occasion <span class="opt">Optional</span></label>' +
-      '<input id="f_fabric" type="text" placeholder="e.g. Cotton, Silk, Wedding, Casual…"/></div>' +
-  '</div>' +
-
-  /* Reason */
-  '<div class="form-section">' +
-    '<div class="form-section-title">Reason for Divert</div>' +
-    '<div class="field"><label>Reason <span class="req">*</span></label>' +
-      '<select id="f_reason">'+reasonOptions+'</select></div>' +
-    '<div class="field"><label>Detailed Remarks <span class="opt">Optional</span></label>' +
-      '<textarea id="f_remarks" placeholder="Any specific details about what the customer wanted…"></textarea></div>' +
-  '</div>' +
-
-  /* Coming back */
+  /* Coming back — FIRST */
   '<div class="form-section">' +
     '<div class="form-section-title">Customer — Coming Back?</div>' +
     '<div class="coming-back-row">' +
@@ -684,6 +653,37 @@ function renderNewForm(){
       '</div>' +
     '</div>' +
 
+  '</div>' +
+
+  /* Reason — SECOND */
+  '<div class="form-section">' +
+    '<div class="form-section-title">Reason for Divert</div>' +
+    '<div class="field"><label>Reason <span class="req">*</span></label>' +
+      '<select id="f_reason">'+reasonOptions+'</select></div>' +
+    '<div class="field"><label>Detailed Remarks <span class="opt">Optional</span></label>' +
+      '<textarea id="f_remarks" placeholder="Any specific details about what the customer wanted…"></textarea></div>' +
+  '</div>' +
+
+  /* Product info — THIRD */
+  '<div class="form-section">' +
+    '<div class="form-section-title">Product Details</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Section <span class="req">*</span></label>' +
+        '<select id="f_section">'+sectOptions+'</select></div>' +
+      '<div class="field"><label>Product Wanted <span class="req">*</span></label>' +
+        '<input id="f_product" type="text" placeholder="Product name or description"/></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Quantity <span class="opt">Optional</span></label>' +
+        '<input id="f_qty" type="number" min="1" placeholder="Qty needed"/></div>' +
+      '<div class="field"><label>Price Range <span class="opt">Optional</span></label>' +
+        '<select id="f_price">' +
+          '<option value="">— Select —</option>' +
+          '<option>Low</option><option>Mid</option><option>Premium</option>' +
+        '</select></div>' +
+    '</div>' +
+    '<div class="field"><label>Fabric / Occasion <span class="opt">Optional</span></label>' +
+      '<input id="f_fabric" type="text" placeholder="e.g. Cotton, Silk, Wedding, Casual…"/></div>' +
   '</div>' +
 
   /* Submit */
