@@ -10,14 +10,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
-  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
-  --crimson:#C0392B;--crimson-l:#FDECEA;
-  --green:#1E7A1E;--green-l:#EBF5EB;
-  --orange:#E67E22;--orange-l:#FEF0E6;
-  --purple:#6C3483;--purple-l:#F5EEF8;
-  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
-  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8
   --radius:12px;--radius-sm:8px;
   --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
 }
@@ -28,7 +27,7 @@ button{font-family:inherit;cursor:pointer;border:0;outline:0}
 input,select{font-family:inherit;outline:0}
 
 /* ── Top bar ── */
-.back-bar{background:var(--teal);padding:14px 24px;display:flex;align-items:center;
+.back-bar{background:var(--navy);padding:14px 24px;display:flex;align-items:center;
   gap:12px;position:sticky;top:0;z-index:50}
 .back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
   border-radius:var(--radius-sm);font-size:13px;font-weight:500;
@@ -42,7 +41,7 @@ input,select{font-family:inherit;outline:0}
 .tab{padding:14px 16px;font-size:13px;font-weight:500;color:var(--ink-60);
   cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
 .tab:hover{color:var(--ink)}
-.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
 
 /* ── Filter bar ── */
 .filter-bar{background:var(--white);border-bottom:1px solid var(--border);
@@ -54,12 +53,12 @@ input,select{font-family:inherit;outline:0}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 8px center}
 .filter-input{width:120px}
-.filter-select:focus,.filter-input:focus{border-color:var(--teal);outline:none}
+.filter-select:focus,.filter-input:focus{border-color:var(--navy);outline:none}
 .filter-label{font-size:12px;color:var(--ink-60);font-weight:500}
 .filter-sep{width:1px;height:20px;background:var(--border)}
-.btn-apply{padding:7px 16px;border-radius:var(--radius-sm);background:var(--teal);
+.btn-apply{padding:7px 16px;border-radius:var(--radius-sm);background:var(--navy);
   color:#fff;font-size:12px;font-weight:500;border:0;cursor:pointer}
-.btn-apply:hover{background:var(--teal-d)}
+.btn-apply:hover{background:var(--navy-d)}
 
 /* ── Main ── */
 .main{max-width:960px;margin:0 auto;padding:24px 20px 60px}
@@ -72,8 +71,8 @@ input,select{font-family:inherit;outline:0}
 .stat-label{font-size:10px;font-weight:500;color:var(--ink-60);
   text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 .stat-val{font-family:'DM Serif Display',serif;font-size:30px;line-height:1;color:var(--ink)}
-.stat-val.gold{color:var(--saffron-d)}
-.stat-val.teal{color:var(--teal)}
+.stat-val.gold{color:var(--gold-d)}
+.stat-val.teal{color:var(--navy)}
 .stat-val.green{color:var(--green)}
 .stat-val.red{color:var(--crimson)}
 .stat-val.orange{color:var(--orange)}
@@ -100,8 +99,8 @@ input,select{font-family:inherit;outline:0}
 .bar-val{font-size:12px;font-weight:500;color:var(--ink);width:44px;flex-shrink:0}
 
 /* ── Horizontal bar colors ── */
-.bar-teal{background:var(--teal)}
-.bar-saffron{background:var(--saffron)}
+.bar-teal{background:var(--navy)}
+.bar-saffron{background:var(--gold)}
 .bar-green{background:var(--green)}
 .bar-crimson{background:var(--crimson)}
 .bar-orange{background:var(--orange)}
@@ -116,10 +115,10 @@ input,select{font-family:inherit;outline:0}
 .score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .score-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px}
 .score-q{font-size:11px;color:var(--ink-60);margin-bottom:8px;line-height:1.4}
-.score-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--teal)}
+.score-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--navy)}
 .score-out{font-size:11px;color:var(--ink-30);margin-left:4px}
 .score-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
-.score-fill{height:100%;border-radius:3px;background:var(--teal)}
+.score-fill{height:100%;border-radius:3px;background:var(--navy)}
 
 /* ── Table ── */
 .rep-table{width:100%;border-collapse:collapse}
@@ -136,7 +135,7 @@ input,select{font-family:inherit;outline:0}
 .pill{padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500}
 .pill-open{background:var(--crimson-l);color:var(--crimson)}
 .pill-sourcing{background:var(--orange-l);color:var(--orange)}
-.pill-available{background:var(--teal-l);color:var(--teal)}
+.pill-available{background:var(--navy-l);color:var(--navy)}
 .pill-closed{background:var(--green-l);color:var(--green)}
 .pill-cannot{background:var(--surface);color:var(--ink-60)}
 
@@ -667,7 +666,7 @@ function renderFeedback(){
 
       html += '<div class="score-card">' +
         '<div class="score-q">'+esc(q.q_text)+'</div>' +
-        '<div style="font-size:13px;font-weight:500;color:var(--teal);margin-bottom:4px">'+esc(topAns)+'</div>' +
+        '<div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:4px">'+esc(topAns)+'</div>' +
         '<div style="font-size:11px;color:var(--ink-30)">'+topPct+'% of responses · '+total+' answered</div>' +
         '<div class="score-bar"><div class="score-fill" style="width:'+topPct+'%"></div></div>' +
         '</div>';
@@ -924,7 +923,7 @@ function fmtTime(h){
 
 function intensityColor(v){
   if(v===0) return "var(--surface)";
-  var r=13,g=110,b=110;
+  var r=30,g=45,b=90;
   var alpha = 0.15 + v*0.85;
   return "rgba("+r+","+g+","+b+","+alpha.toFixed(2)+")";
 }
