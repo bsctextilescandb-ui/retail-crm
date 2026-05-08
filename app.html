@@ -351,7 +351,7 @@ input,select,textarea{font-family:inherit;outline:0}
   <!-- ── Sidebar ── -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-logo">🏪</div>
+      <div class="sidebar-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" style="width:100%;height:100%;object-fit:contain;border-radius:9px"/></div>
       <div class="sidebar-brand-text">
         <h2>Retail CRM</h2>
         <p id="companyName">Loading…</p>
@@ -541,12 +541,6 @@ function navigate(page) {
   content.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
 
   if (page === "footfall") renderFootfall();
-  else if (page === "feedback") { window.location.href = "feedback.html"; }
-  else if (page === "divert") { window.location.href = "divert.html"; }
-  else if (page === "settings") { window.location.href = "admin.html"; }
-  else if (page === "users")    { window.location.href = "admin.html"; }
-  else if (page === "sections") { window.location.href = "admin.html"; }
-  else if (page === "reports") { window.location.href = "reports.html"; }
   else {
     content.innerHTML = '<div class="empty fade-in">' +
       '<div class="empty-icon">🚧</div>' +
