@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Share Your Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --saffron:#F4A017;--saffron-d:#C47F0A;--saffron-l:#FEF3DC;
+  --teal:#0D6E6E;--teal-d:#084E4E;--teal-l:#E6F4F4;
+  --crimson:#C0392B;--crimson-l:#FDECEA;
+  --green:#1E7A1E;--green-l:#EBF5EB;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#FAFAF7;--white:#FFFFFF;--surface:#F3F2EE;--border:#E4E2DC;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
+
+/* ── Header ── */
+.header{
+  background:var(--teal);
+  padding:24px 20px 20px;
+  text-align:center;
+}
+.header-logo{
+  width:52px;height:52px;background:var(--saffron);
+  border-radius:14px;display:flex;align-items:center;
+  justify-content:center;margin:0 auto 12px;font-size:26px;
+}
+.header h1{
+  font-family:'DM Serif Display',serif;
+  font-size:22px;color:#fff;margin-bottom:4px;
+}
+.header p{font-size:13px;color:rgba(255,255,255,.65)}
+.company-name{
+  font-size:11px;color:rgba(255,255,255,.5);
+  margin-top:6px;text-transform:uppercase;letter-spacing:.1em;
+}
+
+/* ── Main ── */
+.main{max-width:600px;margin:0 auto;padding:20px 16px 60px}
+
+/* ── Progress bar ── */
+.progress-wrap{
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:14px 18px;
+  margin-bottom:16px;box-shadow:var(--shadow);
+}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:var(--teal);border-radius:3px;transition:width .4s ease}
+.progress-label{font-size:12px;color:var(--ink-60);display:flex;justify-content:space-between}
+
+/* ── Card ── */
+.q-card{
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:22px;
+  box-shadow:var(--shadow);margin-bottom:12px;
+}
+.q-num-tag{
+  font-size:10px;font-weight:600;color:var(--teal);
+  background:var(--teal-l);padding:3px 9px;
+  border-radius:999px;display:inline-block;margin-bottom:10px;
+}
+.q-text{
+  font-size:15px;font-weight:500;line-height:1.4;
+  margin-bottom:14px;color:var(--ink);
+}
+.q-optional{font-size:11px;color:var(--ink-30);font-weight:400;margin-left:4px}
+.req{color:var(--crimson);margin-left:2px}
+
+/* ── Options ── */
+.options-list{display:flex;flex-direction:column;gap:8px}
+.opt-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--white);
+  cursor:pointer;transition:all .15s;
+}
+.opt-item:hover{border-color:var(--teal);background:var(--teal-l)}
+.opt-item.selected{
+  border-color:var(--teal);background:var(--teal);
+}
+.opt-item.selected .opt-text{color:#fff}
+.opt-item.others-item.selected{
+  border-color:var(--saffron);background:var(--saffron-l);
+}
+.opt-item.others-item.selected .opt-text{color:var(--ink)}
+.opt-radio{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.opt-item.selected .opt-radio{
+  background:#fff;border-color:#fff;
+}
+.opt-item.selected .opt-radio::after{
+  content:'';width:8px;height:8px;
+  background:var(--teal);border-radius:50%;
+}
+.opt-item.others-item.selected .opt-radio{
+  background:var(--saffron);border-color:var(--saffron-d);
+}
+.opt-item.others-item.selected .opt-radio::after{
+  background:var(--ink);
+}
+.opt-text{font-size:14px;color:var(--ink);transition:color .15s}
+
+.others-input{
+  margin-top:10px;width:100%;padding:10px 14px;
+  border:1.5px solid var(--saffron);border-radius:var(--radius-sm);
+  font-size:14px;color:var(--ink);background:var(--saffron-l);
+  display:none;
+}
+.others-input:focus{outline:none;border-color:var(--saffron-d);
+  box-shadow:0 0 0 3px rgba(244,160,23,.15)}
+.others-input.show{display:block}
+
+/* ── Text inputs ── */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{
+  display:block;font-size:11px;font-weight:500;
+  color:var(--ink-60);text-transform:uppercase;
+  letter-spacing:.09em;margin-bottom:6px;
+}
+.field input,.field textarea{
+  width:100%;padding:11px 14px;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-size:14px;color:var(--ink);background:var(--white);
+  transition:border .15s,box-shadow .15s;
+}
+.field input:focus,.field textarea:focus{
+  border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-l);outline:none}
+.field textarea{resize:none;height:90px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:400px){.field-row{grid-template-columns:1fr}}
+
+/* ── Personal section ── */
+.personal-header{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;background:var(--surface);
+  border-radius:var(--radius-sm);cursor:pointer;
+  border:1.5px solid var(--border);margin-bottom:12px;
+}
+.personal-header-text{flex:1}
+.personal-header-title{font-size:13px;font-weight:500}
+.personal-header-sub{font-size:11px;color:var(--ink-60);margin-top:1px}
+.chevron{font-size:14px;color:var(--ink-30);transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.personal-body{display:none}
+.personal-body.show{display:block}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:13px 24px;border-radius:var(--radius-sm);
+  font-size:15px;font-weight:500;
+  transition:transform .15s;cursor:pointer;border:0;width:100%;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none;filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(13,110,110,.25)}
+.btn-ghost{background:var(--white);color:var(--ink-60);border:1.5px solid var(--border);margin-top:10px}
+
+/* ── Alert ── */
+.alert{padding:10px 14px;border-radius:var(--radius-sm);
+  font-size:13px;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-error{background:var(--crimson-l);color:var(--crimson)}
+
+/* ── Spinner ── */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Success ── */
+.success-card{
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:40px 24px;
+  text-align:center;box-shadow:var(--shadow);margin-top:20px;
+}
+.success-icon-big{
+  width:72px;height:72px;background:var(--green-l);
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;margin:0 auto 16px;font-size:36px;
+}
+
+/* ── QR section (for staff/admin) ── */
+.qr-admin{
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:20px;
+  text-align:center;box-shadow:var(--shadow);margin-bottom:16px;
+  display:none;
+}
+.qr-admin.show{display:block}
+#qrCanvas{margin:12px auto;display:block}
+
+.fade-in{animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-logo">🏪</div>
+  <h1>Share Your Feedback</h1>
+  <p>Help us serve you better</p>
+  <div class="company-name" id="companyName">Retail CRM</div>
+</div>
+
+<div class="main" id="mainContent">
+  <div style="text-align:center;padding:40px;color:var(--ink-60)">⏳ Loading…</div>
+</div>
+
+<!-- QR code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+var PAGE_URL = "https://bsctextilescandb-ui.github.io/retail-crm/feedback-qr.html";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var QUESTIONS = [];
+var answers   = {}; // q_id → selected option text
+var others    = {}; // q_id → open text
+var personalOpen = false;
+
+/* ============================================================
+   API (no auth — public form)
+   ============================================================ */
+function apiPublic(body) {
+  return fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body),
+  }).then(function(r){ return r.json(); });
+}
+
+function apiGet(action) {
+  return fetch(API_URL + "?action=" + action).then(function(r){ return r.json(); });
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot() {
+  // Load questions and company name in parallel
+  Promise.all([
+    apiGet("feedback_form"),
+    apiGet("setup_check"),
+  ]).then(function(results) {
+    var qRes = results[0];
+    var sRes = results[1];
+
+    if (sRes.ok && sRes.company_name) {
+      document.getElementById("companyName").textContent = sRes.company_name;
+      document.title = "Feedback — " + sRes.company_name;
+    }
+
+    if (!qRes.ok) { showLoadError(); return; }
+    QUESTIONS = qRes.questions || [];
+    renderForm();
+  }).catch(function() { showLoadError(); });
+}
+
+function showLoadError() {
+  document.getElementById("mainContent").innerHTML =
+    '<div style="text-align:center;padding:40px;color:var(--crimson)">' +
+    '<p style="font-size:32px;margin-bottom:12px">⚠️</p>' +
+    '<p>Unable to load form. Please try again.</p>' +
+    '<button onclick="boot()" style="margin-top:16px;padding:10px 20px;' +
+    'background:var(--teal);color:#fff;border:0;border-radius:8px;cursor:pointer">Retry</button></div>';
+}
+
+/* ============================================================
+   RENDER FORM
+   ============================================================ */
+function renderForm() {
+  var total    = QUESTIONS.length + 3; // questions + area + your voice + personal
+  var answered = Object.keys(answers).length;
+  var pct      = Math.round((answered / Math.max(QUESTIONS.length, 1)) * 100);
+
+  var html = '<div class="fade-in">';
+
+  // Progress
+  html += '<div class="progress-wrap">' +
+    '<div class="progress-label">' +
+      '<span>Your responses</span>' +
+      '<span>' + answered + ' of ' + QUESTIONS.length + ' answered</span>' +
+    '</div>' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+  '</div>';
+
+  // Area
+  html += '<div class="q-card">' +
+    '<div class="q-num-tag">Zone</div>' +
+    '<div class="q-text">Which area or section are you visiting? <span class="req">*</span></div>' +
+    '<div class="field" style="margin-bottom:0">' +
+      '<input type="text" id="areaInput" placeholder="e.g. Ground Floor, Sarees, Kids Wear…" ' +
+      'style="font-size:15px"/>' +
+    '</div>' +
+  '</div>';
+
+  // Questions
+  QUESTIONS.forEach(function(q, qi) {
+    var isMandatory = String(q.is_mandatory).toUpperCase() === "TRUE";
+    var selected    = answers[q.q_id] || "";
+
+    html += '<div class="q-card">' +
+      '<div class="q-num-tag">Q' + (qi + 1) + '</div>' +
+      '<div class="q-text">' + esc(q.q_text) +
+        (isMandatory
+          ? '<span class="req"> *</span>'
+          : '<span class="q-optional"> (optional)</span>') +
+      '</div>' +
+      '<div class="options-list">';
+
+    q.options.forEach(function(opt) {
+      var isOthers  = opt.toLowerCase() === "others";
+      var isSel     = selected === opt;
+      html += '<div class="opt-item' +
+        (isOthers ? " others-item" : "") +
+        (isSel    ? " selected"    : "") +
+        '" onclick="pick(\'' + esc(q.q_id) + '\',\'' + esc(opt) + '\')">' +
+        '<div class="opt-radio"></div>' +
+        '<div class="opt-text">' + esc(opt) + '</div>' +
+      '</div>';
+    });
+
+    // Others text input
+    var othersSelected = selected.toLowerCase() === "others";
+    html += '<input type="text" class="others-input' + (othersSelected ? " show" : "") +
+      '" id="others_' + q.q_id + '" placeholder="Please tell us more…" ' +
+      'value="' + esc(others[q.q_id] || "") + '" ' +
+      'oninput="others[\'' + q.q_id + '\']=this.value"/>';
+
+    html += '</div></div>';
+  });
+
+  // Your Voice
+  html += '<div class="q-card">' +
+    '<div class="q-num-tag">Your Voice</div>' +
+    '<div class="q-text">Any other feedback or suggestions? <span class="q-optional">(optional)</span></div>' +
+    '<div class="field" style="margin-bottom:0">' +
+      '<textarea id="yourVoice" placeholder="Share anything you'd like us to know…"></textarea>' +
+    '</div>' +
+  '</div>';
+
+  // Personal details
+  html += '<div class="q-card">' +
+    '<div class="personal-header" onclick="togglePersonal()">' +
+      '<div class="personal-header-text">' +
+        '<div class="personal-header-title">Your Details</div>' +
+        '<div class="personal-header-sub">Optional — helps us serve you better</div>' +
+      '</div>' +
+      '<div class="chevron' + (personalOpen ? " open" : "") + '" id="chevron">▾</div>' +
+    '</div>' +
+    '<div class="personal-body' + (personalOpen ? " show" : "") + '" id="personalBody">' +
+      '<div class="field-row">' +
+        '<div class="field"><label>Name</label>' +
+          '<input type="text" id="custName" placeholder="Your name"/></div>' +
+        '<div class="field"><label>Mobile</label>' +
+          '<input type="tel" id="custMobile" placeholder="10-digit number" maxlength="10"/></div>' +
+      '</div>' +
+      '<div class="field"><label>Date of Birth</label>' +
+        '<input type="date" id="custDob"/></div>' +
+    '</div>' +
+  '</div>';
+
+  // Alert + Submit
+  html += '<div id="formAlert" class="alert alert-error"></div>';
+  html += '<button id="submitBtn" class="btn btn-teal" onclick="submitForm()">' +
+    '<span id="submitSpin" class="spinner"></span> Submit Feedback ✓' +
+  '</button>';
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ============================================================
+   INTERACTIONS
+   ============================================================ */
+function pick(qId, opt) {
+  // Toggle off if same
+  if (answers[qId] === opt) {
+    delete answers[qId];
+    delete others[qId];
+  } else {
+    answers[qId] = opt;
+    if (opt.toLowerCase() !== "others") delete others[qId];
+  }
+  renderForm();
+
+  // Restore scrolled values after re-render
+  var areaEl = document.getElementById("areaInput");
+  if (areaEl && window._areaVal) areaEl.value = window._areaVal;
+  var voiceEl = document.getElementById("yourVoice");
+  if (voiceEl && window._voiceVal) voiceEl.value = window._voiceVal;
+}
+
+function togglePersonal() {
+  personalOpen = !personalOpen;
+  var body    = document.getElementById("personalBody");
+  var chevron = document.getElementById("chevron");
+  if (body)    body.classList.toggle("show", personalOpen);
+  if (chevron) chevron.classList.toggle("open", personalOpen);
+}
+
+/* ============================================================
+   SUBMIT
+   ============================================================ */
+function submitForm() {
+  var alert   = document.getElementById("formAlert");
+  var areaEl  = document.getElementById("areaInput");
+  var area    = areaEl ? areaEl.value.trim() : "";
+
+  if (!area) { showAlert(alert, "Please enter your area / zone."); return; }
+
+  // Mandatory question check
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var q = QUESTIONS[i];
+    if (String(q.is_mandatory).toUpperCase() === "TRUE" && !answers[q.q_id]) {
+      showAlert(alert, "Please answer: " + q.q_text);
+      return;
+    }
+  }
+
+  // Others text check
+  for (var qId in answers) {
+    if (answers[qId].toLowerCase() === "others") {
+      var inp = document.getElementById("others_" + qId);
+      if (!inp || !inp.value.trim()) {
+        showAlert(alert, "Please specify your answer for the \"Others\" option.");
+        if (inp) inp.focus();
+        return;
+      }
+      others[qId] = inp.value.trim();
+    }
+  }
+
+  var voiceEl = document.getElementById("yourVoice");
+  var payload = {
+    action:     "feedback_public",
+    date:       dateKeyIST(),
+    source:     "qr_self",
+    area:       area,
+    your_voice: voiceEl ? voiceEl.value.trim() : "",
+    cust_name:   getValue("custName"),
+    cust_mobile: getValue("custMobile"),
+    cust_dob:    getValue("custDob"),
+  };
+
+  // Map answers
+  QUESTIONS.forEach(function(q, i) {
+    payload["q" + i]           = answers[q.q_id] || "";
+    payload["q" + i + "_other"]= others[q.q_id]  || "";
+  });
+  if (payload.q1_other === undefined) payload.q1_other = payload.q0_other || "";
+
+  setLoading(true);
+  hideAlert(alert);
+
+  apiPublic(payload).then(function(res) {
+    setLoading(false);
+    if (res.ok) {
+      showSuccess();
+    } else {
+      showAlert(alert, res.error || "Submission failed. Please try again.");
+    }
+  }).catch(function() {
+    setLoading(false);
+    showAlert(alert, "Connection error. Please try again.");
+  });
+}
+
+function showSuccess() {
+  document.getElementById("mainContent").innerHTML =
+    '<div class="success-card fade-in">' +
+      '<div class="success-icon-big">🙏</div>' +
+      '<h2 class="serif" style="font-size:26px;margin-bottom:8px">Thank You!</h2>' +
+      '<p style="color:var(--ink-60);font-size:15px;line-height:1.6;margin-bottom:24px">' +
+        'Your feedback has been recorded.<br>We appreciate your time!' +
+      '</p>' +
+      '<button class="btn btn-teal" onclick="resetAndNew()" style="max-width:240px;margin:0 auto">' +
+        'Submit Another →' +
+      '</button>' +
+    '</div>';
+}
+
+function resetAndNew() {
+  answers = {}; others = {}; personalOpen = false;
+  renderForm();
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function dateKeyIST() {
+  var d=new Date(); var utc=d.getTime()+d.getTimezoneOffset()*60000;
+  var ist=new Date(utc+330*60000);
+  return String(ist.getDate()).padStart(2,"0")+"/"+
+         String(ist.getMonth()+1).padStart(2,"0")+"/"+ist.getFullYear();
+}
+function getValue(id) {
+  var el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+function showAlert(el,msg) {
+  if(!el)return; el.textContent=msg; el.classList.add("show");
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function hideAlert(el) { if(el) el.classList.remove("show"); }
+function setLoading(on) {
+  var btn=document.getElementById("submitBtn");
+  var spin=document.getElementById("submitSpin");
+  if(btn) btn.disabled=on;
+  if(spin) spin.classList.toggle("show",on);
+}
+function esc(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+boot();
+</script>
+</body>
+</html>
