@@ -466,6 +466,9 @@ function buildNav() {
   var role = SESSION.user.role;
   var nav  = [];
 
+  // Dashboard — all roles
+  nav.push({ icon:"🏠", label:"Dashboard", page:"dashboard", section:"CRM" });
+
   // Footfall — all except PM
   if (hasRole(["super_admin","admin","crm_manager","crm_staff"])) {
     nav.push({ icon:"📊", label:"Footfall", page:"footfall", section:"CRM" });
@@ -530,6 +533,7 @@ function navigate(page) {
   content.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
 
   if      (page === "footfall")  renderFootfall();
+  else if (page === "dashboard") window.location.href = "dashboard.html";
   else if (page === "feedback")  window.location.href = "feedback.html";
   else if (page === "divert")    window.location.href = "divert.html";
   else if (page === "reports")   window.location.href = "reports.html";
@@ -1036,7 +1040,7 @@ function boot() {
   setInterval(updateClock, 1000);
 
   // Default page based on role
-  var defaultPage = "footfall";
+  var defaultPage = "dashboard";
   if (SESSION.user.role === "purchase_manager") defaultPage = "divert";
   navigate(defaultPage);
 }
