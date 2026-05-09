@@ -1364,20 +1364,38 @@ function formatDatePick(val){
 }
 
 function sendDERInline(){
-  var btn=document.getElementById("derBtn");
-  var alrt=document.getElementById("derAlert");
-  if(btn) btn.disabled=true;
-  apiPost({action:"send_der",date:dashDate}).then(function(res){
-    if(btn) btn.disabled=false;
+  var btn  = document.getElementById("derBtn");
+  var alrt = document.getElementById("derAlert");
+  if(!dashDate){
+    if(alrt){ alrt.style.display="block"; alrt.style.background="var(--crimson-l)"; alrt.style.color="var(--crimson)"; alrt.textContent="Error: No date selected."; }
+    return;
+  }
+  if(btn){ btn.disabled=true; btn.textContent="⏳ Sending…"; }
+  if(alrt){ alrt.style.display="none"; }
+
+  apiPost({ action:"send_der", date:dashDate }).then(function(res){
+    if(btn){ btn.disabled=false; btn.innerHTML="📧 Send DER Email"; }
     if(alrt){
       alrt.style.display="block";
-      alrt.style.background=res.ok?"var(--green-l)":"var(--crimson-l)";
-      alrt.style.color=res.ok?"var(--green)":"var(--crimson)";
-      alrt.textContent=res.ok?"✓ DER sent!":res.error;
-      setTimeout(function(){alrt.style.display="none";},5000);
+      if(res.ok){
+        alrt.style.background="var(--green-l)";
+        alrt.style.color="var(--green)";
+        alrt.textContent="✓ " + (res.message||"DER sent successfully!");
+      } else {
+        alrt.style.background="var(--crimson-l)";
+        alrt.style.color="var(--crimson)";
+        alrt.textContent="✗ " + (res.error||"Failed to send DER. Check Admin → Settings for DER email.");
+      }
+      setTimeout(function(){ alrt.style.display="none"; }, 7000);
     }
-  }).catch(function(){
-    if(btn) btn.disabled=false;
+  }).catch(function(e){
+    if(btn){ btn.disabled=false; btn.innerHTML="📧 Send DER Email"; }
+    if(alrt){
+      alrt.style.display="block";
+      alrt.style.background="var(--crimson-l)";
+      alrt.style.color="var(--crimson)";
+      alrt.textContent="Connection error: " + e.message;
+    }
   });
 }
 
