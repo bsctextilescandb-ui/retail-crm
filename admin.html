@@ -190,6 +190,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
 
 <div class="back-bar">
   <button class="back-btn" onclick="goBack()">← Back</button>
+  <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" style="height:32px;width:32px;object-fit:contain;border-radius:6px;background:#fff;padding:2px;flex-shrink:0"/>
   <div class="bar-title" id="barTitle">Admin Panel</div>
 </div>
 
@@ -1071,5 +1072,112 @@ function esc(s){
 /* ── Start ── */
 boot();
 </script>
+
+
+<style>
+#google_translate_element .goog-te-gadget-simple{
+  background:var(--navy,#1E2D5A)!important;
+  border:1.5px solid var(--gold,#B8860B)!important;
+  border-radius:8px!important;
+  padding:6px 12px!important;
+  box-shadow:0 4px 16px rgba(0,0,0,.2)!important;
+}
+#google_translate_element .goog-te-gadget-simple span,
+#google_translate_element .goog-te-gadget-simple a{
+  color:#ffffff!important;
+  font-size:12px!important;
+  font-family:'DM Sans',Arial,sans-serif!important;
+  font-weight:500!important;
+  text-decoration:none!important;
+}
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value:hover{
+  text-decoration:none!important;
+}
+.goog-te-banner-frame{display:none!important}
+body{top:0!important}
+</style>
+
+
+<!-- Custom Language Selector -->
+<div id="langBtn" onclick="toggleLangMenu()" style="position:fixed;bottom:20px;right:20px;z-index:9999;
+  background:#1E2D5A;border:1.5px solid #B8860B;border-radius:10px;
+  padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);font-family:'DM Sans',Arial,sans-serif">
+  <span style="font-size:16px">🌐</span>
+  <span id="langLabel" style="font-size:12px;font-weight:500;color:#fff">Language</span>
+  <span style="font-size:10px;color:#B8860B">▲</span>
+</div>
+
+<div id="langMenu" style="position:fixed;bottom:62px;right:20px;z-index:9998;
+  background:#1E2D5A;border:1.5px solid #B8860B;border-radius:10px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3);
+  display:none;min-width:180px;font-family:'DM Sans',Arial,sans-serif">
+  <div style="padding:8px 0">
+    <div onclick="setLang('en','English')"         class="lang-opt">English</div>
+    <div onclick="setLang('ta','தமிழ்')"           class="lang-opt">தமிழ் (Tamil)</div>
+    <div onclick="setLang('hi','हिन्दी')"          class="lang-opt">हिन्दी (Hindi)</div>
+    <div onclick="setLang('kn','ಕನ್ನಡ')"          class="lang-opt">ಕನ್ನಡ (Kannada)</div>
+    <div onclick="setLang('te','తెలుగు')"          class="lang-opt">తెలుగు (Telugu)</div>
+    <div onclick="setLang('ml','മലയാളം')"         class="lang-opt">മലയാളം (Malayalam)</div>
+    <div onclick="setLang('mr','मराठी')"           class="lang-opt">मराठी (Marathi)</div>
+  </div>
+</div>
+
+<style>
+.lang-opt{padding:10px 18px;font-size:13px;color:rgba(255,255,255,.8);cursor:pointer;
+  transition:background .15s;line-height:1.4}
+.lang-opt:hover{background:rgba(184,134,11,.25);color:#fff}
+.goog-te-banner-frame{display:none!important}
+body{top:0!important}
+</style>
+
+<!-- Google Translate (hidden engine) -->
+<div id="google_translate_element" style="display:none"></div>
+<script type="text/javascript">
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({
+    pageLanguage:'en',
+    includedLanguages:'en,ta,hi,kn,te,ml,mr',
+    autoDisplay:false
+  },'google_translate_element');
+}
+function toggleLangMenu(){
+  var m=document.getElementById('langMenu');
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  document.getElementById('langBtn').querySelector('span:last-child').textContent=open?'▲':'▼';
+}
+function setLang(code,label){
+  // Set cookie for Google Translate
+  var expires=new Date();
+  expires.setFullYear(expires.getFullYear()+1);
+  document.cookie='googtrans=/en/'+code+';expires='+expires.toUTCString()+';path=/';
+  document.cookie='googtrans=/en/'+code+';expires='+expires.toUTCString()+';path=/;domain='+location.hostname;
+  document.getElementById('langLabel').textContent=label;
+  document.getElementById('langMenu').style.display='none';
+  document.getElementById('langBtn').querySelector('span:last-child').textContent='▲';
+  // Store preference
+  try{localStorage.setItem('crm_lang',code);localStorage.setItem('crm_lang_label',label);}catch(e){}
+  location.reload();
+}
+// Restore last language label
+(function(){
+  try{
+    var lbl=localStorage.getItem('crm_lang_label');
+    if(lbl) document.getElementById('langLabel').textContent=lbl;
+  }catch(e){}
+  // Close menu on outside click
+  document.addEventListener('click',function(e){
+    var btn=document.getElementById('langBtn');
+    var menu=document.getElementById('langMenu');
+    if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)){
+      menu.style.display='none';
+      btn.querySelector('span:last-child').textContent='▲';
+    }
+  });
+})();
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </body>
 </html>
