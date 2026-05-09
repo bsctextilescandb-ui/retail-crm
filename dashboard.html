@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Dashboard — Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select{font-family:inherit;outline:0}
+
+/* ── Top bar ── */
+.back-bar{background:var(--navy);padding:14px 24px;display:flex;align-items:center;
+  gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
+  border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:6px;transition:background .15s}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.bar-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1}
+.bar-right{display:flex;align-items:center;gap:10px}
+.bar-date{font-size:12px;color:rgba(255,255,255,.6)}
+.bar-clock{font-size:13px;font-weight:500;color:var(--gold);font-variant-numeric:tabular-nums}
+.refresh-btn{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);
+  padding:6px 12px;border-radius:var(--radius-sm);font-size:12px;
+  display:flex;align-items:center;gap:5px;transition:background .15s}
+.refresh-btn:hover{background:rgba(255,255,255,.2)}
+
+/* ── Main ── */
+.main{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+
+/* ── Section headers ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.sec-title{font-size:12px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.1em;
+  display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);min-width:40px}
+
+/* ── Pulse stats ── */
+.pulse-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;margin-bottom:28px}
+.pulse-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:20px;box-shadow:var(--shadow);
+  position:relative;overflow:hidden}
+.pulse-card::before{content:'';position:absolute;top:0;left:0;
+  width:4px;height:100%;border-radius:4px 0 0 4px}
+.pulse-card.red::before{background:var(--crimson)}
+.pulse-card.gold::before{background:var(--gold)}
+.pulse-card.green::before{background:var(--green)}
+.pulse-card.navy::before{background:var(--navy)}
+.pulse-label{font-size:10px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+.pulse-val{font-family:'DM Serif Display',serif;font-size:34px;line-height:1;margin-bottom:4px}
+.pulse-val.red{color:var(--crimson)}
+.pulse-val.gold{color:var(--gold-d)}
+.pulse-val.green{color:var(--green)}
+.pulse-val.navy{color:var(--navy)}
+.pulse-sub{font-size:11px;color:var(--ink-30)}
+
+/* ── Charts grid ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr}}
+.three-col{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:860px){.three-col{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.three-col{grid-template-columns:1fr}}
+
+/* ── Chart card ── */
+.chart-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.chart-card-header{padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.chart-card-title{font-size:14px;font-weight:500}
+.chart-card-sub{font-size:11px;color:var(--ink-60);margin-top:2px}
+.chart-card-body{padding:18px}
+.chart-card.full{grid-column:1/-1}
+
+/* ── SVG line chart ── */
+.line-chart-wrap{width:100%;overflow-x:auto}
+.line-chart-wrap svg{display:block}
+
+/* ── Bar chart ── */
+.bar-chart{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{font-size:11px;color:var(--ink-60);width:80px;text-align:right;flex-shrink:0;line-height:1.3}
+.bar-lbl.wide{width:130px}
+.bar-track{flex:1;height:22px;background:var(--surface);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.bar-navy{background:var(--navy)}
+.bar-gold{background:var(--gold)}
+.bar-green{background:var(--green)}
+.bar-crimson{background:var(--crimson)}
+.bar-orange{background:var(--orange)}
+.bar-val{font-size:11px;font-weight:500;color:var(--ink);width:32px;flex-shrink:0}
+
+/* ── Score cards ── */
+.score-row{display:flex;gap:12px;flex-wrap:wrap}
+.score-card{flex:1;min-width:120px;background:var(--surface);
+  border-radius:var(--radius-sm);padding:16px;text-align:center;
+  border:1px solid var(--border)}
+.score-label{font-size:10px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.score-num{font-family:'DM Serif Display',serif;font-size:36px;line-height:1;margin-bottom:4px}
+.score-num.good{color:var(--green)}
+.score-num.warn{color:var(--orange)}
+.score-num.bad{color:var(--crimson)}
+.score-num.navy{color:var(--navy)}
+.score-sub{font-size:11px;color:var(--ink-30)}
+.score-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+
+/* ── NPS breakdown ── */
+.nps-breakdown{display:flex;gap:8px;margin-top:10px}
+.nps-seg{flex:1;text-align:center;padding:8px 4px;border-radius:var(--radius-sm)}
+.nps-seg-val{font-size:16px;font-weight:600}
+.nps-seg-lbl{font-size:9px;margin-top:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+
+/* ── Section diverts ── */
+.sect-list{display:flex;flex-direction:column;gap:6px}
+.sect-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.sect-name{flex:1;font-size:13px;font-weight:500}
+.sect-count{font-family:'DM Serif Display',serif;font-size:20px;
+  color:var(--crimson);min-width:28px;text-align:right}
+.sect-label{font-size:10px;color:var(--ink-30)}
+
+/* ── Coming back list ── */
+.cb-list{display:flex;flex-direction:column;gap:8px}
+.cb-item{background:var(--surface);border-radius:var(--radius-sm);
+  padding:12px 14px;border:1px solid var(--border)}
+.cb-name{font-size:13px;font-weight:500;margin-bottom:3px}
+.cb-meta{font-size:11px;color:var(--ink-60);display:flex;gap:10px;flex-wrap:wrap}
+
+/* ── Aging list ── */
+.aging-list{display:flex;flex-direction:column;gap:8px}
+.aging-item{background:var(--crimson-l);border-radius:var(--radius-sm);
+  padding:12px 14px;border:1px solid rgba(192,57,43,.2)}
+.aging-product{font-size:13px;font-weight:500;color:var(--crimson);margin-bottom:3px}
+.aging-meta{font-size:11px;color:var(--ink-60);display:flex;gap:10px;flex-wrap:wrap}
+.aging-days{font-weight:600;color:var(--crimson)}
+
+/* ── Voice list ── */
+.voice-list{display:flex;flex-direction:column;gap:8px}
+.voice-item{background:var(--surface);border-radius:var(--radius-sm);
+  padding:11px 14px;border-left:3px solid var(--gold)}
+.voice-text{font-size:13px;color:var(--ink);line-height:1.5}
+.voice-meta{font-size:11px;color:var(--ink-30);margin-top:4px}
+
+/* ── Activity log ── */
+.activity-list{display:flex;flex-direction:column;gap:6px}
+.act-item{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;
+  background:var(--surface);border-radius:var(--radius-sm)}
+.act-dot{width:8px;height:8px;border-radius:50%;background:var(--navy);
+  flex-shrink:0;margin-top:4px}
+.act-text{font-size:12px;color:var(--ink);flex:1;line-height:1.4}
+.act-time{font-size:10px;color:var(--ink-30);white-space:nowrap}
+
+/* ── Quick actions ── */
+.qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px}
+.qa-btn{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:16px;text-align:center;cursor:pointer;transition:all .15s;text-decoration:none;display:block}
+.qa-btn:hover{border-color:var(--navy);background:var(--navy-l);transform:translateY(-2px)}
+.qa-icon{font-size:24px;margin-bottom:8px}
+.qa-label{font-size:12px;font-weight:500;color:var(--ink)}
+
+/* ── DER section ── */
+.der-card{background:var(--white);border-radius:var(--radius);
+  border:2px solid var(--gold);box-shadow:var(--shadow-md);
+  overflow:hidden;margin-bottom:28px}
+.der-header{background:linear-gradient(135deg,var(--navy),#2A3F7E);
+  padding:18px 22px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px}
+.der-header-left h3{font-family:'DM Serif Display',serif;font-size:20px;color:#fff}
+.der-header-left p{font-size:12px;color:rgba(255,255,255,.6);margin-top:3px}
+.der-header-right{display:flex;gap:8px;align-items:center}
+.btn-send-der{background:var(--gold);color:var(--ink);padding:9px 20px;
+  border-radius:var(--radius-sm);font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:7px;transition:background .15s}
+.btn-send-der:hover{background:var(--gold-d);color:#fff}
+.btn-send-der:disabled{opacity:.5;cursor:not-allowed}
+.der-body{padding:20px 22px}
+.der-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.der-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px}
+.der-item-label{font-size:10px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.der-item-val{font-size:15px;font-weight:600;color:var(--ink)}
+.der-item-val.highlight{color:var(--navy);font-family:'DM Serif Display',serif;font-size:22px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  transition:transform .15s;cursor:pointer;border:0}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none;filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* ── Spinner ── */
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spinner.dark{border-color:rgba(26,26,46,.15);border-top-color:var(--ink)}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Alert ── */
+.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;
+  margin-bottom:12px;display:none}
+.alert.show{display:block}
+.alert-success{background:var(--green-l);color:var(--green)}
+.alert-error{background:var(--crimson-l);color:var(--crimson)}
+
+/* ── Empty ── */
+.empty-sm{text-align:center;padding:20px;color:var(--ink-30);font-size:13px}
+
+/* ── Auto refresh badge ── */
+.refresh-badge{font-size:10px;color:rgba(255,255,255,.5);
+  display:flex;align-items:center;gap:4px}
+.refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.fade-in{animation:fadeIn .35s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <div class="bar-title">Live Dashboard</div>
+  <div class="bar-right">
+    <div class="refresh-badge">
+      <div class="refresh-dot"></div>
+      <span id="refreshLabel">Auto-refresh in 5:00</span>
+    </div>
+    <button class="refresh-btn" onclick="loadDashboard()">↺ Refresh</button>
+    <div class="bar-date" id="topDate"></div>
+    <div class="bar-clock" id="topClock"></div>
+  </div>
+</div>
+
+<div class="main" id="mainContent">
+  <div style="text-align:center;padding:60px;color:var(--ink-60)">⏳ Loading dashboard…</div>
+</div>
+
+<script>
+/* ── Config ── */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ── Session ── */
+var SESSION = null;
+function getSession(){
+  var t=sessionStorage.getItem("crm_token"),u=sessionStorage.getItem("crm_user");
+  if(!t||!u) return null;
+  try{return{token:t,user:JSON.parse(u)};}catch(e){return null;}
+}
+
+/* ── API ── */
+function api(body){
+  body.token=SESSION.token;
+  return fetch(API_URL,{method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+/* ── State ── */
+var DASH          = null;
+var refreshTimer  = null;
+var countdownTimer= null;
+var refreshSecs   = 300; // 5 minutes
+var remaining     = refreshSecs;
+
+function canManageDER(){
+  return SESSION && (SESSION.user.role==="super_admin"||SESSION.user.role==="admin");
+}
+
+/* ── IST helpers ── */
+function nowIST(){
+  var d=new Date(),utc=d.getTime()+d.getTimezoneOffset()*60000;
+  return new Date(utc+330*60000);
+}
+function dateKeyIST(){
+  var d=nowIST();
+  return String(d.getDate()).padStart(2,"0")+"/"+
+    String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+function fmtTime(h){
+  var s=h%12||12,sf=h>=12?"PM":"AM";
+  return String(s).padStart(2,"0")+":00 "+sf;
+}
+function parseDate(str){
+  if(!str) return null;
+  var s=String(str);
+  if(s.indexOf("/")!==-1){var p=s.split("/");if(p.length===3)return new Date(p[2],p[1]-1,p[0]);}
+  return new Date(str);
+}
+
+/* ── Boot ── */
+function boot(){
+  SESSION = getSession();
+  if(!SESSION){ window.location.href="index.html"; return; }
+  updateClock();
+  setInterval(updateClock,1000);
+  loadDashboard();
+  startAutoRefresh();
+}
+
+function goBack(){ window.location.href="app.html"; }
+
+function updateClock(){
+  var now  = nowIST();
+  var time = now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",
+    second:"2-digit",hour12:true,timeZone:"Asia/Kolkata"});
+  var date = now.toLocaleDateString("en-US",{weekday:"short",day:"numeric",
+    month:"short",year:"numeric",timeZone:"Asia/Kolkata"});
+  var tc=document.getElementById("topClock"),td=document.getElementById("topDate");
+  if(tc) tc.textContent=time;
+  if(td) td.textContent=date;
+}
+
+function startAutoRefresh(){
+  remaining = refreshSecs;
+  if(countdownTimer) clearInterval(countdownTimer);
+  if(refreshTimer)   clearTimeout(refreshTimer);
+
+  countdownTimer = setInterval(function(){
+    remaining--;
+    var m=Math.floor(remaining/60), s=remaining%60;
+    var el=document.getElementById("refreshLabel");
+    if(el) el.textContent="Auto-refresh in "+m+":"+(s<10?"0":"")+s;
+    if(remaining<=0){
+      clearInterval(countdownTimer);
+      loadDashboard();
+      startAutoRefresh();
+    }
+  },1000);
+}
+
+/* ── Load dashboard data ── */
+function loadDashboard(){
+  remaining = refreshSecs;
+  api({action:"get_dashboard",date:dateKeyIST()}).then(function(res){
+    if(!res.ok){
+      document.getElementById("mainContent").innerHTML =
+        '<div style="text-align:center;padding:60px;color:var(--crimson)">⚠️ '+esc(res.error)+'</div>';
+      return;
+    }
+    DASH = res;
+    renderDashboard();
+  }).catch(function(e){
+    document.getElementById("mainContent").innerHTML =
+      '<div style="text-align:center;padding:60px;color:var(--ink-60)">Connection error — '+esc(e.message)+'</div>';
+  });
+}
+
+/* ── Render ── */
+function renderDashboard(){
+  if(!DASH) return;
+  var d     = DASH;
+  var p     = d.pulse;
+  var isMan = canManageDER();
+
+  var html = '<div class="fade-in">';
+
+  /* ── Section 1: Today's Pulse ── */
+  html += sectionHead("Today's Pulse", d.date);
+  html += '<div class="pulse-grid">';
+  html += pulseCard("Today's Footfall",  p.footfall,       "gold",   "visitors logged");
+  html += pulseCard("Feedbacks",         p.feedbacks,      "navy",   "collected today");
+  html += pulseCard("New Diverts",       p.diverts_today,  "red",    "raised today");
+  html += pulseCard("Open Diverts",      p.open_diverts,   p.open_diverts>0?"red":"green", "pending action");
+  html += '</div>';
+
+  /* ── Section 2: Footfall Charts ── */
+  html += sectionHead("Footfall Overview", "");
+  html += '<div class="charts-grid">';
+
+  /* Line chart — today's hourly slots */
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title">Today — Hourly Progress</div>';
+  html += '<div class="chart-card-sub">'+d.slots.filter(function(s){return s.status==="completed";}).length+' of '+d.slots.length+' slots submitted</div>';
+  html += '</div></div><div class="chart-card-body">';
+  html += renderLineChart(d.slots);
+  html += '</div></div>';
+
+  /* Bar chart — this week */
+  var weekKeys = Object.keys(d.week_footfall||{});
+  var weekVals = weekKeys.map(function(k){return d.week_footfall[k];});
+  var maxWeek  = Math.max.apply(null,weekVals.concat([1]));
+
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title">This Week — Daily Footfall</div>';
+  html += '<div class="chart-card-sub">Last 7 days</div>';
+  html += '</div></div><div class="chart-card-body"><div class="bar-chart">';
+  weekKeys.forEach(function(k){
+    var v   = d.week_footfall[k];
+    var pct = maxWeek>0?Math.round(v/maxWeek*100):0;
+    var dt  = parseDate(k);
+    var lbl = dt ? dt.toLocaleDateString("en-IN",{day:"numeric",month:"short"}) : k;
+    html += barRow(lbl, v, pct, "bar-navy");
+  });
+  html += '</div></div></div>';
+
+  html += '</div>'; /* charts-grid */
+
+  /* ── Section 3: Divert Health ── */
+  html += sectionHead("Divert Health", "");
+  html += '<div class="charts-grid three-col">';
+
+  /* By section */
+  var sectKeys = Object.keys(d.divert_by_section||{}).filter(function(k){return d.divert_by_section[k]>0;});
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title">Open by Section</div>';
+  html += '<div class="chart-card-sub">'+p.open_diverts+' total open</div>';
+  html += '</div></div><div class="chart-card-body">';
+  if(sectKeys.length===0){
+    html += '<div class="empty-sm">✓ No open diverts</div>';
+  } else {
+    html += '<div class="sect-list">';
+    sectKeys.sort(function(a,b){return d.divert_by_section[b]-d.divert_by_section[a];})
+      .forEach(function(k){
+        html += '<div class="sect-item">' +
+          '<div class="sect-name">'+esc(k)+'</div>' +
+          '<div><div class="sect-count">'+d.divert_by_section[k]+'</div>' +
+          '<div class="sect-label">open</div></div>' +
+        '</div>';
+      });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  /* Aging diverts */
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title" style="color:'+(d.aged_diverts.length>0?'var(--crimson)':'var(--ink)')+'">⚠️ Aging Diverts</div>';
+  html += '<div class="chart-card-sub">Open beyond 3 days</div>';
+  html += '</div></div><div class="chart-card-body">';
+  if(d.aged_diverts.length===0){
+    html += '<div class="empty-sm">✓ No aging diverts</div>';
+  } else {
+    html += '<div class="aging-list">';
+    d.aged_diverts.forEach(function(div){
+      var dt   = parseDate(div.date);
+      var days = dt ? Math.floor((nowIST()-dt)/86400000) : "?";
+      html += '<div class="aging-item">' +
+        '<div class="aging-product">'+esc(div.product_wanted)+'</div>' +
+        '<div class="aging-meta">' +
+          '<span>'+esc(div.section_name)+'</span>' +
+          '<span class="aging-days">'+days+' days old</span>' +
+          (div.cust_mobile?'<span>📞 '+esc(div.cust_mobile)+'</span>':'') +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  /* Coming back */
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title">Coming Back Customers</div>';
+  html += '<div class="chart-card-sub">'+d.coming_back.length+' awaiting call</div>';
+  html += '</div></div><div class="chart-card-body">';
+  if(d.coming_back.length===0){
+    html += '<div class="empty-sm">No customers waiting</div>';
+  } else {
+    html += '<div class="cb-list">';
+    d.coming_back.forEach(function(div){
+      html += '<div class="cb-item">' +
+        '<div class="cb-name">'+esc(div.cust_name||"Customer")+'</div>' +
+        '<div class="cb-meta">' +
+          (div.cust_mobile?'<span>📞 '+esc(div.cust_mobile)+'</span>':'') +
+          '<span>'+esc(div.section_name)+'</span>' +
+          '<span>'+esc(div.product_wanted)+'</span>' +
+          (div.expected_date?'<span>📅 '+esc(div.expected_date)+'</span>':'') +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  html += '</div>'; /* three-col */
+
+  /* ── Section 4: Feedback Snapshot ── */
+  html += sectionHead("Feedback Snapshot", "");
+  html += '<div class="charts-grid">';
+
+  /* CSI + NPS scores */
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title">Customer Satisfaction & Loyalty</div>';
+  html += '<div class="chart-card-sub">Based on today\'s '+p.feedbacks+' feedback responses</div>';
+  html += '</div></div><div class="chart-card-body">';
+  html += '<div class="score-row" style="margin-bottom:16px">';
+
+  /* CSI */
+  var csiScore = d.csi.score;
+  var csiCls   = csiScore===null?"navy":csiScore>=75?"good":csiScore>=50?"warn":"bad";
+  html += '<div class="score-card">' +
+    '<div class="score-label">CSI Score</div>' +
+    '<div class="score-num '+csiCls+'">'+(csiScore!==null?csiScore+"%":"—")+'</div>' +
+    '<div class="score-sub">'+(csiScore!==null?d.csi.count+' responses':'No data')+'</div>' +
+    '<div class="score-bar"><div class="score-bar-fill" style="width:'+(csiScore||0)+'%;background:'+(csiScore>=75?'var(--green)':csiScore>=50?'var(--orange)':'var(--crimson)')+'"></div></div>' +
+  '</div>';
+
+  /* NPS */
+  var npsScore = d.nps.score;
+  var npsCls   = npsScore===null?"navy":npsScore>=50?"good":npsScore>=0?"warn":"bad";
+  html += '<div class="score-card">' +
+    '<div class="score-label">NPS Score</div>' +
+    '<div class="score-num '+npsCls+'">'+(npsScore!==null?npsScore:"—")+'</div>' +
+    '<div class="score-sub">'+(npsScore!==null?d.nps.count+' responses':'No data')+'</div>' +
+    (npsScore!==null?
+      '<div class="nps-breakdown">' +
+        '<div class="nps-seg" style="background:var(--green-l)">' +
+          '<div class="nps-seg-val" style="color:var(--green)">'+d.nps.promoters+'</div>' +
+          '<div class="nps-seg-lbl" style="color:var(--green)">Promoters</div>' +
+        '</div>' +
+        '<div class="nps-seg" style="background:var(--surface)">' +
+          '<div class="nps-seg-val" style="color:var(--ink-60)">'+d.nps.passives+'</div>' +
+          '<div class="nps-seg-lbl" style="color:var(--ink-30)">Passives</div>' +
+        '</div>' +
+        '<div class="nps-seg" style="background:var(--crimson-l)">' +
+          '<div class="nps-seg-val" style="color:var(--crimson)">'+d.nps.detractors+'</div>' +
+          '<div class="nps-seg-lbl" style="color:var(--crimson)">Detractors</div>' +
+        '</div>' +
+      '</div>' : '') +
+  '</div>';
+
+  html += '</div>'; /* score-row */
+
+  /* Weekly feedback trend */
+  var fbWeekKeys = Object.keys(d.week_feedback||{});
+  var fbWeekVals = fbWeekKeys.map(function(k){return d.week_feedback[k];});
+  var maxFBWeek  = Math.max.apply(null,fbWeekVals.concat([1]));
+  html += '<div style="margin-top:4px"><div style="font-size:11px;font-weight:500;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Weekly Trend</div>';
+  html += '<div class="bar-chart">';
+  fbWeekKeys.forEach(function(k){
+    var v   = d.week_feedback[k];
+    var pct = maxFBWeek>0?Math.round(v/maxFBWeek*100):0;
+    var dt  = parseDate(k);
+    var lbl = dt ? dt.toLocaleDateString("en-IN",{day:"numeric",month:"short"}) : k;
+    html += barRow(lbl, v, pct, "bar-gold");
+  });
+  html += '</div></div>';
+
+  html += '</div></div>'; /* chart-card */
+
+  /* Your Voice */
+  html += '<div class="chart-card">';
+  html += '<div class="chart-card-header"><div>';
+  html += '<div class="chart-card-title">Your Voice — Today</div>';
+  html += '<div class="chart-card-sub">Open feedback from customers</div>';
+  html += '</div></div><div class="chart-card-body">';
+  if(!d.today_voices||d.today_voices.length===0){
+    html += '<div class="empty-sm">No open feedback today</div>';
+  } else {
+    html += '<div class="voice-list">';
+    d.today_voices.forEach(function(v){
+      html += '<div class="voice-item">' +
+        '<div class="voice-text">'+esc(v.text)+'</div>' +
+        '<div class="voice-meta">'+esc(v.area||"")+(v.time?' · '+esc(v.time):'')+'</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  html += '</div>'; /* charts-grid */
+
+  /* ── Section 5: Quick Actions ── */
+  html += sectionHead("Quick Actions", "");
+  html += '<div class="qa-grid">';
+  html += qaBtn("feedback.html",  "💬", "New Feedback");
+  html += qaBtn("divert.html",    "↩️",  "New Divert");
+  html += qaBtn("reports.html",   "📈", "View Reports");
+  html += qaBtn("admin.html",     "⚙️",  "Admin Panel");
+  html += '</div>';
+
+  /* Activity log */
+  if(d.recent_activity&&d.recent_activity.length>0){
+    html += '<div class="chart-card" style="margin-bottom:28px">';
+    html += '<div class="chart-card-header"><div>';
+    html += '<div class="chart-card-title">Recent Activity</div>';
+    html += '<div class="chart-card-sub">Last 10 actions across all modules</div>';
+    html += '</div></div><div class="chart-card-body"><div class="activity-list">';
+    d.recent_activity.forEach(function(a){
+      var ts = String(a.timestamp||"").slice(0,16).replace("T"," ");
+      html += '<div class="act-item">' +
+        '<div class="act-dot"></div>' +
+        '<div class="act-text"><strong>'+esc(a.by||"")+'</strong> — '+esc(a.note||"")+(a.status?' → <strong>'+esc(a.status)+'</strong>':'')+'</div>' +
+        '<div class="act-time">'+ts+'</div>' +
+      '</div>';
+    });
+    html += '</div></div></div>';
+  }
+
+  /* ── DER Section ── */
+  html += sectionHead("Day End Report", "Management Only");
+  html += '<div class="der-card">';
+  html += '<div class="der-header">';
+  html += '<div class="der-header-left">';
+  html += '<h3>Day End Report — '+esc(d.date)+'</h3>';
+  html += '<p>Auto-generated from today\'s CRM data</p>';
+  html += '</div>';
+  html += '<div class="der-header-right">';
+  if(canManageDER()){
+    html += '<div id="derAlert" class="alert alert-success" style="margin:0;padding:7px 12px;font-size:12px"></div>';
+    html += '<button id="derBtn" class="btn-send-der" onclick="sendDER()">' +
+      '<span id="derSpin" class="spinner dark"></span> 📧 Send DER Email' +
+    '</button>';
+  } else {
+    html += '<span style="font-size:12px;color:rgba(255,255,255,.5)">View only</span>';
+  }
+  html += '</div></div>';
+
+  /* DER body */
+  html += '<div class="der-body">';
+  html += '<div class="der-grid">';
+  html += derItem("Total Footfall",   p.footfall,                              true);
+  html += derItem("Bills Count",      p.bills||"Not entered",                  false);
+  html += derItem("Conversion",       p.conversion ? p.conversion+"%" : "—",  false);
+  html += derItem("Feedbacks",        p.feedbacks,                             false);
+  html += derItem("CSI Score",        csiScore!==null?csiScore+"%":"—",        false);
+  html += derItem("NPS Score",        npsScore!==null?npsScore:"—",            false);
+  html += derItem("Diverts Today",    p.diverts_today,                         false);
+  html += derItem("Open Diverts",     p.open_diverts,                          false);
+  html += derItem("Aging Diverts",    d.aged_diverts.length,                   false);
+  html += derItem("Coming Back",      d.coming_back.length+" customers",       false);
+  html += '</div>';
+
+  /* Open diverts by section in DER */
+  if(sectKeys.length>0){
+    html += '<div style="font-size:11px;font-weight:500;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Open Diverts by Section</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">';
+    sectKeys.forEach(function(k){
+      html += '<div style="background:var(--crimson-l);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--crimson);font-weight:500">'+esc(k)+': '+d.divert_by_section[k]+'</div>';
+    });
+    html += '</div>';
+  }
+
+  /* Your Voice in DER */
+  if(d.today_voices&&d.today_voices.length>0){
+    html += '<div style="font-size:11px;font-weight:500;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Customer Voice</div>';
+    html += '<div class="voice-list">';
+    d.today_voices.forEach(function(v){
+      html += '<div class="voice-item"><div class="voice-text">'+esc(v.text)+'</div></div>';
+    });
+    html += '</div>';
+  }
+
+  html += '</div></div>'; /* der-body + der-card */
+  html += '</div>'; /* fade-in */
+
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ── Line chart for hourly slots ── */
+function renderLineChart(slots){
+  if(!slots||slots.length===0) return '<div class="empty-sm">No slot data</div>';
+
+  var W=560, H=140, padL=36, padR=16, padT=12, padB=32;
+  var cW=W-padL-padR, cH=H-padT-padB;
+  var n=slots.length;
+  var maxVal=Math.max.apply(null,slots.map(function(s){return s.count;}).concat([1]));
+
+  var pts=[];
+  slots.forEach(function(s,i){
+    var x=padL+(i/(n-1||1))*cW;
+    var y=padT+cH-(s.count/maxVal)*cH;
+    pts.push({x:x,y:y,s:s,i:i});
+  });
+
+  var pathD = pts.map(function(p,i){return (i===0?"M":"L")+p.x.toFixed(1)+","+p.y.toFixed(1);}).join(" ");
+
+  // Fill area
+  var areaD = pathD + " L"+pts[pts.length-1].x.toFixed(1)+","+(padT+cH)+" L"+padL+","+(padT+cH)+" Z";
+
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:160px">';
+
+  // Grid lines
+  for(var gi=0;gi<=4;gi++){
+    var gy=padT+(gi/4)*cH;
+    svg += '<line x1="'+padL+'" y1="'+gy.toFixed(0)+'" x2="'+(W-padR)+'" y2="'+gy.toFixed(0)+'" stroke="#E8E4D8" stroke-width="1"/>';
+    var gv=Math.round(maxVal*(1-gi/4));
+    svg += '<text x="'+(padL-4)+'" y="'+(gy+4).toFixed(0)+'" text-anchor="end" font-size="9" fill="#9CA3AF">'+gv+'</text>';
+  }
+
+  // Area fill
+  svg += '<defs><linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E2D5A" stop-opacity="0.15"/><stop offset="100%" stop-color="#1E2D5A" stop-opacity="0.02"/></linearGradient></defs>';
+  svg += '<path d="'+areaD+'" fill="url(#lineGrad)"/>';
+
+  // Line
+  svg += '<path d="'+pathD+'" fill="none" stroke="#1E2D5A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+
+  // Dots and labels
+  pts.forEach(function(p){
+    var col = p.s.status==="completed"?"#1E7A1E":
+              p.s.status==="active"?"#B8860B":
+              p.s.status==="missed"?"#C0392B":"#D1D5DB";
+    svg += '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
+
+    // X labels (every other slot to avoid crowding)
+    if(p.i%2===0||n<=8){
+      var hh=p.s.hour%12||12, sf=p.s.hour>=12?"P":"A";
+      svg += '<text x="'+p.x.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="8.5" fill="#9CA3AF">'+hh+sf+'</text>';
+    }
+
+    // Value label on completed dots
+    if(p.s.status==="completed"&&p.s.count>0){
+      svg += '<text x="'+p.x.toFixed(1)+'" y="'+(p.y-8).toFixed(1)+'" text-anchor="middle" font-size="9" fill="#1E2D5A" font-weight="600">'+p.s.count+'</text>';
+    }
+  });
+
+  svg += '</svg>';
+  return '<div class="line-chart-wrap">'+svg+'</div>';
+}
+
+/* ── Send DER ── */
+function sendDER(){
+  var btn  = document.getElementById("derBtn");
+  var spin = document.getElementById("derSpin");
+  var alrt = document.getElementById("derAlert");
+  if(btn) btn.disabled=true;
+  if(spin) spin.classList.add("show");
+
+  api({action:"send_der",date:dateKeyIST()}).then(function(res){
+    if(btn) btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    if(res.ok){
+      if(alrt){ alrt.textContent="✓ "+res.message; alrt.classList.add("show"); }
+      setTimeout(function(){ if(alrt) alrt.classList.remove("show"); },5000);
+    } else {
+      if(alrt){ alrt.style.background="var(--crimson-l)"; alrt.style.color="var(--crimson)"; alrt.textContent=res.error; alrt.classList.add("show"); }
+    }
+  }).catch(function(){
+    if(btn) btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    if(alrt){ alrt.style.background="var(--crimson-l)"; alrt.style.color="var(--crimson)"; alrt.textContent="Connection error."; alrt.classList.add("show"); }
+  });
+}
+
+/* ── Render helpers ── */
+function sectionHead(title, sub){
+  return '<div class="sec-head" style="margin-bottom:12px">' +
+    '<div class="sec-title">'+esc(title)+(sub?'<span style="font-size:10px;color:var(--ink-30);text-transform:none;letter-spacing:0;font-weight:400">'+esc(sub)+'</span>':'')+'</div>' +
+  '</div>';
+}
+
+function pulseCard(label,val,color,sub){
+  return '<div class="pulse-card '+color+'">' +
+    '<div class="pulse-label">'+label+'</div>' +
+    '<div class="pulse-val '+color+'">'+val+'</div>' +
+    '<div class="pulse-sub">'+sub+'</div>' +
+  '</div>';
+}
+
+function barRow(label,val,pct,colorCls){
+  return '<div class="bar-row">' +
+    '<div class="bar-lbl">'+esc(String(label))+'</div>' +
+    '<div class="bar-track"><div class="bar-fill '+colorCls+'" style="width:'+Math.max(pct,1)+'%"></div></div>' +
+    '<div class="bar-val">'+val+'</div>' +
+  '</div>';
+}
+
+function derItem(label,val,highlight){
+  return '<div class="der-item">' +
+    '<div class="der-item-label">'+label+'</div>' +
+    '<div class="der-item-val'+(highlight?" highlight":"")+'">'+esc(String(val))+'</div>' +
+  '</div>';
+}
+
+function qaBtn(href,icon,label){
+  return '<a href="'+href+'" class="qa-btn">' +
+    '<div class="qa-icon">'+icon+'</div>' +
+    '<div class="qa-label">'+label+'</div>' +
+  '</a>';
+}
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+boot();
+</script>
+</body>
+</html>
