@@ -533,7 +533,7 @@ function navigate(page) {
   content.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
 
   if      (page === "footfall")  renderFootfall();
-  else if (page === "dashboard") window.location.href = "dashboard.html";
+  else if (page === "dashboard") renderDashboardShell();
   else if (page === "feedback")  window.location.href = "feedback.html";
   else if (page === "divert")    window.location.href = "divert.html";
   else if (page === "reports")   window.location.href = "reports.html";
@@ -1040,9 +1040,345 @@ function boot() {
   setInterval(updateClock, 1000);
 
   // Default page based on role
-  var defaultPage = "dashboard";
+  var defaultPage = "footfall";
+  if (SESSION.user.role === "super_admin" || SESSION.user.role === "admin") defaultPage = "dashboard";
   if (SESSION.user.role === "purchase_manager") defaultPage = "divert";
   navigate(defaultPage);
+}
+
+/* ============================================================
+   DASHBOARD MODULE (inline in app)
+   ============================================================ */
+var DASH_DATA     = null;
+var dashRefresh   = null;
+var dashCountdown = null;
+var dashRemaining = 300;
+var dashDate      = null;
+
+function renderDashboardShell() {
+  dashDate = dateKeyIST();
+  var content = document.getElementById("content");
+  content.innerHTML = '<div style="text-align:center;padding:60px;color:var(--ink-60)">⏳ Loading dashboard…</div>';
+  loadDashData(dashDate);
+  startDashRefresh();
+}
+
+function dateKeyIST() {
+  var d  = nowIST();
+  var dd = String(d.getDate()).padStart(2,"0");
+  var mm = String(d.getMonth()+1).padStart(2,"0");
+  return dd+"/"+mm+"/"+d.getFullYear();
+}
+
+function startDashRefresh() {
+  if(dashCountdown) clearInterval(dashCountdown);
+  dashRemaining = 300;
+  dashCountdown = setInterval(function(){
+    dashRemaining--;
+    if(dashRemaining<=0){
+      clearInterval(dashCountdown);
+      loadDashData(dashDate);
+      startDashRefresh();
+    }
+  },1000);
+}
+
+function loadDashData(date) {
+  apiPost({ action:"get_dashboard", date:date }).then(function(res){
+    if(!res.ok){ return; }
+    DASH_DATA = res;
+    paintDashboard();
+  });
+}
+
+function switchDashDate(date) {
+  dashDate = date;
+  var content = document.getElementById("content");
+  content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink-60)">⏳ Loading…</div>';
+  loadDashData(date);
+}
+
+function paintDashboard() {
+  if(!DASH_DATA) return;
+  var d   = DASH_DATA;
+  var p   = d.pulse;
+  var today = dateKeyIST();
+  var isToday = dashDate === today;
+  var canDER = SESSION && (SESSION.user.role==="super_admin"||SESSION.user.role==="admin");
+
+  var html = '<div class="fade-in" style="padding-bottom:40px">';
+
+  /* ── Date tabs ── */
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">';
+  html += '<div style="display:flex;gap:6px">';
+  html += '<button onclick="switchDashDate(\''+today+'\')" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1.5px solid '+(isToday?'var(--navy)':'var(--border)')+';background:'+(isToday?'var(--navy)':'var(--white)')+';color:'+(isToday?'#fff':'var(--ink-60)')+'">Today</button>';
+
+  // Yesterday
+  var yd=nowIST(); yd.setDate(yd.getDate()-1);
+  var ydKey=String(yd.getDate()).padStart(2,"0")+"/"+String(yd.getMonth()+1).padStart(2,"0")+"/"+yd.getFullYear();
+  var isYd = dashDate===ydKey;
+  html += '<button onclick="switchDashDate(\''+ydKey+'\')" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1.5px solid '+(isYd?'var(--navy)':'var(--border)')+';background:'+(isYd?'var(--navy)':'var(--white)')+';color:'+(isYd?'#fff':'var(--ink-60)')+'">Yesterday</button>';
+  html += '</div>';
+
+  // Custom date picker
+  html += '<input type="date" id="dashDatePick" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit" onchange="switchDashDate(formatDatePick(this.value))"/>';
+
+  if(isToday){
+    html += '<span style="font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px;margin-left:auto">';
+    html += '<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite"></span> Live · refreshes every 5 min</span>';
+  } else {
+    html += '<span style="font-size:11px;color:var(--ink-30);margin-left:auto">Viewing: '+esc(dashDate)+'</span>';
+  }
+  html += '</div>';
+
+  /* ── Pulse ── */
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:24px">';
+  html += dPulse("Today's Footfall", p.footfall,      "var(--gold-d)");
+  html += dPulse("Feedbacks",        p.feedbacks,     "var(--navy)");
+  html += dPulse("New Diverts",      p.diverts_today, "var(--crimson)");
+  html += dPulse("Open Diverts",     p.open_diverts,  p.open_diverts>0?"var(--crimson)":"var(--green)");
+  html += '</div>';
+
+  /* ── Charts row ── */
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">';
+
+  /* Hourly line chart */
+  html += '<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden">';
+  html += '<div style="padding:14px 18px;border-bottom:1px solid var(--border)">';
+  html += '<div style="font-size:14px;font-weight:500">Hourly Footfall — '+esc(dashDate)+'</div>';
+  html += '<div style="font-size:11px;color:var(--ink-60);margin-top:2px">'+d.slots.filter(function(s){return s.status==="completed";}).length+' of '+d.slots.length+' slots submitted</div>';
+  html += '</div><div style="padding:16px">';
+  html += renderLineChart(d.slots);
+  html += '</div></div>';
+
+  /* Weekly bar chart */
+  var wk   = d.week_footfall||{};
+  var wkK  = Object.keys(wk);
+  var maxW = Math.max.apply(null,wkK.map(function(k){return wk[k];}).concat([1]));
+  html += '<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden">';
+  html += '<div style="padding:14px 18px;border-bottom:1px solid var(--border)">';
+  html += '<div style="font-size:14px;font-weight:500">This Week — Daily Footfall</div>';
+  html += '<div style="font-size:11px;color:var(--ink-60);margin-top:2px">Last 7 days</div>';
+  html += '</div><div style="padding:16px"><div style="display:flex;flex-direction:column;gap:8px">';
+  wkK.forEach(function(k){
+    var v=wk[k], pct=maxW>0?Math.round(v/maxW*100):0;
+    var dt=parseDateStr(k);
+    var lbl=dt?dt.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):k;
+    html += dBarRow(lbl,v,pct,"var(--navy)");
+  });
+  html += '</div></div></div>';
+
+  html += '</div>'; /* charts row */
+
+  /* ── Divert + Feedback row ── */
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">';
+
+  /* Diverts by section */
+  var ds   = d.divert_by_section||{};
+  var dsK  = Object.keys(ds).filter(function(k){return ds[k]>0;});
+  html += '<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden">';
+  html += '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:500">Open Diverts by Section</div>';
+  html += '<div style="padding:14px 16px">';
+  if(dsK.length===0){
+    html += '<div style="text-align:center;padding:16px;color:var(--green);font-size:13px">✓ No open diverts</div>';
+  } else {
+    dsK.sort(function(a,b){return ds[b]-ds[a];}).forEach(function(k){
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">';
+      html += '<span style="font-size:13px">'+esc(k)+'</span>';
+      html += '<span style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--crimson)">'+ds[k]+'</span>';
+      html += '</div>';
+    });
+  }
+  html += '</div></div>';
+
+  /* CSI + NPS */
+  var csi=d.csi||{}, nps=d.nps||{};
+  var csiCls=csi.score>=75?"var(--green)":csi.score>=50?"var(--orange)":"var(--crimson)";
+  var npsCls=nps.score>=50?"var(--green)":nps.score>=0?"var(--orange)":"var(--crimson)";
+  html += '<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden">';
+  html += '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:500">CSI & NPS</div>';
+  html += '<div style="padding:14px 16px">';
+  html += '<div style="display:flex;gap:10px;margin-bottom:12px">';
+  html += '<div style="flex:1;background:var(--surface);border-radius:8px;padding:14px;text-align:center">';
+  html += '<div style="font-size:10px;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">CSI</div>';
+  html += '<div style="font-family:\'DM Serif Display\',serif;font-size:32px;color:'+(csi.score!==null?csiCls:'var(--ink-30)')+'">'+( csi.score!==null?csi.score+"%":"—")+'</div>';
+  html += '<div style="font-size:10px;color:var(--ink-30);margin-top:4px">'+csi.count+' responses</div>';
+  html += '</div>';
+  html += '<div style="flex:1;background:var(--surface);border-radius:8px;padding:14px;text-align:center">';
+  html += '<div style="font-size:10px;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">NPS</div>';
+  html += '<div style="font-family:\'DM Serif Display\',serif;font-size:32px;color:'+(nps.score!==null?npsCls:'var(--ink-30)')+'">'+( nps.score!==null?nps.score:"—")+'</div>';
+  html += '<div style="font-size:10px;color:var(--ink-30);margin-top:4px">'+nps.count+' responses</div>';
+  html += '</div></div>';
+  if(nps.count>0){
+    html += '<div style="display:flex;gap:6px">';
+    html += '<div style="flex:1;background:var(--green-l);border-radius:6px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--green)">'+nps.promoters+'</div><div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.06em">Promoters</div></div>';
+    html += '<div style="flex:1;background:var(--surface);border-radius:6px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--ink-60)">'+nps.passives+'</div><div style="font-size:9px;color:var(--ink-30);text-transform:uppercase;letter-spacing:.06em">Passives</div></div>';
+    html += '<div style="flex:1;background:var(--crimson-l);border-radius:6px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--crimson)">'+nps.detractors+'</div><div style="font-size:9px;color:var(--crimson);text-transform:uppercase;letter-spacing:.06em">Detractors</div></div>';
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  /* Your Voice */
+  var vv = d.today_voices||[];
+  html += '<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden">';
+  html += '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:500">Your Voice</div>';
+  html += '<div style="padding:14px 16px">';
+  if(vv.length===0){
+    html += '<div style="text-align:center;padding:16px;font-size:13px;color:var(--ink-30)">No open feedback today</div>';
+  } else {
+    vv.forEach(function(v){
+      html += '<div style="border-left:3px solid var(--gold);padding:8px 12px;margin-bottom:8px;background:var(--surface);border-radius:0 6px 6px 0">';
+      html += '<div style="font-size:13px;line-height:1.5">'+esc(v.text)+'</div>';
+      html += '<div style="font-size:10px;color:var(--ink-30);margin-top:4px">'+esc(v.area||"")+(v.time?" · "+esc(v.time):"")+'</div>';
+      html += '</div>';
+    });
+  }
+  html += '</div></div>';
+
+  html += '</div>'; /* 3-col row */
+
+  /* ── Quick Actions ── */
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px">';
+  ['feedback.html,💬,New Feedback','divert.html,↩️,New Divert','reports.html,📈,View Reports','admin.html,⚙️,Admin Panel'].forEach(function(item){
+    var parts=item.split(",");
+    html += '<a href="'+parts[0]+'" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;text-decoration:none;display:block;transition:all .15s" onmouseover="this.style.borderColor=\'var(--navy)\';this.style.background=\'var(--navy-l)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--white)\'">';
+    html += '<div style="font-size:22px;margin-bottom:6px">'+parts[1]+'</div>';
+    html += '<div style="font-size:12px;font-weight:500;color:var(--ink)">'+parts[2]+'</div>';
+    html += '</a>';
+  });
+  html += '</div>';
+
+  /* ── DER ── */
+  html += '<div style="background:var(--white);border-radius:var(--radius);border:2px solid var(--gold);box-shadow:var(--shadow-md);overflow:hidden">';
+  html += '<div style="background:linear-gradient(135deg,var(--navy),#2A3F7E);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">';
+  html += '<div><div style="font-family:\'DM Serif Display\',serif;font-size:19px;color:#fff">Day End Report — '+esc(dashDate)+'</div>';
+  html += '<div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">Auto-generated from CRM data</div></div>';
+  if(canDER){
+    html += '<div style="display:flex;gap:8px;align-items:center">';
+    html += '<div id="derAlert" style="font-size:12px;display:none;padding:6px 12px;border-radius:6px"></div>';
+    html += '<button id="derBtn" onclick="sendDERInline()" style="background:var(--gold);color:var(--ink);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:0;cursor:pointer;display:flex;align-items:center;gap:6px">📧 Send DER Email</button>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  /* DER body */
+  html += '<div style="padding:18px 20px">';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px">';
+  var derItems=[
+    ["Total Footfall",   p.footfall],
+    ["Bills Count",      p.bills||"Not entered"],
+    ["Conversion",       p.conversion?p.conversion+"%":"—"],
+    ["Feedbacks",        p.feedbacks],
+    ["CSI Score",        csi.score!==null?csi.score+"%":"—"],
+    ["NPS Score",        nps.score!==null?nps.score:"—"],
+    ["Diverts Today",    p.diverts_today],
+    ["Open Diverts",     p.open_diverts],
+    ["Aging (3d+)",      d.aged_diverts?d.aged_diverts.length:0],
+    ["Coming Back",      d.coming_back?d.coming_back.length+" customers":"0"],
+  ];
+  derItems.forEach(function(item){
+    html += '<div style="background:var(--surface);border-radius:8px;padding:12px">';
+    html += '<div style="font-size:10px;font-weight:500;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">'+item[0]+'</div>';
+    html += '<div style="font-size:15px;font-weight:600;color:var(--ink)">'+esc(String(item[1]))+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  if(dsK.length>0){
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+    dsK.forEach(function(k){
+      html += '<div style="background:var(--crimson-l);border-radius:6px;padding:4px 12px;font-size:12px;color:var(--crimson);font-weight:500">'+esc(k)+': '+ds[k]+'</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  html += '</div>';
+  document.getElementById("content").innerHTML = html;
+}
+
+/* ── Line chart ── */
+function renderLineChart(slots){
+  if(!slots||slots.length===0) return '<div style="text-align:center;padding:20px;color:var(--ink-30)">No data</div>';
+  var W=520,H=130,pL=32,pR=12,pT=10,pB=28;
+  var cW=W-pL-pR, cH=H-pT-pB;
+  var n=slots.length;
+  var maxV=Math.max.apply(null,slots.map(function(s){return s.count;}).concat([1]));
+  var pts=slots.map(function(s,i){
+    return {x:pL+(i/(n-1||1))*cW, y:pT+cH-(s.count/maxV)*cH, s:s};
+  });
+  var path=pts.map(function(p,i){return(i===0?"M":"L")+p.x.toFixed(1)+","+p.y.toFixed(1);}).join(" ");
+  var area=path+" L"+pts[pts.length-1].x.toFixed(1)+","+(pT+cH)+" L"+pL+","+(pT+cH)+" Z";
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:150px">';
+  for(var gi=0;gi<=3;gi++){
+    var gy=pT+(gi/3)*cH;
+    svg+='<line x1="'+pL+'" y1="'+gy.toFixed(0)+'" x2="'+(W-pR)+'" y2="'+gy.toFixed(0)+'" stroke="#E8E4D8" stroke-width="1"/>';
+    svg+='<text x="'+(pL-4)+'" y="'+(gy+4).toFixed(0)+'" text-anchor="end" font-size="8" fill="#9CA3AF">'+Math.round(maxV*(1-gi/3))+'</text>';
+  }
+  svg+='<defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E2D5A" stop-opacity="0.2"/><stop offset="100%" stop-color="#1E2D5A" stop-opacity="0.02"/></linearGradient></defs>';
+  svg+='<path d="'+area+'" fill="url(#lg)"/>';
+  svg+='<path d="'+path+'" fill="none" stroke="#1E2D5A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+  pts.forEach(function(p,i){
+    var col=p.s.status==="completed"?"#1E7A1E":p.s.status==="active"?"#B8860B":p.s.status==="missed"?"#C0392B":"#D1D5DB";
+    svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
+    if(i%2===0||n<=8){
+      var hh=p.s.hour%12||12,sf=p.s.hour>=12?"P":"A";
+      svg+='<text x="'+p.x.toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" font-size="8" fill="#9CA3AF">'+hh+sf+'</text>';
+    }
+    if(p.s.status==="completed"&&p.s.count>0){
+      svg+='<text x="'+p.x.toFixed(1)+'" y="'+(p.y-7).toFixed(1)+'" text-anchor="middle" font-size="9" fill="#1E2D5A" font-weight="600">'+p.s.count+'</text>';
+    }
+  });
+  svg+='</svg>';
+  return svg;
+}
+
+function dPulse(label,val,color){
+  return '<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow);border-left:4px solid '+color+'">' +
+    '<div style="font-size:10px;font-weight:500;color:var(--ink-60);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px">'+label+'</div>' +
+    '<div style="font-family:\'DM Serif Display\',serif;font-size:34px;line-height:1;color:'+color+';margin-bottom:4px">'+val+'</div>' +
+  '</div>';
+}
+
+function dBarRow(label,val,pct,color){
+  return '<div style="display:flex;align-items:center;gap:8px">' +
+    '<div style="font-size:11px;color:var(--ink-60);width:76px;text-align:right;flex-shrink:0">'+esc(String(label))+'</div>' +
+    '<div style="flex:1;height:20px;background:var(--surface);border-radius:4px;overflow:hidden">' +
+      '<div style="height:100%;border-radius:4px;background:'+color+';width:'+Math.max(pct,1)+'%;transition:width .8s ease"></div>' +
+    '</div>' +
+    '<div style="font-size:11px;font-weight:500;color:var(--ink);width:28px">'+val+'</div>' +
+  '</div>';
+}
+
+function parseDateStr(str){
+  if(!str) return null;
+  var s=String(str);
+  if(s.indexOf("/")!==-1){var p=s.split("/");if(p.length===3)return new Date(p[2],p[1]-1,p[0]);}
+  return new Date(str);
+}
+
+function formatDatePick(val){
+  if(!val) return dateKeyIST();
+  var p=val.split("-");
+  return p[2]+"/"+p[1]+"/"+p[0];
+}
+
+function sendDERInline(){
+  var btn=document.getElementById("derBtn");
+  var alrt=document.getElementById("derAlert");
+  if(btn) btn.disabled=true;
+  apiPost({action:"send_der",date:dashDate}).then(function(res){
+    if(btn) btn.disabled=false;
+    if(alrt){
+      alrt.style.display="block";
+      alrt.style.background=res.ok?"var(--green-l)":"var(--crimson-l)";
+      alrt.style.color=res.ok?"var(--green)":"var(--crimson)";
+      alrt.textContent=res.ok?"✓ DER sent!":res.error;
+      setTimeout(function(){alrt.style.display="none";},5000);
+    }
+  }).catch(function(){
+    if(btn) btn.disabled=false;
+  });
 }
 
 boot();
