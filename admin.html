@@ -974,7 +974,15 @@ function renderSettings(){
     '</div>' +
   '</div>';
 
-  html += '<div id="setAlert" class="alert alert-error"></div>';
+  html += '<div class="settings-card">' +
+    '<div class="settings-card-title">📧 Day End Report (DER)</div>' +
+    '<div class="field"><label>DER Email Address</label>' +
+      '<input id="set_der_email" type="email" value="'+esc(s.der_email||'')+'" placeholder="management@store.com"/>' +
+      '<p class="field-note">DER will be emailed to this address when Admin clicks Send DER</p></div>' +
+    '<div class="field"><label>WhatsApp Note <span class="opt">Optional</span></label>' +
+      '<input id="set_der_wa" type="text" value="'+esc(s.der_whatsapp_note||'')+'" placeholder="Please share this DER on the management WhatsApp group"/>' +
+      '<p class="field-note">This note is appended at the bottom of the DER email</p></div>' +
+  '</div>';
   html += '<div id="setSuccess" class="alert alert-success"></div>';
   html += '<div style="display:flex;justify-content:flex-end">' +
     '<button id="saveSetBtn" class="btn btn-teal" onclick="saveSettings()">' +
@@ -1003,6 +1011,8 @@ function saveSettings(){
     footfall_grace_min:   gv("set_grace"),
     footfall_edit_cutoff: gv("set_cutoff"),
     last_slot_cutoff:     gv("set_cutoff"),
+    der_email:            gv("set_der_email"),
+    der_whatsapp_note:    gv("set_der_wa"),
   }}).then(function(res){
     setLoading("saveSetBtn","saveSetSpin",false);
     if(res.ok){
