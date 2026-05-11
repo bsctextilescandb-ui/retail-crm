@@ -361,8 +361,8 @@ function tplLogin() {
         '<h2 class="card-title serif">Welcome back</h2>' +
         '<p class="card-sub">Sign in to access your CRM dashboard</p>' +
         '<div id="loginAlert" class="alert alert-error"></div>' +
-        '<div class="field"><label>Email Address</label>' +
-          '<input id="lemail" type="email" placeholder="you@company.com" autocomplete="email"/></div>' +
+        '<div class="field"><label>Username</label>' +
+          '<input id="lemail" type="text" placeholder="Enter your username" autocomplete="username"/></div>' +
         '<div class="field"><label>Password</label>' +
           '<input id="lpwd" type="password" placeholder="Enter your password" autocomplete="current-password"/>' +
           '<span class="link-sm" onclick="forgotPwd()">Forgot password?</span></div>' +
@@ -388,12 +388,12 @@ function doLogin() {
   var pwd   = val("lpwd");
   var alert = document.getElementById("loginAlert");
 
-  if (!email || !pwd) { showAlert(alert, "Please enter your email and password."); return; }
+  if (!email || !pwd) { showAlert(alert, "Please enter your username and password."); return; }
 
   setLoading("loginBtn","loginSpin", true);
   hideAlert(alert);
 
-  apiPost({ action:"login", email:email, password:pwd }).then(function(res) {
+  apiPost({ action:"login", username:email, password:pwd }).then(function(res) {
     setLoading("loginBtn","loginSpin", false);
     if (res.ok) {
       saveSession(res);
@@ -577,7 +577,7 @@ function tplStep3() {
       '<div class="field"><label>Full Name <span class="req">*</span></label>' +
         '<input id="aname" type="text" placeholder="Admin full name" value="' + esc(state.admin.name||'') + '"/></div>' +
       '<div class="field"><label>Email <span class="req">*</span></label>' +
-        '<input id="aemail" type="email" placeholder="admin@store.com" value="' + esc(state.admin.email||'') + '"/></div>' +
+        '<input id="aemail" type="text" placeholder="e.g. admin or bsc_admin" value="' + esc(state.admin.email||'') + '"/></div>' +
     '</div>' +
     '<div class="field-row">' +
       '<div class="field"><label>Password <span class="req">*</span></label>' +
@@ -619,7 +619,7 @@ function doOnboard() {
   if (!name||!email||!pwd)    { showAlert(alert,"All fields are required."); return; }
   if (pwd.length < 8)         { showAlert(alert,"Password must be at least 8 characters."); return; }
   if (pwd !== pwd2)           { showAlert(alert,"Passwords do not match."); return; }
-  if (!validEmail(email))     { showAlert(alert,"Please enter a valid email address."); return; }
+  if (!email)                 { showAlert(alert,"Username is required."); return; }
 
   state.admin = { name:name, email:email, password:pwd };
   setLoading("submitBtn","submitSpin",true);
