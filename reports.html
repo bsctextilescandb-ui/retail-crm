@@ -867,7 +867,7 @@ function renderDivert(){
       '</div></div>' +
       '<div class="report-card-body" style="padding:0">' +
       '<div style="overflow-x:auto"><table class="rep-table">' +
-      '<thead><tr><th>ID</th><th>Product</th><th>Section</th>' +
+      '<thead><tr><th>Product</th><th>Section</th>' +
       '<th>Raised On</th><th>Days Open</th><th>Status</th><th>Customer</th></tr></thead><tbody>';
 
     aged.sort(function(a,b){return (parseDate(a.date)||0)-(parseDate(b.date)||0);})
@@ -876,10 +876,10 @@ function renderDivert(){
         var days= r&&!isNaN(r) ? Math.floor((nowIST()-r)/86400000) : "?";
         var ageCls = days>=7?"aging-danger":days>=5?"aging-warn":"aging-ok";
         html += '<tr>' +
-          '<td class="td-muted" style="font-size:11px">'+esc(d.divert_id)+'</td>' +
+          
           '<td><strong>'+esc(d.product_wanted)+'</strong></td>' +
           '<td class="td-muted">'+esc(d.section_name)+'</td>' +
-          '<td class="td-muted">'+fmtDisplay(d.date)+'</td>' +
+          '<td class="td-muted">'+fmtDate(d.date)+'</td>' +
           '<td class="'+ageCls+'">'+days+' days</td>' +
           '<td><span class="pill pill-'+(d.status==="sourcing"?"sourcing":"open")+'">'+d.status+'</span></td>' +
           '<td class="td-muted">'+(d.cust_mobile?'📞 '+esc(d.cust_mobile):"—")+'</td>' +
@@ -915,6 +915,33 @@ function barRow(label, val, pct, colorCls, wide){
 
 function empty(msg){
   return '<div class="empty"><div class="empty-icon">📊</div><p>'+msg+'</p></div>';
+}
+
+
+/* ── Universal date formatter ── */
+function fmtDate(val) {
+  if (!val || val === '—' || val === '') return '—';
+  var s = String(val).trim();
+  if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/.test(s)) {
+    return s.replace(' IST','').slice(0,16);
+  }
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    var d = new Date(s);
+    if (isNaN(d)) return s;
+    var ist = new Date(d.getTime() + 330 * 60000);
+    var dd  = String(ist.getUTCDate()).padStart(2,'0');
+    var mm  = String(ist.getUTCMonth()+1).padStart(2,'0');
+    var yy  = ist.getUTCFullYear();
+    var hh  = String(ist.getUTCHours()).padStart(2,'0');
+    var mi  = String(ist.getUTCMinutes()).padStart(2,'0');
+    return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    var p = s.split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  return s;
 }
 
 function fmtTime(h){
