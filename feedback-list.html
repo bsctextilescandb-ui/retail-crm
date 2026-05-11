@@ -361,7 +361,7 @@ function renderCard(fb){
       '<div class="fb-main">' +
         '<div class="fb-area">'+(fb.area||"No area specified")+'</div>' +
         '<div class="fb-meta">' +
-          '<span>📅 '+esc(fb.date||"")+'</span>' +
+          '<span>📅 '+esc(fmtDate(fb.date))+'</span>' +
           (fb.time?'<span>🕐 '+esc(fb.time)+'</span>':'') +
           (fb.cust_name?'<span>👤 '+esc(fb.cust_name)+'</span>':'') +
           (fb.cust_mobile?'<span>📞 '+esc(fb.cust_mobile)+'</span>':'') +
@@ -426,7 +426,7 @@ function renderCardBody(fb){
       '<div class="action-taken-text">'+esc(fb.action_taken)+'</div>' +
       (fb.remarks?'<div class="action-taken-text" style="margin-top:4px;color:var(--ink-60)">'+esc(fb.remarks)+'</div>':'') +
       '<div class="action-taken-meta">By '+esc(fb.action_by||"—")+
-        (fb.action_at?' · '+String(fb.action_at).slice(0,16).replace("T"," "):'')+'</div>' +
+        (fb.action_at?' · '+fmtDate(fb.action_at):'')+'</div>' +
     '</div>';
   }
 
@@ -522,6 +522,33 @@ function updateFeedback(id){
     if(spin) spin.classList.remove("show");
     showAlert(alert,"Connection error.");
   });
+}
+
+
+/* ── Universal date formatter ── */
+function fmtDate(val) {
+  if (!val || val === '—' || val === '') return '—';
+  var s = String(val).trim();
+  if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/.test(s)) {
+    return s.replace(' IST','').slice(0,16);
+  }
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    var d = new Date(s);
+    if (isNaN(d)) return s;
+    var ist = new Date(d.getTime() + 330 * 60000);
+    var dd  = String(ist.getUTCDate()).padStart(2,'0');
+    var mm  = String(ist.getUTCMonth()+1).padStart(2,'0');
+    var yy  = ist.getUTCFullYear();
+    var hh  = String(ist.getUTCHours()).padStart(2,'0');
+    var mi  = String(ist.getUTCMinutes()).padStart(2,'0');
+    return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    var p = s.split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  return s;
 }
 
 /* ── Helpers ── */
