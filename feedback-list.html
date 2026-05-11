@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Feedback List — Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
+
+/* ── Top bar ── */
+.back-bar{background:var(--navy);padding:14px 24px;display:flex;align-items:center;
+  gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;
+  border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  transition:background .15s}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.bar-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1}
+
+/* ── Filter bar ── */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);
+  padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  position:sticky;top:53px;z-index:40}
+.filter-select,.filter-input{padding:7px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:12px;color:var(--ink);
+  background:var(--white);font-family:inherit}
+.filter-select{appearance:none;padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center}
+.filter-select:focus,.filter-input:focus{border-color:var(--navy);outline:none}
+.btn-filter{padding:7px 16px;border-radius:var(--radius-sm);background:var(--navy);
+  color:#fff;font-size:12px;font-weight:500;border:0;cursor:pointer;font-family:inherit}
+.count-label{font-size:12px;color:var(--ink-30);margin-left:auto}
+
+/* ── Main ── */
+.main{max-width:860px;margin:0 auto;padding:20px 20px 60px}
+
+/* ── Feedback cards ── */
+.fb-list{display:flex;flex-direction:column;gap:10px}
+.fb-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;
+  transition:box-shadow .15s}
+.fb-card:hover{box-shadow:var(--shadow-md)}
+
+.fb-header{padding:14px 18px;display:flex;align-items:flex-start;gap:12px;
+  cursor:pointer;border-bottom:1px solid transparent;transition:border .15s}
+.fb-header.expanded{border-bottom-color:var(--border)}
+.fb-main{flex:1;min-width:0}
+.fb-area{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.fb-meta{font-size:12px;color:var(--ink-60);display:flex;flex-wrap:wrap;gap:8px}
+.fb-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+
+/* ── Status pills ── */
+.status-pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.pill-new{background:var(--navy-l);color:var(--navy)}
+.pill-reviewed{background:var(--gold-l);color:var(--gold-d)}
+.pill-action_taken{background:var(--orange-l);color:var(--orange)}
+.pill-closed{background:var(--green-l);color:var(--green)}
+
+/* ── Source badge ── */
+.source-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500}
+.src-staff{background:var(--navy-l);color:var(--navy)}
+.src-qr{background:var(--gold-l);color:var(--gold-d)}
+
+/* ── Expand body ── */
+.fb-body{padding:16px 18px;display:none}
+.fb-body.open{display:block}
+
+/* ── Answer grid ── */
+.ans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;margin-bottom:14px}
+.ans-item{background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px}
+.ans-label{font-size:10px;font-weight:500;color:var(--ink-30);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.ans-val{font-size:13px;font-weight:500;color:var(--ink)}
+
+/* ── Voice box ── */
+.voice-box{background:var(--gold-l);border-left:3px solid var(--gold);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:10px 14px;margin-bottom:14px;font-size:13px;
+  color:var(--ink);line-height:1.5}
+
+/* ── Personal details ── */
+.personal-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.personal-item{font-size:12px;color:var(--ink-60);
+  background:var(--surface);padding:4px 10px;border-radius:999px}
+
+/* ── Action taken section ── */
+.action-taken-box{background:var(--green-l);border-radius:var(--radius-sm);
+  padding:12px 14px;margin-bottom:14px;border:1px solid rgba(30,122,30,.2)}
+.action-taken-title{font-size:11px;font-weight:600;color:var(--green);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.action-taken-text{font-size:13px;color:var(--ink);margin-bottom:4px}
+.action-taken-meta{font-size:11px;color:var(--ink-30)}
+
+/* ── Update panel ── */
+.update-panel{border-top:1px solid var(--border);padding-top:14px;margin-top:4px}
+.update-panel-title{font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.update-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.upd-field{flex:1;min-width:160px}
+.upd-field label{display:block;font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.upd-field select,.upd-field textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:13px;color:var(--ink);
+  background:var(--white);font-family:inherit}
+.upd-field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A2E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.upd-field select:focus,.upd-field textarea:focus{border-color:var(--navy);outline:none}
+.upd-field textarea{resize:none;height:68px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  transition:transform .15s;cursor:pointer;border:0;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none;filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-ghost{background:transparent;color:var(--ink-60);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-sm{padding:6px 14px;font-size:12px}
+
+/* ── Alert ── */
+.alert{padding:9px 13px;border-radius:var(--radius-sm);font-size:12px;
+  margin-bottom:10px;display:none}
+.alert.show{display:block}
+.alert-error{background:var(--crimson-l);color:var(--crimson)}
+.alert-success{background:var(--green-l);color:var(--green)}
+
+/* ── Spinner ── */
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Stats row ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:10px;margin-bottom:20px}
+.stat-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:14px;box-shadow:var(--shadow)}
+.stat-lbl{font-size:10px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.stat-val{font-family:'DM Serif Display',serif;font-size:26px;line-height:1}
+.stat-val.navy{color:var(--navy)}
+.stat-val.gold{color:var(--gold-d)}
+.stat-val.green{color:var(--green)}
+.stat-val.orange{color:var(--orange)}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:48px 24px;color:var(--ink-60)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+
+.fade-in{animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg"
+    style="height:32px;width:32px;object-fit:contain;border-radius:6px;background:#fff;padding:2px;flex-shrink:0"/>
+  <div class="bar-title">Feedback List</div>
+</div>
+
+<div class="filter-bar">
+  <span style="font-size:12px;color:var(--ink-60);font-weight:500">Filter:</span>
+  <input type="date" id="filterDate" class="filter-input" onchange="applyFilter()"/>
+  <select id="filterStatus" class="filter-select" onchange="applyFilter()">
+    <option value="">All Status</option>
+    <option value="new">New</option>
+    <option value="reviewed">Reviewed</option>
+    <option value="action_taken">Action Taken</option>
+    <option value="closed">Closed</option>
+  </select>
+  <button class="btn-filter" onclick="loadFeedback()">↺ Refresh</button>
+  <span class="count-label" id="countLabel">Loading…</span>
+</div>
+
+<div class="main" id="mainContent">
+  <div style="text-align:center;padding:48px;color:var(--ink-60)">⏳ Loading feedback…</div>
+</div>
+
+<script>
+/* ── Config ── */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ── Session ── */
+var SESSION = null;
+function getSession(){
+  var t=sessionStorage.getItem("crm_token"),u=sessionStorage.getItem("crm_user");
+  if(!t||!u) return null;
+  try{return{token:t,user:JSON.parse(u)};}catch(e){return null;}
+}
+
+/* ── API ── */
+function api(body){
+  body.token=SESSION.token;
+  return fetch(API_URL,{method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+/* ── State ── */
+var ALL_FB    = [];
+var QUESTIONS = [];
+var expandedId= null;
+
+function canUpdate(){
+  return SESSION && ["super_admin","admin","crm_manager","crm_staff"].indexOf(SESSION.user.role)!==-1;
+}
+
+/* ── IST ── */
+function nowIST(){
+  var d=new Date(),utc=d.getTime()+d.getTimezoneOffset()*60000;
+  return new Date(utc+330*60000);
+}
+function dateKeyIST(){
+  var d=nowIST();
+  return String(d.getDate()).padStart(2,"0")+"/"+
+    String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+
+/* ── Boot ── */
+function boot(){
+  SESSION = getSession();
+  if(!SESSION){ window.location.href="index.html"; return; }
+
+  // Set today's date in filter
+  var now   = nowIST();
+  var today = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+  document.getElementById("filterDate").value = today;
+
+  Promise.all([
+    api({action:"get_feedback"}),
+    api({action:"get_feedback_questions"}),
+  ]).then(function(res){
+    if(res[0].ok) ALL_FB    = res[0].feedback  || [];
+    if(res[1].ok) QUESTIONS = res[1].questions  || [];
+    applyFilter();
+  }).catch(function(e){
+    document.getElementById("mainContent").innerHTML =
+      '<div class="empty"><div class="empty-icon">⚠️</div><p>'+esc(e.message)+'</p></div>';
+  });
+}
+
+function goBack(){ window.location.href="app.html"; }
+
+function loadFeedback(){
+  api({action:"get_feedback"}).then(function(res){
+    if(res.ok){ ALL_FB=res.feedback||[]; applyFilter(); }
+  });
+}
+
+/* ── Filter ── */
+function applyFilter(){
+  var dateVal   = document.getElementById("filterDate").value;
+  var statusVal = document.getElementById("filterStatus").value;
+
+  var filtered = ALL_FB.slice();
+
+  if(dateVal){
+    var p=dateVal.split("-");
+    var dk=p[2]+"/"+p[1]+"/"+p[0]; // Convert YYYY-MM-DD to DD/MM/YYYY
+    filtered = filtered.filter(function(f){ return f.date===dk; });
+  }
+  if(statusVal){
+    filtered = filtered.filter(function(f){ return f.status===statusVal; });
+  }
+
+  // Newest first
+  filtered = filtered.reverse();
+  renderList(filtered);
+}
+
+/* ── Stats ── */
+function getStats(list){
+  return {
+    total:    list.length,
+    new_:     list.filter(function(f){return f.status==="new";}).length,
+    reviewed: list.filter(function(f){return f.status==="reviewed";}).length,
+    actioned: list.filter(function(f){return f.status==="action_taken";}).length,
+    closed:   list.filter(function(f){return f.status==="closed";}).length,
+  };
+}
+
+/* ── Render list ── */
+function renderList(list){
+  document.getElementById("countLabel").textContent = list.length+" entries";
+
+  var s = getStats(ALL_FB); // stats from ALL (not filtered)
+
+  var html = '<div class="fade-in">';
+
+  // Stats
+  html += '<div class="stats-row">';
+  html += statCard("Total",        ALL_FB.length, "navy");
+  html += statCard("New",          s.new_,        "navy");
+  html += statCard("Reviewed",     s.reviewed,    "gold");
+  html += statCard("Action Taken", s.actioned,    "orange");
+  html += statCard("Closed",       s.closed,      "green");
+  html += '</div>';
+
+  if(list.length===0){
+    html += '<div class="empty"><div class="empty-icon">💬</div>' +
+      '<h3 style="font-size:16px;font-weight:500;color:var(--ink);margin-bottom:6px">No feedback found</h3>' +
+      '<p style="font-size:13px">Try changing the date or status filter</p></div>';
+  } else {
+    html += '<div class="fb-list">';
+    list.forEach(function(fb){ html += renderCard(fb); });
+    html += '</div>';
+  }
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+
+  // Re-expand if needed
+  if(expandedId){
+    var body = document.getElementById("fbb_"+expandedId);
+    var hdr  = document.getElementById("fbh_"+expandedId);
+    if(body){ body.classList.add("open"); }
+    if(hdr)  { hdr.classList.add("expanded"); }
+  }
+}
+
+function statCard(label, val, color){
+  return '<div class="stat-card">' +
+    '<div class="stat-lbl">'+label+'</div>' +
+    '<div class="stat-val '+color+'">'+val+'</div>' +
+  '</div>';
+}
+
+/* ── Render single card ── */
+function renderCard(fb){
+  var pillCls = "pill-"+(fb.status||"new");
+  var pillLbl = {new:"New",reviewed:"Reviewed",action_taken:"Action Taken",closed:"Closed"}[fb.status]||"New";
+  var srcCls  = fb.source==="qr_self"?"src-qr":"src-staff";
+  var srcLbl  = fb.source==="qr_self"?"QR":"Staff";
+
+  var html = '<div class="fb-card">' +
+    '<div class="fb-header" id="fbh_'+esc(fb.feedback_id)+'" onclick="toggleCard(\''+esc(fb.feedback_id)+'\')">' +
+      '<div class="fb-main">' +
+        '<div class="fb-area">'+(fb.area||"No area specified")+'</div>' +
+        '<div class="fb-meta">' +
+          '<span>📅 '+esc(fb.date||"")+'</span>' +
+          (fb.time?'<span>🕐 '+esc(fb.time)+'</span>':'') +
+          (fb.cust_name?'<span>👤 '+esc(fb.cust_name)+'</span>':'') +
+          (fb.cust_mobile?'<span>📞 '+esc(fb.cust_mobile)+'</span>':'') +
+        '</div>' +
+      '</div>' +
+      '<div class="fb-right">' +
+        '<span class="status-pill '+pillCls+'">'+pillLbl+'</span>' +
+        '<span class="source-badge '+srcCls+'">'+srcLbl+'</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb-body" id="fbb_'+esc(fb.feedback_id)+'">' +
+      renderCardBody(fb) +
+    '</div>' +
+  '</div>';
+
+  return html;
+}
+
+function renderCardBody(fb){
+  var html = '';
+
+  /* Answers grid */
+  html += '<div class="ans-grid">';
+  QUESTIONS.forEach(function(q,i){
+    var key = "q"+i;
+    var val = fb[key] || fb["q"+i+"_overall_experience"] || "";
+    // Try sheet column names
+    var colMap = {
+      0:"q0_visit_type", 1:"q1_how_did_you_know", 2:"q2_overall_experience",
+      3:"q3_staff_behaviour", 4:"q4_product_variety", 5:"q5_pricing_value", 6:"q6_visit_again"
+    };
+    if(!val && colMap[i]) val = fb[colMap[i]] || "";
+    if(val){
+      html += '<div class="ans-item">' +
+        '<div class="ans-label">'+esc(q.q_text)+'</div>' +
+        '<div class="ans-val">'+esc(val)+'</div>' +
+      '</div>';
+    }
+  });
+  html += '</div>';
+
+  /* Your Voice */
+  if(fb.your_voice){
+    html += '<div class="voice-box">💬 '+esc(fb.your_voice)+'</div>';
+  }
+
+  /* Personal details */
+  var hasPers = fb.cust_name||fb.cust_mobile||fb.cust_dob;
+  if(hasPers){
+    html += '<div class="personal-row">';
+    if(fb.cust_name)   html += '<span class="personal-item">👤 '+esc(fb.cust_name)+'</span>';
+    if(fb.cust_mobile) html += '<span class="personal-item">📞 '+esc(fb.cust_mobile)+'</span>';
+    if(fb.cust_dob)    html += '<span class="personal-item">🎂 '+esc(fb.cust_dob)+'</span>';
+    html += '</div>';
+  }
+
+  /* Action taken — only show if action exists */
+  var isClosed = fb.status==="closed"||fb.status==="action_taken";
+  if(isClosed && fb.action_taken){
+    html += '<div class="action-taken-box">' +
+      '<div class="action-taken-title">✓ Action Taken</div>' +
+      '<div class="action-taken-text">'+esc(fb.action_taken)+'</div>' +
+      (fb.remarks?'<div class="action-taken-text" style="margin-top:4px;color:var(--ink-60)">'+esc(fb.remarks)+'</div>':'') +
+      '<div class="action-taken-meta">By '+esc(fb.action_by||"—")+
+        (fb.action_at?' · '+String(fb.action_at).slice(0,16).replace("T"," "):'')+'</div>' +
+    '</div>';
+  }
+
+  /* Update panel — only if not closed and has permission */
+  if(canUpdate() && fb.status!=="closed"){
+    html += '<div class="update-panel">' +
+      '<div class="update-panel-title">Update Status</div>' +
+      '<div id="updAlert_'+esc(fb.feedback_id)+'" class="alert alert-error"></div>' +
+      '<div class="update-row">';
+
+    /* Status options based on current status */
+    var statusOpts = '<option value="">— Select Status —</option>';
+    if(fb.status==="new"){
+      statusOpts += '<option value="reviewed">Mark as Reviewed</option>';
+    }
+    if(fb.status==="new"||fb.status==="reviewed"){
+      statusOpts += '<option value="action_taken">Action Taken</option>';
+      statusOpts += '<option value="closed">Close Feedback</option>';
+    }
+
+    html += '<div class="upd-field"><label>Status</label>' +
+      '<select id="st_'+esc(fb.feedback_id)+'">'+statusOpts+'</select></div>';
+
+    html += '<div class="upd-field"><label>Action / Remark</label>' +
+      '<textarea id="note_'+esc(fb.feedback_id)+'" placeholder="Describe what action was taken or add a remark…"></textarea></div>';
+
+    html += '<div style="padding-top:18px">' +
+      '<button class="btn btn-navy btn-sm" onclick="updateFeedback(\''+esc(fb.feedback_id)+'\')">' +
+        '<span id="usp_'+esc(fb.feedback_id)+'" class="spinner"></span> Update' +
+      '</button></div>';
+
+    html += '</div></div>';
+  }
+
+  if(fb.status==="closed"){
+    html += '<div style="text-align:center;padding:10px;font-size:12px;color:var(--green);font-weight:500">✓ Feedback closed</div>';
+  }
+
+  return html;
+}
+
+/* ── Toggle card ── */
+function toggleCard(id){
+  expandedId = expandedId===id ? null : id;
+  document.querySelectorAll(".fb-body").forEach(function(b){ b.classList.remove("open"); });
+  document.querySelectorAll(".fb-header").forEach(function(h){ h.classList.remove("expanded"); });
+  if(expandedId){
+    var body = document.getElementById("fbb_"+expandedId);
+    var hdr  = document.getElementById("fbh_"+expandedId);
+    if(body) body.classList.add("open");
+    if(hdr)  hdr.classList.add("expanded");
+  }
+}
+
+/* ── Update feedback ── */
+function updateFeedback(id){
+  var status  = document.getElementById("st_"+id).value;
+  var note    = document.getElementById("note_"+id).value.trim();
+  var alert   = document.getElementById("updAlert_"+id);
+  var spin    = document.getElementById("usp_"+id);
+  var btn     = spin ? spin.parentElement : null;
+
+  if(!status && !note){
+    showAlert(alert,"Please select a status or add a remark."); return;
+  }
+
+  if(btn)  btn.disabled=true;
+  if(spin) spin.classList.add("show");
+  hideAlert(alert);
+
+  api({
+    action:       "update_feedback",
+    feedback_id:  id,
+    status:       status || undefined,
+    action_taken: note,
+    remarks:      note,
+  }).then(function(res){
+    if(btn)  btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    if(res.ok){
+      // Update local data
+      var fb = ALL_FB.find(function(f){ return f.feedback_id===id; });
+      if(fb){
+        if(status)   fb.status      = status;
+        if(note){    fb.action_taken= note; fb.action_by = SESSION.user.name; fb.action_at = new Date().toISOString(); }
+      }
+      applyFilter();
+    } else {
+      showAlert(alert, res.error||"Update failed.");
+    }
+  }).catch(function(){
+    if(btn)  btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    showAlert(alert,"Connection error.");
+  });
+}
+
+/* ── Helpers ── */
+function showAlert(el,msg){ if(!el)return; el.textContent=msg; el.classList.add("show"); }
+function hideAlert(el){ if(el) el.classList.remove("show"); }
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+boot();
+</script>
+
+<!-- Custom Language Selector -->
+<div id="langBtn" onclick="toggleLangMenu()" style="position:fixed;bottom:20px;right:20px;z-index:9999;
+  background:#1E2D5A;border:1.5px solid #B8860B;border-radius:10px;
+  padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);font-family:'DM Sans',Arial,sans-serif">
+  <span style="font-size:16px">🌐</span>
+  <span id="langLabel" style="font-size:12px;font-weight:500;color:#fff">Language</span>
+  <span style="font-size:10px;color:#B8860B">▲</span>
+</div>
+<div id="langMenu" style="position:fixed;bottom:62px;right:20px;z-index:9998;
+  background:#1E2D5A;border:1.5px solid #B8860B;border-radius:10px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3);display:none;min-width:180px;
+  font-family:'DM Sans',Arial,sans-serif">
+  <div style="padding:8px 0">
+    <div onclick="setLang('en','English')"       class="lang-opt">English</div>
+    <div onclick="setLang('ta','தமிழ்')"         class="lang-opt">தமிழ் (Tamil)</div>
+    <div onclick="setLang('hi','हिन्दी')"        class="lang-opt">हिन्दी (Hindi)</div>
+    <div onclick="setLang('kn','ಕನ್ನಡ')"        class="lang-opt">ಕನ್ನಡ (Kannada)</div>
+    <div onclick="setLang('te','తెలుగు')"        class="lang-opt">తెలుగు (Telugu)</div>
+    <div onclick="setLang('ml','മലയാളം')"       class="lang-opt">മലയാളം (Malayalam)</div>
+    <div onclick="setLang('mr','मराठी')"         class="lang-opt">मराठी (Marathi)</div>
+  </div>
+</div>
+<style>
+.lang-opt{padding:10px 18px;font-size:13px;color:rgba(255,255,255,.8);cursor:pointer;transition:background .15s;line-height:1.4}
+.lang-opt:hover{background:rgba(184,134,11,.25);color:#fff}
+.goog-te-banner-frame{display:none!important}
+body{top:0!important}
+</style>
+<div id="google_translate_element" style="display:none"></div>
+<script>
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({pageLanguage:'en',includedLanguages:'en,ta,hi,kn,te,ml,mr',autoDisplay:false},'google_translate_element');
+}
+function toggleLangMenu(){
+  var m=document.getElementById('langMenu');
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  document.getElementById('langBtn').querySelector('span:last-child').textContent=open?'▲':'▼';
+}
+function setLang(code,label){
+  var expires=new Date(); expires.setFullYear(expires.getFullYear()+1);
+  document.cookie='googtrans=/en/'+code+';expires='+expires.toUTCString()+';path=/';
+  document.cookie='googtrans=/en/'+code+';expires='+expires.toUTCString()+';path=/;domain='+location.hostname;
+  document.getElementById('langLabel').textContent=label;
+  document.getElementById('langMenu').style.display='none';
+  try{localStorage.setItem('crm_lang',code);localStorage.setItem('crm_lang_label',label);}catch(e){}
+  location.reload();
+}
+(function(){
+  try{var lbl=localStorage.getItem('crm_lang_label');if(lbl)document.getElementById('langLabel').textContent=lbl;}catch(e){}
+  document.addEventListener('click',function(e){
+    var btn=document.getElementById('langBtn'),menu=document.getElementById('langMenu');
+    if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)){menu.style.display='none';btn.querySelector('span:last-child').textContent='▲';}
+  });
+})();
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
