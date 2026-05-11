@@ -469,6 +469,7 @@ function renderDashboard(){
         '<div class="aging-product">'+esc(div.product_wanted)+'</div>' +
         '<div class="aging-meta">' +
           '<span>'+esc(div.section_name)+'</span>' +
+          '<span>📅 '+fmtDate(div.date)+'</span>' +
           '<span class="aging-days">'+days+' days old</span>' +
           (div.cust_mobile?'<span>📞 '+esc(div.cust_mobile)+'</span>':'') +
         '</div>' +
@@ -495,7 +496,7 @@ function renderDashboard(){
           (div.cust_mobile?'<span>📞 '+esc(div.cust_mobile)+'</span>':'') +
           '<span>'+esc(div.section_name)+'</span>' +
           '<span>'+esc(div.product_wanted)+'</span>' +
-          (div.expected_date?'<span>📅 '+esc(div.expected_date)+'</span>':'') +
+          (div.expected_date?'<span>📅 '+esc(fmtDate(div.expected_date))+'</span>':'') +
         '</div>' +
       '</div>';
     });
@@ -609,7 +610,7 @@ function renderDashboard(){
     html += '<div class="chart-card-sub">Last 10 actions across all modules</div>';
     html += '</div></div><div class="chart-card-body"><div class="activity-list">';
     d.recent_activity.forEach(function(a){
-      var ts = String(a.timestamp||"").slice(0,16).replace("T"," ");
+      var ts = fmtDate(a.timestamp);
       html += '<div class="act-item">' +
         '<div class="act-dot"></div>' +
         '<div class="act-text"><strong>'+esc(a.by||"")+'</strong> — '+esc(a.note||"")+(a.status?' → <strong>'+esc(a.status)+'</strong>':'')+'</div>' +
@@ -803,6 +804,33 @@ function qaBtn(href,icon,label){
 
 function esc(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+
+/* ── Universal date formatter ── */
+function fmtDate(val) {
+  if (!val || val === '—' || val === '') return '—';
+  var s = String(val).trim();
+  if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/.test(s)) {
+    return s.replace(' IST','').slice(0,16);
+  }
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    var d = new Date(s);
+    if (isNaN(d)) return s;
+    var ist = new Date(d.getTime() + 330 * 60000);
+    var dd  = String(ist.getUTCDate()).padStart(2,'0');
+    var mm  = String(ist.getUTCMonth()+1).padStart(2,'0');
+    var yy  = ist.getUTCFullYear();
+    var hh  = String(ist.getUTCHours()).padStart(2,'0');
+    var mi  = String(ist.getUTCMinutes()).padStart(2,'0');
+    return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    var p = s.split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  return s;
 }
 
 boot();
