@@ -324,7 +324,7 @@ function renderUsers(){
   } else {
     html += '<div class="table-card"><div class="table-wrap"><table>' +
       '<thead><tr>' +
-        '<th>Name</th><th>Email</th><th>Role</th>' +
+        '<th>Name</th><th>Username</th><th>Role</th>' +
         '<th>Sections</th><th>Status</th>' +
         (isSuperAdmin() ? '<th style="text-align:right">Actions</th>' : '') +
       '</tr></thead><tbody>';
@@ -386,8 +386,8 @@ function openUserModal(userId){
         '<div class="field-row">' +
           '<div class="field"><label>Full Name <span class="req">*</span></label>' +
             '<input id="u_name" type="text" value="'+esc(u?u.name:'')+'" placeholder="Full name"/></div>' +
-          '<div class="field"><label>Email <span class="req">*</span></label>' +
-            '<input id="u_email" type="email" value="'+esc(u?u.email:'')+'" placeholder="email@store.com"' +
+          '<div class="field"><label>Username <span class="req">*</span></label>' +
+            '<input id="u_email" type="text" value="'+esc(u?u.email:'')+'" placeholder="e.g. john or crm_staff1"' +
             (isEdit?' readonly style="background:var(--surface);color:var(--ink-60)"':'')+'/></div>' +
         '</div>' +
         '<div class="field-row">' +
