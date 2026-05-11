@@ -475,7 +475,8 @@ function buildNav() {
   }
   // Feedback — all except PM
   if (hasRole(["super_admin","admin","crm_manager","crm_staff"])) {
-    nav.push({ icon:"💬", label:"Feedback", page:"feedback", section:"CRM" });
+    nav.push({ icon:"💬", label:"Feedback List", page:"feedback_list", section:"CRM" });
+    nav.push({ icon:"✍️", label:"New Feedback",  page:"feedback",      section:"CRM" });
   }
   // Divert — all
   nav.push({ icon:"↩️", label:"Divert Register", page:"divert", section:"CRM" });
@@ -523,7 +524,8 @@ function navigate(page) {
   closeSidebar();
 
   var titles = {
-    footfall:"Footfall Count", feedback:"Feedback",
+    footfall:"Footfall Count", feedback:"New Feedback",
+    feedback_list:"Feedback List",
     divert:"Divert Register", reports:"Reports",
     settings:"Settings", users:"User Management", sections:"Sections"
   };
@@ -534,6 +536,7 @@ function navigate(page) {
 
   if      (page === "footfall")  renderFootfall();
   else if (page === "dashboard") renderDashboardShell();
+  else if (page === "feedback_list") window.location.href = "feedback-list.html";
   else if (page === "feedback")  window.location.href = "feedback.html";
   else if (page === "divert")    window.location.href = "divert.html";
   else if (page === "reports")   window.location.href = "reports.html";
