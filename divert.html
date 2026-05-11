@@ -406,7 +406,7 @@ function renderDivertCard(d){
         '<div class="divert-product">'+esc(d.product_wanted)+'</div>' +
         '<div class="divert-meta">' +
           '<span>📦 '+esc(d.section_name)+'</span>' +
-          '<span>📅 '+esc(fmtDate(d.date))+'</span>' +
+          '<span>📅 '+esc(fmtDate(d.date, true))+'</span>' +
           (d.cust_name ? '<span>👤 '+esc(d.cust_name)+'</span>' : '') +
           (d.cust_mobile ? '<span>📞 '+esc(d.cust_mobile)+'</span>' : '') +
           cbBadge +
@@ -435,7 +435,7 @@ function renderDivertBody(d){
   html += detailItem("Reason",       d.reason_code||"—");
   html += detailItem("Coming Back",  d.coming_back||"—");
   if(d.coming_back==="Yes"){
-    html += detailItem("Expected Date", fmtDate(d.expected_date));
+    html += detailItem("Expected Date", fmtDate(d.expected_date, true));
   }
   html += detailItem("Raised By",    d.raised_by||"—");
   html += detailItem("Raised At", fmtDate(d.raised_at));
@@ -793,12 +793,22 @@ function toast(title,sub,type){
 
 
 /* ── Universal date formatter ── */
-function fmtDate(val) {
+function fmtDate(val, dateOnly) {
   if (!val || val === '—' || val === '') return '—';
   var s = String(val).trim();
+  // Already DD/MM/YYYY HH:MM[:SS] [IST]
   if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/.test(s)) {
-    return s.replace(' IST','').slice(0,16);
+    var clean = s.replace(' IST','').slice(0,16);
+    return dateOnly ? clean.slice(0,10) : clean;
   }
+  // DD/MM/YYYY — date only
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  // YYYY-MM-DD — date picker format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    var p = s.split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  // ISO datetime 2026-05-10T18:30:00.000Z — convert UTC→IST
   if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
     var d = new Date(s);
     if (isNaN(d)) return s;
@@ -808,13 +818,8 @@ function fmtDate(val) {
     var yy  = ist.getUTCFullYear();
     var hh  = String(ist.getUTCHours()).padStart(2,'0');
     var mi  = String(ist.getUTCMinutes()).padStart(2,'0');
-    return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
+    return dateOnly ? dd+'/'+mm+'/'+yy : dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
   }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-    var p = s.split('-');
-    return p[2]+'/'+p[1]+'/'+p[0];
-  }
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
   return s;
 }
 
