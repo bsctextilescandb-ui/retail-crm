@@ -681,15 +681,20 @@ function buildSlots() {
     }
 
     var status;
+    // Active window = during the slot hour + 3 hours after slot ends
+    // e.g. 10-11 slot is active from 10:00 to 14:00
+    var slotEndHour   = h + 1;
+    var activeEndHour = h + 4; // slot hour + 3 grace hours
+    var nowTotalMins  = hour * 60 + mins;
+    var slotStartMins = h * 60;
+    var activeEndMins = activeEndHour * 60;
+
     if (entry) {
       status = "completed";
-    } else if (hour === h && mins <= 59) {
-      // Currently this hour — active if within grace of slot end
+    } else if (nowTotalMins >= slotStartMins && nowTotalMins < activeEndMins) {
+      // Within active window (during slot OR up to 3 hours after)
       status = "active";
-    } else if (hour === h + 1 && mins <= grace) {
-      // Grace period — still active
-      status = "active";
-    } else if (hour > h + 1 || (hour === h + 1 && mins > grace)) {
+    } else if (nowTotalMins >= activeEndMins) {
       status = "missed";
     } else {
       status = "pending";
@@ -816,9 +821,9 @@ function updateCountdown() {
   var now      = nowIST();
   var active   = ffState.slots.find(function(s){ return s.status === "active"; });
   if (!active) return;
-  var grace    = parseInt(ffState.settings.footfall_grace_min || "30", 10);
+  // Active window closes 3 hours after slot ends
   var slotEnd  = new Date(now);
-  slotEnd.setHours(active.h + 1, grace, 0, 0); // grace mins after next hour
+  slotEnd.setHours(active.h + 4, 0, 0, 0); // 3 hours after slot end
   var diff     = Math.max(0, Math.floor((slotEnd - now) / 1000));
   var mm       = String(Math.floor(diff / 60)).padStart(2,"0");
   var ss       = String(diff % 60).padStart(2,"0");
