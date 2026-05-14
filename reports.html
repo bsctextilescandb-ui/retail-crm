@@ -518,7 +518,7 @@ function renderFootfall(){
     sCard("Total Footfall",  totalFF,  "gold",  "for period") +
     sCard("Avg Daily",       avgDaily, "teal",  "visitors/day") +
     sCard("Peak Day",        peakDay ? fmtDisplay(peakDay) : "—", "",  "highest traffic") +
-    sCard("Peak Slot",       peakSlot!==null ? fmtTime(peakSlot) : "—", "purple", "busiest hour") +
+    sCard("Peak Slot",       peakSlot!==null ? fmtRange(peakSlot) : "—", "purple", "busiest slot") +
   '</div>';
 
   /* Daily trend */
@@ -557,7 +557,7 @@ function renderFootfall(){
       var bg = intensityColor(intensity);
       var textColor = intensity>0.5 ? "#fff" : "var(--ink)";
       html += '<div class="hm-cell" style="background:'+bg+';color:'+textColor+'">' +
-        '<div class="hm-label">'+fmtTime(h)+'</div>' +
+        '<div class="hm-label">'+fmtRange(h)+'</div>' +
         '<div class="hm-val">'+count+'</div>' +
       '</div>';
     }
@@ -955,6 +955,9 @@ function fmtDate(val, dateOnly) {
 function fmtTime(h){
   var s=h%12||12, suffix=h>=12?"PM":"AM";
   return String(s).padStart(2,"0")+":00 "+suffix;
+}
+function fmtRange(h){
+  return fmtTime(h)+" – "+fmtTime(h+1);
 }
 
 function intensityColor(v){
