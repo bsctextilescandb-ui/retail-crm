@@ -377,11 +377,11 @@ function renderSummary(){
 
   /* Loyalty score from Q6 */
   var loyaltyQ  = DATA.questions.find(function(q){return q.display_order==6||q.q_id==="Q6";});
-  var loyaltyKey= loyaltyQ ? "q6" : null;
+  var loyaltyKey= loyaltyQ ? "q6_visit_again" : null;
   var loyalMap  = {};
   if(loyaltyKey){
     fb.forEach(function(f){
-      var v=f[loyaltyKey]||"";
+      var v=f[loyaltyKey]||f["q6"]||"";
       if(v) loyalMap[v]=(loyalMap[v]||0)+1;
     });
   }
@@ -658,10 +658,14 @@ function renderFeedback(){
       '<div class="report-card-body"><div class="score-grid">';
 
     DATA.questions.forEach(function(q, qi){
-      var key  = "q"+qi;
+      var colMap = {
+        0:"q0_visit_type", 1:"q1_how_did_you_know", 2:"q2_overall_experience",
+        3:"q3_staff_behaviour", 4:"q4_product_variety", 5:"q5_pricing_value",
+        6:"q6_visit_again", 7:"q7_custom"
+      };
       var answers = {};
       fb.forEach(function(f){
-        var v = String(f[key]||"").trim();
+        var v = String(f["q"+qi] || f[colMap[qi]] || "").trim();
         if(v) answers[v]=(answers[v]||0)+1;
       });
       var total   = Object.values(answers).reduce(function(s,v){return s+v;},0);
@@ -689,10 +693,14 @@ function renderFeedback(){
       '<div class="report-card-body">';
 
     DATA.questions.forEach(function(q, qi){
-      var key     = "q"+qi;
+      var colMap = {
+        0:"q0_visit_type", 1:"q1_how_did_you_know", 2:"q2_overall_experience",
+        3:"q3_staff_behaviour", 4:"q4_product_variety", 5:"q5_pricing_value",
+        6:"q6_visit_again", 7:"q7_custom"
+      };
       var answers = {};
       fb.forEach(function(f){
-        var v=String(f[key]||"").trim();
+        var v=String(f["q"+qi] || f[colMap[qi]] || "").trim();
         if(v) answers[v]=(answers[v]||0)+1;
       });
       var total = Object.values(answers).reduce(function(s,v){return s+v;},0);
