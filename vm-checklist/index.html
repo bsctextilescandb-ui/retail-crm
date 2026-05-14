@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>BSC — VM Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:'DM Serif Display',serif}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
+
+/* ── SCREENS ─────────────────────────────────────── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* ── PIN SCREEN ───────────────────────────────────── */
+#pinScreen{
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.pin-box{
+  background:var(--white);border-radius:20px;
+  padding:40px 32px;width:100%;max-width:360px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  text-align:center;animation:slideUp .35s ease;
+}
+.pin-brand{
+  width:60px;height:60px;border-radius:14px;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;font-size:26px;
+}
+.pin-box h2{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:4px}
+.pin-box p{font-size:13px;color:var(--ink-60);margin-bottom:28px}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:28px}
+.pin-dot{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--ink-30);background:transparent;
+  transition:all .2s;
+}
+.pin-dot.filled{background:var(--navy);border-color:var(--navy)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.pin-key{
+  padding:16px 8px;border-radius:10px;background:var(--ivory);
+  font-size:20px;font-weight:600;color:var(--ink);
+  transition:all .15s;border:1.5px solid var(--border);
+}
+.pin-key:active{background:var(--navy-l);transform:scale(.95)}
+.pin-key.del{font-size:16px;color:var(--crimson)}
+.pin-key.zero{grid-column:2}
+.pin-switch{font-size:13px;color:var(--gold);cursor:pointer;text-decoration:underline}
+.pin-error{font-size:13px;color:var(--crimson);margin-top:10px;min-height:18px}
+.role-tabs{display:flex;gap:8px;margin-bottom:24px}
+.role-tab{
+  flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;
+  background:var(--ivory);color:var(--ink-60);border:1.5px solid var(--border);
+  transition:all .2s;
+}
+.role-tab.active{background:var(--navy);color:var(--white);border-color:var(--navy)}
+
+/* ── TOP BAR ──────────────────────────────────────── */
+.topbar{
+  background:var(--navy);padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-logo{
+  width:36px;height:36px;border-radius:8px;
+  background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.topbar-title{font-family:'DM Serif Display',serif;color:var(--white);font-size:17px}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-date{font-size:12px;color:rgba(255,255,255,.7);text-align:right}
+.logout-btn{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.12);color:var(--white);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+
+/* ── OWNER DASHBOARD ──────────────────────────────── */
+#ownerScreen .body{padding:20px;max-width:640px;margin:0 auto}
+
+.score-hero{
+  background:var(--navy);border-radius:18px;padding:28px 24px;
+  text-align:center;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.score-hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:rgba(255,255,255,.05);
+}
+.score-label{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.score-value{font-family:'DM Serif Display',serif;font-size:64px;line-height:1;color:var(--white)}
+.score-value span{font-size:24px;opacity:.6}
+.score-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  margin-top:12px;
+}
+.score-badge.good{background:rgba(30,122,30,.3);color:#7EE87E}
+.score-badge.warn{background:rgba(192,57,43,.3);color:#FF8B7E}
+.score-meta{font-size:12px;color:rgba(255,255,255,.5);margin-top:10px}
+
+.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.section-card{
+  background:var(--white);border-radius:14px;padding:16px;
+  box-shadow:var(--shadow);border:1.5px solid var(--border);
+}
+.section-card-name{font-size:11px;color:var(--ink-60);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.section-score{font-family:'DM Serif Display',serif;font-size:28px;color:var(--navy)}
+.section-score span{font-size:13px;color:var(--ink-30)}
+.section-bar{height:4px;border-radius:2px;background:var(--border);margin-top:8px;overflow:hidden}
+.section-bar-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .6s ease}
+.section-bar-fill.low{background:var(--crimson)}
+
+.history-card{
+  background:var(--white);border-radius:14px;padding:20px;
+  box-shadow:var(--shadow);border:1.5px solid var(--border);margin-bottom:20px;
+}
+.card-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px}
+.history-chart{display:flex;align-items:flex-end;gap:4px;height:60px}
+.history-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.history-bar{
+  width:100%;border-radius:4px 4px 0 0;background:var(--navy-l);
+  transition:height .4s ease;min-height:4px;position:relative;
+}
+.history-bar.today{background:var(--navy)}
+.history-bar.low{background:var(--crimson-l)}
+.history-bar.today.low{background:var(--crimson)}
+.history-bar-date{font-size:9px;color:var(--ink-30);white-space:nowrap}
+
+.detail-btn{
+  width:100%;padding:14px;border-radius:10px;
+  background:var(--navy-l);color:var(--navy);font-size:14px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:12px;transition:all .2s;
+}
+.detail-btn:hover{background:var(--navy);color:var(--white)}
+
+.no-submit{
+  background:var(--white);border-radius:14px;padding:40px 24px;
+  text-align:center;box-shadow:var(--shadow);border:1.5px solid var(--border);
+}
+.no-submit .icon{font-size:48px;margin-bottom:12px}
+.no-submit h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px}
+.no-submit p{font-size:13px;color:var(--ink-60)}
+
+/* ── DETAIL MODAL ─────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:200;display:flex;align-items:flex-end;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{
+  background:var(--white);border-radius:20px 20px 0 0;
+  width:100%;max-height:85vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .3s ease;padding:24px 20px;
+}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy);margin-bottom:16px}
+
+.detail-section{margin-bottom:20px}
+.detail-section-title{
+  font-size:11px;font-weight:700;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.07em;
+  padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:10px;
+}
+.detail-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid var(--ink-10);gap:12px;
+}
+.detail-row-label{font-size:13px;color:var(--ink);flex:1;line-height:1.4}
+.detail-row-val{
+  font-size:13px;font-weight:600;flex-shrink:0;
+}
+.detail-row-val.yes{color:var(--green)}
+.detail-row-val.no{color:var(--crimson)}
+.detail-row-val.rating{color:var(--navy)}
+.detail-remarks{font-size:11px;color:var(--ink-60);margin-top:4px;font-style:italic}
+
+/* ── MANAGER CHECKLIST ────────────────────────────── */
+#managerScreen .body{padding:0;max-width:640px;margin:0 auto}
+
+.checklist-progress{
+  background:var(--white);padding:16px 20px;
+  border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:90;
+}
+.progress-info{display:flex;justify-content:space-between;margin-bottom:8px}
+.progress-label{font-size:13px;font-weight:600;color:var(--ink)}
+.progress-count{font-size:13px;color:var(--ink-60)}
+.progress-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--gold);transition:width .3s ease}
+
+.section-block{padding:20px}
+.section-header{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:16px;
+}
+.section-num{
+  width:28px;height:28px;border-radius:8px;background:var(--navy);
+  color:var(--white);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.section-name{font-family:'DM Serif Display',serif;font-size:17px;color:var(--navy)}
+.section-divider{height:1px;background:var(--border);margin-bottom:16px}
+
+.point-card{
+  background:var(--white);border-radius:12px;padding:14px;
+  margin-bottom:10px;border:1.5px solid var(--border);
+  transition:border-color .2s;
+}
+.point-card.answered{border-color:var(--gold)}
+.point-label{font-size:13px;color:var(--ink);margin-bottom:4px;line-height:1.4}
+.point-freq{font-size:11px;color:var(--ink-30);margin-bottom:12px}
+.point-controls{display:flex;gap:8px;align-items:center}
+
+/* Yes/No toggle */
+.yn-btn{
+  flex:1;padding:10px 8px;border-radius:8px;font-size:13px;font-weight:600;
+  border:1.5px solid var(--border);background:var(--ivory);color:var(--ink-60);
+  transition:all .2s;
+}
+.yn-btn.yes.active{background:var(--green-l);border-color:var(--green);color:var(--green)}
+.yn-btn.no.active{background:var(--crimson-l);border-color:var(--crimson);color:var(--crimson)}
+
+/* Star rating */
+.star-rating{display:flex;gap:6px}
+.star{font-size:26px;cursor:pointer;color:var(--border);transition:color .15s;line-height:1}
+.star.active{color:#F59E0B}
+.star:hover{color:#F59E0B}
+
+/* Remarks */
+.remarks-input{
+  width:100%;margin-top:10px;padding:8px 12px;
+  border-radius:8px;border:1.5px solid var(--border);
+  font-size:12px;color:var(--ink);background:var(--ivory);
+  resize:none;height:48px;transition:border-color .2s;
+}
+.remarks-input:focus{border-color:var(--navy)}
+.remarks-toggle{
+  font-size:11px;color:var(--ink-30);cursor:pointer;
+  margin-top:8px;display:inline-flex;align-items:center;gap:4px;
+}
+.remarks-toggle:hover{color:var(--navy)}
+
+.submit-wrap{padding:20px;background:var(--ivory);border-top:1px solid var(--border)}
+.submit-btn{
+  width:100%;padding:16px;border-radius:12px;
+  background:var(--navy);color:var(--white);
+  font-size:15px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.submit-btn:not(:disabled):hover{background:var(--navy-d)}
+
+/* ── SETUP SCREEN ─────────────────────────────────── */
+#setupScreen{
+  background:var(--navy);min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.setup-box{
+  background:var(--white);border-radius:20px;padding:36px 28px;
+  width:100%;max-width:380px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s ease;
+}
+.setup-icon{font-size:48px;margin-bottom:16px}
+.setup-box h2{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:8px}
+.setup-box p{font-size:13px;color:var(--ink-60);margin-bottom:24px}
+.setup-field{text-align:left;margin-bottom:16px}
+.setup-field label{font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px}
+.setup-field input{
+  width:100%;padding:12px 14px;border-radius:10px;
+  border:1.5px solid var(--border);font-size:15px;
+  background:var(--ivory);letter-spacing:.15em;
+}
+.setup-field input:focus{border-color:var(--navy)}
+.setup-submit{
+  width:100%;padding:14px;border-radius:10px;
+  background:var(--navy);color:var(--white);font-size:15px;font-weight:700;
+  margin-top:8px;transition:all .2s;
+}
+.setup-submit:hover{background:var(--navy-d)}
+.setup-error{font-size:13px;color:var(--crimson);margin-top:10px;min-height:18px}
+
+/* ── LOADING ──────────────────────────────────────── */
+.loader{
+  display:flex;align-items:center;justify-content:center;
+  padding:60px 20px;
+}
+.spinner{
+  width:36px;height:36px;border-radius:50%;
+  border:3px solid var(--border);border-top-color:var(--navy);
+  animation:spin .7s linear infinite;
+}
+
+/* ── TOAST ────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:var(--white);padding:12px 20px;border-radius:10px;
+  font-size:13px;font-weight:500;z-index:999;transition:transform .3s ease;
+  white-space:nowrap;pointer-events:none;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--crimson)}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="screen active">
+  <div class="setup-box">
+    <div class="setup-icon">🔐</div>
+    <h2>First Time Setup</h2>
+    <p>Set a PIN for Manager and Owner access to the VM Checklist app.</p>
+    <div class="setup-field">
+      <label>Manager PIN (4–6 digits)</label>
+      <input type="password" inputmode="numeric" id="setupManagerPin" maxlength="6" placeholder="e.g. 1234"/>
+    </div>
+    <div class="setup-field">
+      <label>Owner PIN (4–6 digits)</label>
+      <input type="password" inputmode="numeric" id="setupOwnerPin" maxlength="6" placeholder="e.g. 5678"/>
+    </div>
+    <button class="setup-submit" onclick="doSetup()">Set PINs & Continue</button>
+    <div id="setupError" class="setup-error"></div>
+  </div>
+</div>
+
+<!-- PIN SCREEN -->
+<div id="pinScreen" class="screen">
+  <div class="pin-box">
+    <div class="pin-brand">🏪</div>
+    <h2>BSC Textiles</h2>
+    <p id="pinSubtitle">Enter your PIN to continue</p>
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="setRole('manager')">Manager</button>
+      <button class="role-tab" onclick="setRole('owner')">Owner</button>
+    </div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key zero" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div id="pinError" class="pin-error"></div>
+  </div>
+</div>
+
+<!-- OWNER DASHBOARD -->
+<div id="ownerScreen" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">🏪</div>
+      <div>
+        <div class="topbar-title">VM Dashboard</div>
+        <div class="topbar-sub">BSC Textiles — Belagavi</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="ownerDate"></div>
+      <button class="logout-btn" onclick="logout()">↩</button>
+    </div>
+  </div>
+  <div class="body" id="ownerBody">
+    <div class="loader"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- MANAGER CHECKLIST -->
+<div id="managerScreen" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">✅</div>
+      <div>
+        <div class="topbar-title">VM Checklist</div>
+        <div class="topbar-sub" id="managerDateSub"></div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="logout-btn" onclick="logout()">↩</button>
+    </div>
+  </div>
+  <div class="checklist-progress">
+    <div class="progress-info">
+      <span class="progress-label">Progress</span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="body" id="managerBody"></div>
+  <div class="submit-wrap">
+    <button class="submit-btn" id="submitBtn" onclick="submitChecklist()" disabled>
+      Submit Checklist
+    </button>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Checklist Detail</div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+const API_URL = "https://script.google.com/macros/s/AKfycbxEOnr7KDTiZ2J3Q3a9Fmc872MrWbT6PcJBBYZXUdcbOkUWF-OFBV18iRdwbyoVHQ6S/exec";
+
+// ── VM CHECKLIST DATA ─────────────────────────────────────────
+const CHECKLIST = [
+  {
+    id: "S1", name: "Mannequin — Placement & Visibility",
+    points: [
+      { id:"S1P1", label:"Mannequins placed at store entrance / high-visibility zones", type:"yesno", freq:"Daily" },
+      { id:"S1P2", label:"Proper spacing between mannequins", type:"yesno", freq:"Daily" },
+      { id:"S1P3", label:"Facing customer flow direction", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S2", name: "Mannequin — Styling & Coordination",
+    points: [
+      { id:"S2P1", label:"Complete outfit styling (Top + Bottom / Saree + Blouse / Dupatta)", type:"yesno", freq:"2/1 Days" },
+      { id:"S2P2", label:"Color coordination as per theme or collection", type:"rating", freq:"2/1 Days" },
+      { id:"S2P3", label:"Latest collection / focus products displayed", type:"yesno", freq:"2/1 Days" },
+      { id:"S2P4", label:"Accessories used (dupatta, jewelry) — not overcrowded", type:"yesno", freq:"2/1 Days" },
+      { id:"S2P5", label:"Proper fitting (no loose, sagging, or tight look)", type:"yesno", freq:"2/1 Days" },
+    ]
+  },
+  {
+    id: "S3", name: "Mannequin — Theme & Season Alignment",
+    points: [
+      { id:"S3P1", label:"Seasonal relevance (Festival / Wedding / Casual / Office wear)", type:"yesno", freq:"Seasonal" },
+      { id:"S3P2", label:"Color theme followed consistently", type:"rating", freq:"Seasonal" },
+      { id:"S3P3", label:"Mannequin story communicated (e.g., Festive Look, Work Wear)", type:"yesno", freq:"Seasonal" },
+    ]
+  },
+  {
+    id: "S4", name: "Mannequin — Grooming & Maintenance",
+    points: [
+      { id:"S4P1", label:"Clean mannequins (no dust, stains, scratches)", type:"yesno", freq:"Daily" },
+      { id:"S4P2", label:"Correct posture and alignment", type:"yesno", freq:"Daily" },
+      { id:"S4P3", label:"Lighting on mannequins", type:"rating", freq:"Daily" },
+      { id:"S4P4", label:"Damaged mannequins removed or replaced", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S5", name: "Display — Rack Display",
+    points: [
+      { id:"S5P1", label:"Category-wise segregation (Kurtis, Sarees, Sets, Western)", type:"yesno", freq:"Daily" },
+      { id:"S5P2", label:"Size-wise arrangement (S–XL or Free Size clarity)", type:"yesno", freq:"Daily" },
+      { id:"S5P3", label:"Color blocking followed (Light to Dark / Gradient)", type:"rating", freq:"Daily" },
+      { id:"S5P4", label:"Front-facing hero products", type:"yesno", freq:"Daily" },
+      { id:"S5P5", label:"Adequate spacing between garments", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S6", name: "Display — Table Display",
+    points: [
+      { id:"S6P1", label:"Folded garments displayed neatly", type:"yesno", freq:"Daily" },
+      { id:"S6P2", label:"Limited layers (no over stacking)", type:"yesno", freq:"Daily" },
+      { id:"S6P3", label:"Premium products placed on top", type:"yesno", freq:"Daily" },
+      { id:"S6P4", label:"Table theme followed (Festive / New Arrival / Bestseller)", type:"yesno", freq:"Daily" },
+      { id:"S6P5", label:"Clear price visibility (where applicable)", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S7", name: "Display — Wall Display",
+    points: [
+      { id:"S7P1", label:"Symmetry maintained (Balance, Alignment, Spacing, Proportion)", type:"rating", freq:"Daily" },
+      { id:"S7P2", label:"Hooks and hangers aligned", type:"yesno", freq:"Daily" },
+      { id:"S7P3", label:"No empty hooks or overcrowding", type:"yesno", freq:"Daily" },
+      { id:"S7P4", label:"Highlight focus styles / prints", type:"yesno", freq:"Daily" },
+      { id:"S7P5", label:"Clean backdrop and panels", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S8", name: "VM Standards — Product Representation",
+    points: [
+      { id:"S8P1", label:"Latest arrivals highlighted", type:"yesno", freq:"Daily" },
+      { id:"S8P2", label:"Bestseller products clearly positioned", type:"yesno", freq:"Daily" },
+      { id:"S8P3", label:"Slow-moving stock avoided in prime zones", type:"yesno", freq:"Daily" },
+      { id:"S8P4", label:"Correct tagging and labeling", type:"yesno", freq:"Daily" },
+      { id:"S8P5", label:"Consistent hanger types", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S9", name: "VM Standards — Brand & Customer Experience",
+    points: [
+      { id:"S9P1", label:"Easy product discovery for customers", type:"rating", freq:"Daily" },
+      { id:"S9P2", label:"Logical product flow maintained", type:"yesno", freq:"Daily" },
+      { id:"S9P3", label:"Clear category identification", type:"yesno", freq:"Daily" },
+      { id:"S9P4", label:"Premium look and feel maintained overall", type:"rating", freq:"Daily" },
+      { id:"S9P5", label:"Trial room cleanliness and availability", type:"yesno", freq:"Daily" },
+      { id:"S9P6", label:"Floor cleanliness in all display zones", type:"yesno", freq:"Daily" },
+      { id:"S9P7", label:"Staff presence in each section during peak hours", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S10", name: "Signage & Communication",
+    points: [
+      { id:"S10P1", label:"Offer / promotion boards updated", type:"yesno", freq:"Daily" },
+      { id:"S10P2", label:"No outdated offers displayed", type:"yesno", freq:"Daily" },
+      { id:"S10P3", label:"Price boards clean and accurate", type:"yesno", freq:"Daily" },
+      { id:"S10P4", label:"Store entrance signage/board clean and visible", type:"yesno", freq:"Daily" },
+      { id:"S10P5", label:"Festival/seasonal banners placed and removed on time", type:"yesno", freq:"Seasonal" },
+      { id:"S10P6", label:"Category signage available and readable", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S11", name: "Stock & VM Alignment",
+    points: [
+      { id:"S11P1", label:"Display stock matches actual inventory", type:"yesno", freq:"Daily" },
+      { id:"S11P2", label:"No out-of-stock display pieces", type:"yesno", freq:"Daily" },
+      { id:"S11P3", label:"VM updated after stock refilling", type:"yesno", freq:"Daily" },
+      { id:"S11P4", label:"VM changed based on sell-through", type:"yesno", freq:"Daily" },
+      { id:"S11P5", label:"New arrivals pushed to front display", type:"yesno", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S12", name: "VM Maintenance & Hygiene",
+    points: [
+      { id:"S12P1", label:"Dust-free racks and tables", type:"yesno", freq:"Daily" },
+      { id:"S12P2", label:"Folded garments refolded regularly", type:"yesno", freq:"Daily" },
+      { id:"S12P3", label:"Hangers not broken or mismatched", type:"yesno", freq:"Daily" },
+      { id:"S12P4", label:"Trial pieces replaced neatly", type:"yesno", freq:"Daily" },
+      { id:"S12P5", label:"Lighting in all sections working", type:"rating", freq:"Daily" },
+    ]
+  },
+  {
+    id: "S13", name: "VM Review & Governance",
+    points: [
+      { id:"S13P1", label:"Daily VM checklist completed on time", type:"yesno", freq:"Daily" },
+      { id:"S13P2", label:"Weekly VM refresh planned and executed", type:"yesno", freq:"Weekly" },
+      { id:"S13P3", label:"VM photos/videos shared with owner for review", type:"yesno", freq:"Daily" },
+      { id:"S13P4", label:"VM feedback from previous day implemented", type:"yesno", freq:"Daily" },
+      { id:"S13P5", label:"Any VM issues escalated to GM/Owner", type:"yesno", freq:"Daily" },
+    ]
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+let currentRole = "manager";
+let pinBuffer   = "";
+let answers     = {}; // { pointId: { value, remarks } }
+let totalPoints = 0;
+
+// ── INIT ──────────────────────────────────────────────────────
+window.onload = async () => {
+  totalPoints = CHECKLIST.reduce((s, sec) => s + sec.points.length, 0);
+  const res = await api("get", "verify_pin", { pin: "", role: "manager" });
+  if (res.setup_required) {
+    showScreen("setupScreen");
+  } else {
+    showScreen("pinScreen");
+  }
+};
+
+// ── SETUP ─────────────────────────────────────────────────────
+async function doSetup() {
+  const mp = document.getElementById("setupManagerPin").value.trim();
+  const op = document.getElementById("setupOwnerPin").value.trim();
+  const err = document.getElementById("setupError");
+  if (mp.length < 4 || op.length < 4) { err.textContent = "Both PINs must be at least 4 digits."; return; }
+  if (mp === op) { err.textContent = "Manager and Owner PINs must be different."; return; }
+  const res = await api("post", "", { action: "setup_pin", pin: mp, owner_pin: op });
+  if (res.ok) { showScreen("pinScreen"); showToast("PINs set successfully!", "success"); }
+  else err.textContent = res.error || "Setup failed.";
+}
+
+// ── PIN ───────────────────────────────────────────────────────
+function setRole(role) {
+  currentRole = role;
+  pinBuffer = "";
+  updatePinDots();
+  document.getElementById("pinError").textContent = "";
+  document.querySelectorAll(".role-tab").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+function pinPress(digit) {
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length >= 4) setTimeout(verifyPin, 200);
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+}
+
+function updatePinDots() {
+  const dots = document.querySelectorAll(".pin-dot");
+  dots.forEach((d, i) => d.classList.toggle("filled", i < pinBuffer.length));
+}
+
+async function verifyPin() {
+  const res = await api("get", "verify_pin", { pin: pinBuffer, role: currentRole });
+  if (res.ok) {
+    if (currentRole === "owner") loadOwnerDashboard();
+    else loadManagerChecklist();
+  } else {
+    document.getElementById("pinError").textContent = "Incorrect PIN. Try again.";
+    pinBuffer = "";
+    updatePinDots();
+  }
+}
+
+// ── OWNER DASHBOARD ───────────────────────────────────────────
+async function loadOwnerDashboard() {
+  showScreen("ownerScreen");
+  const now = getISTDate();
+  document.getElementById("ownerDate").innerHTML = formatDateLabel(now.dateStr);
+  const body = document.getElementById("ownerBody");
+  body.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
+
+  const [scoreData, histData] = await Promise.all([
+    api("get", "get_score", {}),
+    api("get", "get_history", {})
+  ]);
+
+  if (!scoreData.ok) { body.innerHTML = `<p style="padding:20px;color:var(--crimson)">Error loading data.</p>`; return; }
+
+  body.innerHTML = "";
+
+  if (!scoreData.submitted) {
+    body.innerHTML += `
+      <div style="padding:20px">
+        <div class="no-submit">
+          <div class="icon">📋</div>
+          <h3>Not Yet Submitted</h3>
+          <p>The Manager has not submitted today's VM Checklist yet.</p>
+        </div>
+      </div>`;
+  } else {
+    const score = scoreData.score;
+    const isGood = score >= 3.5;
+    body.innerHTML += `
+      <div style="padding:20px 20px 0">
+        <div class="score-hero">
+          <div class="score-label">Today's VM Score</div>
+          <div class="score-value">${score.toFixed(1)}<span> / 5</span></div>
+          <div class="score-badge ${isGood ? 'good' : 'warn'}">
+            ${isGood ? '✅ On Track' : '⚠️ Needs Attention'}
+          </div>
+          <div class="score-meta">Submitted by ${scoreData.submitted_by} at ${scoreData.submitted_at}</div>
+        </div>
+      </div>`;
+
+    // Section scores
+    body.innerHTML += `<div style="padding:0 20px"><div class="section-grid" id="sectionGrid"></div></div>`;
+    setTimeout(() => {
+      const grid = document.getElementById("sectionGrid");
+      scoreData.sections.forEach(sec => {
+        const pct = (sec.score / 5) * 100;
+        grid.innerHTML += `
+          <div class="section-card">
+            <div class="section-card-name">${sec.name}</div>
+            <div class="section-score">${sec.score.toFixed(1)}<span> /5</span></div>
+            <div class="section-bar">
+              <div class="section-bar-fill ${sec.score < 3.5 ? 'low' : ''}" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+      });
+    }, 50);
+
+    // Detail button
+    body.innerHTML += `
+      <div style="padding:16px 20px 0">
+        <button class="detail-btn" onclick="openDetailModal()">
+          📄 View Full Checklist Detail
+        </button>
+      </div>`;
+  }
+
+  // History chart
+  if (histData.ok && histData.history.length > 0) {
+    const last14 = histData.history.slice(0, 14).reverse();
+    const maxScore = 5;
+    body.innerHTML += `
+      <div style="padding:16px 20px">
+        <div class="history-card">
+          <div class="card-title">📈 Last ${last14.length} Days</div>
+          <div class="history-chart" id="histChart"></div>
+        </div>
+      </div>`;
+    setTimeout(() => {
+      const chart = document.getElementById("histChart");
+      last14.forEach((h, i) => {
+        const isToday = i === last14.length - 1;
+        const pct = (h.score / maxScore) * 100;
+        const low = h.score < 3.5;
+        const d = new Date(h.date);
+        const label = `${d.getDate()}/${d.getMonth()+1}`;
+        chart.innerHTML += `
+          <div class="history-bar-wrap">
+            <div class="history-bar ${isToday?'today':''} ${low?'low':''}"
+              style="height:${Math.max(pct,8)}%" title="${h.score}/5"></div>
+            <div class="history-bar-date">${label}</div>
+          </div>`;
+      });
+    }, 100);
+  }
+
+  body.innerHTML += `<div style="height:24px"></div>`;
+}
+
+// ── DETAIL MODAL ──────────────────────────────────────────────
+async function openDetailModal() {
+  const modal = document.getElementById("detailModal");
+  const content = document.getElementById("detailContent");
+  content.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
+  modal.classList.add("open");
+
+  const res = await api("get", "get_submission", {});
+  if (!res.ok || !res.entries.length) {
+    content.innerHTML = `<p style="color:var(--ink-60);font-size:13px">No detail available.</p>`;
+    return;
+  }
+
+  // Group by section
+  const secMap = {};
+  res.entries.forEach(e => {
+    if (!secMap[e.section]) secMap[e.section] = [];
+    secMap[e.section].push(e);
+  });
+
+  content.innerHTML = "";
+  Object.entries(secMap).forEach(([sec, entries]) => {
+    let html = `<div class="detail-section"><div class="detail-section-title">${sec}</div>`;
+    entries.forEach(e => {
+      const val = e.value;
+      let valHtml = "";
+      if (e.input_type === "yesno") {
+        valHtml = `<span class="detail-row-val ${val}">${val === "yes" ? "✅ Yes" : "❌ No"}</span>`;
+      } else {
+        valHtml = `<span class="detail-row-val rating">⭐ ${val}/5</span>`;
+      }
+      html += `
+        <div class="detail-row">
+          <div style="flex:1">
+            <div class="detail-row-label">${e.point_label}</div>
+            ${e.remarks ? `<div class="detail-remarks">📝 ${e.remarks}</div>` : ""}
+          </div>
+          ${valHtml}
+        </div>`;
+    });
+    html += `</div>`;
+    content.innerHTML += html;
+  });
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("detailModal")) {
+    document.getElementById("detailModal").classList.remove("open");
+  }
+}
+
+// ── MANAGER CHECKLIST ─────────────────────────────────────────
+function loadManagerChecklist() {
+  showScreen("managerScreen");
+  const now = getISTDate();
+  document.getElementById("managerDateSub").textContent = now.label;
+  answers = {};
+  renderChecklist();
+}
+
+function renderChecklist() {
+  const body = document.getElementById("managerBody");
+  body.innerHTML = "";
+
+  CHECKLIST.forEach((sec, si) => {
+    let html = `
+      <div class="section-block" id="sec_${sec.id}">
+        <div class="section-header">
+          <div class="section-num">${si+1}</div>
+          <div class="section-name">${sec.name}</div>
+        </div>
+        <div class="section-divider"></div>`;
+
+    sec.points.forEach(pt => {
+      if (pt.type === "yesno") {
+        html += `
+          <div class="point-card" id="pc_${pt.id}">
+            <div class="point-label">${pt.label}</div>
+            <div class="point-freq">🔄 ${pt.freq}</div>
+            <div class="point-controls">
+              <button class="yn-btn yes" onclick="setYN('${pt.id}','yes')">✅ Yes</button>
+              <button class="yn-btn no"  onclick="setYN('${pt.id}','no')">❌ No</button>
+            </div>
+            <div id="rem_${pt.id}" style="display:none">
+              <textarea class="remarks-input" placeholder="Add remarks..." onchange="setRemarks('${pt.id}',this.value)"></textarea>
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div class="point-card" id="pc_${pt.id}">
+            <div class="point-label">${pt.label}</div>
+            <div class="point-freq">🔄 ${pt.freq}</div>
+            <div class="point-controls">
+              <div class="star-rating" id="stars_${pt.id}">
+                ${[1,2,3,4,5].map(n => `<span class="star" onclick="setRating('${pt.id}',${n})">★</span>`).join("")}
+              </div>
+            </div>
+            <div id="rem_${pt.id}" style="display:none">
+              <textarea class="remarks-input" placeholder="Add remarks..." onchange="setRemarks('${pt.id}',this.value)"></textarea>
+            </div>
+          </div>`;
+      }
+    });
+    html += `</div>`;
+    body.innerHTML += html;
+  });
+
+  body.innerHTML += `<div style="height:8px"></div>`;
+  updateProgress();
+}
+
+function setYN(id, val) {
+  answers[id] = answers[id] || {};
+  answers[id].value = val;
+  const card = document.getElementById(`pc_${id}`);
+  card.classList.add("answered");
+  card.querySelector(".yn-btn.yes").classList.toggle("active", val==="yes");
+  card.querySelector(".yn-btn.no").classList.toggle("active", val==="no");
+  // Show remarks if No
+  document.getElementById(`rem_${id}`).style.display = val === "no" ? "block" : "none";
+  updateProgress();
+}
+
+function setRating(id, val) {
+  answers[id] = answers[id] || {};
+  answers[id].value = String(val);
+  const starsEl = document.getElementById(`stars_${id}`);
+  starsEl.querySelectorAll(".star").forEach((s, i) => s.classList.toggle("active", i < val));
+  document.getElementById(`pc_${id}`).classList.add("answered");
+  document.getElementById(`rem_${id}`).style.display = "block";
+  updateProgress();
+}
+
+function setRemarks(id, val) {
+  answers[id] = answers[id] || {};
+  answers[id].remarks = val;
+}
+
+function updateProgress() {
+  const done = Object.keys(answers).length;
+  document.getElementById("progressCount").textContent = `${done} / ${totalPoints}`;
+  const pct = (done / totalPoints) * 100;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("submitBtn").disabled = done < totalPoints;
+}
+
+async function submitChecklist() {
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  const entries = [];
+  CHECKLIST.forEach(sec => {
+    sec.points.forEach(pt => {
+      const ans = answers[pt.id] || {};
+      entries.push({
+        section:     sec.name,
+        point_id:    pt.id,
+        point_label: pt.label,
+        input_type:  pt.type,
+        value:       ans.value || "",
+        remarks:     ans.remarks || "",
+        frequency:   pt.freq
+      });
+    });
+  });
+
+  const res = await api("post", "", {
+    action: "submit_checklist",
+    submitted_by: "CRM Manager",
+    entries
+  });
+
+  if (res.ok) {
+    showToast("Checklist submitted successfully!", "success");
+    setTimeout(() => logout(), 1500);
+  } else {
+    showToast(res.error || "Submission failed.", "error");
+    btn.disabled = false;
+    btn.textContent = "Submit Checklist";
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+async function api(method, action, params) {
+  try {
+    if (method === "get") {
+      const q = new URLSearchParams({ action, ...params }).toString();
+      const r = await fetch(`${API_URL}?${q}`);
+      return await r.json();
+    } else {
+      const r = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(params),
+        headers: { "Content-Type": "application/json" }
+      });
+      return await r.json();
+    }
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+function getISTDate() {
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const y = ist.getUTCFullYear();
+  const m = String(ist.getUTCMonth()+1).padStart(2,"0");
+  const d = String(ist.getUTCDate()).padStart(2,"0");
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return {
+    dateStr: `${y}-${m}-${d}`,
+    label: `${days[ist.getUTCDay()]}, ${ist.getUTCDate()} ${months[ist.getUTCMonth()]} ${y}`
+  };
+}
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  return `${days[d.getUTCDay()]}, ${d.getUTCDate()} ${months[d.getUTCMonth()]}`;
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const s = document.getElementById(id);
+  s.classList.add("active");
+  s.style.display = id === "pinScreen" || id === "setupScreen" ? "flex" : "block";
+}
+
+function logout() {
+  pinBuffer = "";
+  showScreen("pinScreen");
+}
+
+function showToast(msg, type="") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = type;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>
