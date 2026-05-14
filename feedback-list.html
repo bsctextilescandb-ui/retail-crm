@@ -282,7 +282,7 @@ function applyFilter(){
   if(dateVal){
     var p=dateVal.split("-");
     var dk=p[2]+"/"+p[1]+"/"+p[0]; // Convert YYYY-MM-DD to DD/MM/YYYY
-    filtered = filtered.filter(function(f){ return f.date===dk; });
+    filtered = filtered.filter(function(f){ return String(f.date).trim().slice(0,10)===dk; });
   }
   if(statusVal){
     filtered = filtered.filter(function(f){ return f.status===statusVal; });
@@ -386,18 +386,19 @@ function renderCardBody(fb){
   /* Answers grid */
   html += '<div class="ans-grid">';
   QUESTIONS.forEach(function(q,i){
-    var key = "q"+i;
-    var val = fb[key] || fb["q"+i+"_overall_experience"] || "";
-    // Try sheet column names
+    // Try all possible key formats
     var colMap = {
       0:"q0_visit_type", 1:"q1_how_did_you_know", 2:"q2_overall_experience",
-      3:"q3_staff_behaviour", 4:"q4_product_variety", 5:"q5_pricing_value", 6:"q6_visit_again"
+      3:"q3_staff_behaviour", 4:"q4_product_variety", 5:"q5_pricing_value",
+      6:"q6_visit_again", 7:"q7_custom"
     };
-    if(!val && colMap[i]) val = fb[colMap[i]] || "";
-    if(val){
+    var val = fb["q"+i] || fb[colMap[i]] || "";
+    // Always show mandatory questions, hide optional if blank
+    var isMandatory = String(q.is_mandatory).toUpperCase()==="TRUE";
+    if(val || isMandatory){
       html += '<div class="ans-item">' +
         '<div class="ans-label">'+esc(q.q_text)+'</div>' +
-        '<div class="ans-val">'+esc(val)+'</div>' +
+        '<div class="ans-val">'+(val?esc(val):'<span style="color:var(--ink-30);font-size:11px">Not answered</span>')+'</div>' +
       '</div>';
     }
   });
