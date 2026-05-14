@@ -446,7 +446,7 @@ input,select,textarea{font-family:inherit;outline:0}
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────
-const API_URL = "https://script.google.com/macros/s/AKfycbxEOnr7KDTiZ2J3Q3a9Fmc872MrWbT6PcJBBYZXUdcbOkUWF-OFBV18iRdwbyoVHQ6S/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbw6rsV4E43nX4YZ_P3HJQ3aJP5Wh5W1SpYR4_5vbR-u6LJ15wV-OCNSHQ_5iyfTaH4q/exec";
 
 // ── VM CHECKLIST DATA ─────────────────────────────────────────
 const CHECKLIST = [
@@ -589,7 +589,7 @@ let totalPoints = 0;
 // ── INIT ──────────────────────────────────────────────────────
 window.onload = async () => {
   totalPoints = CHECKLIST.reduce((s, sec) => s + sec.points.length, 0);
-  const res = await api("get", "verify_pin", { pin: "", role: "manager" });
+  const res = await api("verify_pin", { pin: "", role: "manager" });
   if (res.setup_required) {
     showScreen("setupScreen");
   } else {
@@ -604,7 +604,7 @@ async function doSetup() {
   const err = document.getElementById("setupError");
   if (mp.length < 4 || op.length < 4) { err.textContent = "Both PINs must be at least 4 digits."; return; }
   if (mp === op) { err.textContent = "Manager and Owner PINs must be different."; return; }
-  const res = await api("post", "", { action: "setup_pin", pin: mp, owner_pin: op });
+  const res = await api("setup_pin", { pin: mp, owner_pin: op });
   if (res.ok) { showScreen("pinScreen"); showToast("PINs set successfully!", "success"); }
   else err.textContent = res.error || "Setup failed.";
 }
@@ -637,7 +637,7 @@ function updatePinDots() {
 }
 
 async function verifyPin() {
-  const res = await api("get", "verify_pin", { pin: pinBuffer, role: currentRole });
+  const res = await api("verify_pin", { pin: pinBuffer, role: currentRole });
   if (res.ok) {
     if (currentRole === "owner") loadOwnerDashboard();
     else loadManagerChecklist();
@@ -657,8 +657,8 @@ async function loadOwnerDashboard() {
   body.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
 
   const [scoreData, histData] = await Promise.all([
-    api("get", "get_score", {}),
-    api("get", "get_history", {})
+    api("get_score", {}),
+    api("get_history", {})
   ]);
 
   if (!scoreData.ok) { body.innerHTML = `<p style="padding:20px;color:var(--crimson)">Error loading data.</p>`; return; }
@@ -754,7 +754,7 @@ async function openDetailModal() {
   content.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
   modal.classList.add("open");
 
-  const res = await api("get", "get_submission", {});
+  const res = await api("get_submission", {});
   if (!res.ok || !res.entries.length) {
     content.innerHTML = `<p style="color:var(--ink-60);font-size:13px">No detail available.</p>`;
     return;
@@ -914,10 +914,9 @@ async function submitChecklist() {
     });
   });
 
-  const res = await api("post", "", {
-    action: "submit_checklist",
+  const res = await api("submit_checklist", {
     submitted_by: "CRM Manager",
-    entries
+    data: JSON.stringify(entries)
   });
 
   if (res.ok) {
@@ -931,20 +930,11 @@ async function submitChecklist() {
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
-async function api(method, action, params) {
+async function api(action, params) {
   try {
-    if (method === "get") {
-      const q = new URLSearchParams({ action, ...params }).toString();
-      const r = await fetch(`${API_URL}?${q}`);
-      return await r.json();
-    } else {
-      const r = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(params),
-        headers: { "Content-Type": "application/json" }
-      });
-      return await r.json();
-    }
+    const q = new URLSearchParams({ action, ...params }).toString();
+    const r = await fetch(`${API_URL}?${q}`);
+    return await r.json();
   } catch (e) {
     return { ok: false, error: e.message };
   }
