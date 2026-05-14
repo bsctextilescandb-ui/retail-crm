@@ -248,14 +248,19 @@ function toDateKey(d){
     String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
 }
 function parseDate(str){
-  // DD/MM/YYYY
   if(!str) return null;
-  var s = String(str);
-  if(s.indexOf("/")!==-1){
-    var p=s.split("/");
-    if(p.length===3) return new Date(p[2],p[1]-1,p[0]);
+  var s = String(str).trim();
+  // DD/MM/YYYY or DD/MM/YYYY HH:MM:SS IST
+  if(s.indexOf("/")!==-1 && s.length>=10){
+    var p=s.slice(0,10).split("/");
+    if(p.length===3){
+      var d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+      return isNaN(d)?null:d;
+    }
   }
-  return new Date(str);
+  // YYYY-MM-DD or ISO
+  var d2=new Date(s.slice(0,10));
+  return isNaN(d2)?null:d2;
 }
 function fmtDisplay(str){
   var d=parseDate(str);
@@ -315,18 +320,16 @@ function loadData(){
     '<div class="loading">⏳ Loading reports…</div>';
 
   Promise.all([
-    api({action:"get_footfall",   date:"all"}),
+    api({action:"get_footfall"}),
     api({action:"get_feedback"}),
     api({action:"get_diverts"}),
     api({action:"get_feedback_questions"}),
   ]).then(function(res){
-    // Footfall returns only one day — we need all entries
-    // Re-fetch without date filter using a trick: send empty date
-    DATA.footfall  = res[0].entries       || [];
-    DATA.daily     = [res[0].daily_summary].filter(Boolean);
-    DATA.feedback  = res[1].feedback      || [];
-    DATA.diverts   = res[2].diverts       || [];
-    DATA.questions = res[3].questions     || [];
+    DATA.footfall  = res[0].entries    || [];
+    DATA.daily     = res[0].daily_all  || [];
+    DATA.feedback  = res[1].feedback   || [];
+    DATA.diverts   = res[2].diverts    || [];
+    DATA.questions = res[3].questions  || [];
     showTab(currentTab);
   }).catch(function(e){
     document.getElementById("mainContent").innerHTML =
