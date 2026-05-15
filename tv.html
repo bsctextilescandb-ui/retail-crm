@@ -57,7 +57,7 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
 #dashboard{display:none;flex-direction:column;min-height:100vh}
 .tv-header{background:var(--navy);padding:10px 20px;
   display:flex;align-items:center;justify-content:space-between;
-  border-bottom:3px solid var(--gold);flex-shrink:0}
+  border-bottom:3px solid var(--gold);flex-shrink:0;position:relative}
 .tv-brand{display:flex;align-items:center;gap:10px}
 .tv-logo{width:34px;height:34px;background:var(--white);border-radius:7px;
   overflow:hidden;flex-shrink:0}
@@ -202,7 +202,15 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
 <!-- DASHBOARD -->
 <div id="dashboard">
   <div class="tv-header">
-    <div class="tv-brand">
+    <!-- Left: C&B Logo -->
+    <div style="display:flex;align-items:center;min-width:120px">
+      <img src="https://bsctextilescandb-ui.github.io/retail-crm/cnb-logo.png"
+        alt="Consulting & Beyond"
+        style="height:32px;object-fit:contain;opacity:.85;filter:brightness(0) invert(1)"/>
+    </div>
+
+    <!-- Center: BSC Brand -->
+    <div class="tv-brand" style="position:absolute;left:50%;transform:translateX(-50%)">
       <div class="tv-logo">
         <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/>
       </div>
@@ -211,6 +219,8 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
         <div class="tv-sub">Live Store Dashboard · Belagavi</div>
       </div>
     </div>
+
+    <!-- Right: Live + Clock -->
     <div class="tv-right">
       <div class="live-pill">
         <div class="live-dot"></div>
