@@ -525,7 +525,7 @@ function renderDashboard(d){
   // Fall back to all voices if none pass the filter
   var displayVoices = meaningfulVoices.length > 0 ? meaningfulVoices : vv;
 
-  var vh='<div class="seclbl">Your Voice — Today\'s Customer Feedback</div><div class="voice-grid">';
+  var vh='<div class="seclbl">Customer\'s Voice — Today\'s Customer Feedback</div><div class="voice-grid">';
   if(displayVoices.length===0) vh+='<div class="empty-sm" style="grid-column:span 3">No open feedback today</div>';
   else{
     displayVoices.slice(0,3).forEach(function(v){
