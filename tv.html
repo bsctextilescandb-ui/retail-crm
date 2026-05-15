@@ -434,7 +434,7 @@ function renderDashboard(d){
   var sh='<div class="seclbl">Hourly Slot Progress — '+today+'</div><div class="slot-grid">';
   slots.forEach(function(s){
     var cls=s.status==="completed"?"s-done":s.status==="active"?"s-active":s.status==="missed"?"s-miss":"s-pend";
-    var lx=fmtTime(s.hour);
+    var lx=fmtTime(s.hour)+"–"+fmtTime(s.hour+1);
     var sx=s.status==="completed"?" ✓ "+s.count:s.status==="active"?" ⬤":s.status==="missed"?" ✗":"";
     sh+='<div class="slot '+cls+'">'+lx+sx+'</div>';
   });
