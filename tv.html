@@ -142,12 +142,20 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
 .cb-name{font-size:11px;font-weight:700;color:var(--ink)}
 .cb-meta{font-size:10px;color:#9CA3AF;margin-top:2px}
 
-/* Voice */
-.voice-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.voice-item{background:var(--gold-l);border-left:3px solid var(--gold);
-  padding:8px 10px;border-radius:0 6px 6px 0;
-  font-size:11px;color:var(--ink);line-height:1.5;font-style:italic}
-.voice-meta{font-size:9px;color:#9CA3AF;margin-top:3px;font-style:normal}
+/* Ticker */
+.ticker-wrap{overflow:hidden;width:100%;position:relative;padding:4px 0}
+.ticker-track{display:flex;animation:ticker linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{background:var(--gold-l);border-left:3px solid var(--gold);
+  padding:9px 14px;border-radius:0 8px 8px 0;
+  margin-right:14px;width:320px;flex-shrink:0;white-space:normal}
+.ticker-text{font-size:12px;color:var(--ink);line-height:1.5;font-style:italic}
+.ticker-meta{font-size:10px;color:#9CA3AF;margin-top:3px}
+
+/* Line chart */
+.lc-wrap{width:100%;overflow:hidden}
+.lc-wrap svg{display:block;width:100%;max-height:120px}
 
 /* Empty */
 .empty-sm{text-align:center;padding:16px;color:#9CA3AF;font-size:12px}
@@ -458,20 +466,11 @@ function renderDashboard(d){
   });
   h+=C("",dh);
 
-  /* Row 3 — Weekly + CSI/NPS + Aging + Coming back */
-  var wh='<div class="seclbl">This Week — Footfall</div>';
-  wkKeys.forEach(function(k){
-    var v=wk[k],pct=wkMax>0?Math.round(v/wkMax*100):0;
-    var dt=parseDt(k);
-    var lb=dt?dt.toLocaleDateString("en-IN",{weekday:"short"}):k;
-    var gold_=k===today?" gold":"";
-    wh+='<div class="bar-row">' +
-      '<div class="bar-lbl">'+esc(lb)+'</div>' +
-      '<div class="bar-track"><div class="bar-fill'+gold_+'" style="width:'+Math.max(pct,1)+'%"></div></div>' +
-      '<div class="bar-val">'+(v||"—")+'</div>' +
-    '</div>';
-  });
-  h+=C("",wh);
+  /* Row 3 — Line chart + CSI/NPS + Aging + Coming back */
+  // Line chart using today's slots
+  var lcHtml = '<div class="seclbl">Today — Hourly Footfall Line Chart</div>' +
+    '<div class="lc-wrap">' + renderLineChart(slots) + '</div>';
+  h += C("", lcHtml);
 
   var nh='<div class="seclbl">Customer Satisfaction</div>' +
     '<div class="score-row">' +
@@ -517,30 +516,114 @@ function renderDashboard(d){
   }
   h+=C("green",cbh);
 
-  /* Row 4 — Your Voice */
-  // Filter out very short feedback (less than 4 words) and show meaningful ones
+  /* Row 4 — Scrolling Voice Ticker */
   var meaningfulVoices = vv.filter(function(v){
     return v.text && v.text.trim().split(/\s+/).length >= 4;
   });
-  // Fall back to all voices if none pass the filter
   var displayVoices = meaningfulVoices.length > 0 ? meaningfulVoices : vv;
 
-  var vh='<div class="seclbl">Customer\'s Voice — Today\'s Customer Feedback</div><div class="voice-grid">';
-  if(displayVoices.length===0) vh+='<div class="empty-sm" style="grid-column:span 3">No open feedback today</div>';
-  else{
-    displayVoices.slice(0,3).forEach(function(v){
-      // Fix time — if it contains 1899 or is a raw decimal, skip it
+  var tickerItems = "";
+  if(displayVoices.length === 0){
+    tickerItems = '<div class="ticker-item"><div class="ticker-text">No customer feedback today</div></div>';
+  } else {
+    // Duplicate items for seamless loop
+    var allItems = displayVoices.concat(displayVoices);
+    allItems.forEach(function(v){
       var timeStr = v.time ? String(v.time) : "";
-      var showTime = timeStr && timeStr.indexOf("1899") === -1 && timeStr.indexOf("1900") === -1;
-      vh+='<div class="voice-item">"'+esc(v.text)+'"' +
-        '<div class="voice-meta">'+esc(v.area||"")+(showTime?" · "+esc(timeStr):"")+'</div></div>';
+      var showTime = timeStr && timeStr.indexOf("1899")===-1 && timeStr.indexOf("1900")===-1;
+      tickerItems += '<div class="ticker-item">' +
+        '<div class="ticker-text">"'+esc(v.text)+'"</div>' +
+        '<div class="ticker-meta">'+esc(v.area||"")+(showTime?" · "+esc(timeStr):"")+'</div>' +
+      '</div>';
     });
-    for(var i=displayVoices.length;i<3;i++) vh+='<div></div>';
   }
-  vh+='</div>';
+
+  // Speed based on number of items — more items = faster
+  var speed = Math.max(20, displayVoices.length * 12);
+  var tickerWidth = displayVoices.length * 334; // approx width per item
+
+  var vh = '<div class="seclbl">Customer\'s Voice — Today\'s Feedback</div>' +
+    '<div class="ticker-wrap">' +
+      '<div class="ticker-track" id="voiceTicker" style="animation-duration:' + speed + 's">' +
+        tickerItems +
+      '</div>' +
+    '</div>';
+
   h+='<div class="card span4">'+vh+'</div>';
 
   document.getElementById("tvBody").innerHTML=h;
+}
+
+/* ── Line chart ── */
+function renderLineChart(slots){
+  if(!slots||slots.length===0)
+    return '<div class="empty-sm">No slot data</div>';
+
+  var W=520,H=110,pL=28,pR=12,pT=10,pB=26;
+  var cW=W-pL-pR, cH=H-pT-pB;
+  var n=slots.length;
+  var maxV=Math.max.apply(null,slots.map(function(s){return s.count;}).concat([1]));
+
+  var pts=slots.map(function(s,i){
+    return {
+      x: pL+(i/(n-1||1))*cW,
+      y: pT+cH-(s.count/maxV)*cH,
+      s: s
+    };
+  });
+
+  var path=pts.map(function(p,i){
+    return (i===0?"M":"L")+p.x.toFixed(1)+","+p.y.toFixed(1);
+  }).join(" ");
+
+  var area=path+" L"+pts[pts.length-1].x.toFixed(1)+","+(pT+cH)+
+    " L"+pL+","+(pT+cH)+" Z";
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+
+  // Grid lines
+  for(var gi=0;gi<=3;gi++){
+    var gy=pT+(gi/3)*cH;
+    svg+='<line x1="'+pL+'" y1="'+gy.toFixed(0)+'" x2="'+(W-pR)+'" y2="'+gy.toFixed(0)+
+      '" stroke="#E8E4D8" stroke-width="1"/>';
+    svg+='<text x="'+(pL-3)+'" y="'+(gy+3).toFixed(0)+
+      '" text-anchor="end" font-size="7" fill="#9CA3AF" font-family="Cambria,Georgia,serif">'+
+      Math.round(maxV*(1-gi/3))+'</text>';
+  }
+
+  // Area fill
+  svg+='<defs><linearGradient id="tvLg" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0%" stop-color="#1E2D5A" stop-opacity="0.18"/>'+
+    '<stop offset="100%" stop-color="#1E2D5A" stop-opacity="0.02"/>'+
+  '</linearGradient></defs>';
+  svg+='<path d="'+area+'" fill="url(#tvLg)"/>';
+
+  // Line
+  svg+='<path d="'+path+'" fill="none" stroke="#1E2D5A" stroke-width="2.5"'+
+    ' stroke-linecap="round" stroke-linejoin="round"/>';
+
+  // Dots + labels
+  pts.forEach(function(p,i){
+    var col = p.s.status==="completed" ? "#1E7A1E" :
+              p.s.status==="active"    ? "#B8860B" :
+              p.s.status==="missed"    ? "#C0392B" : "#D1D5DB";
+    svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+
+      '" r="3.5" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
+    if(p.s.count>0){
+      svg+='<text x="'+p.x.toFixed(1)+'" y="'+(p.y-7).toFixed(1)+
+        '" text-anchor="middle" font-size="8" fill="#1E2D5A" font-weight="700"'+
+        ' font-family="Cambria,Georgia,serif">'+p.s.count+'</text>';
+    }
+    if(i%2===0||n<=8){
+      var hh=p.s.hour%12||12,sf=p.s.hour>=12?"P":"A";
+      svg+='<text x="'+p.x.toFixed(1)+'" y="'+(H-4)+
+        '" text-anchor="middle" font-size="7.5" fill="#9CA3AF"'+
+        ' font-family="Cambria,Georgia,serif">'+hh+sf+'</text>';
+    }
+  });
+
+  svg+='</svg>';
+  return '<div class="lc-wrap">'+svg+'</div>';
 }
 
 function C(border,content){return '<div class="card'+(border?" "+border:"")+'">'+content+'</div>';}
