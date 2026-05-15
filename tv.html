@@ -508,14 +508,24 @@ function renderDashboard(d){
   h+=C("green",cbh);
 
   /* Row 4 — Your Voice */
+  // Filter out very short feedback (less than 4 words) and show meaningful ones
+  var meaningfulVoices = vv.filter(function(v){
+    return v.text && v.text.trim().split(/\s+/).length >= 4;
+  });
+  // Fall back to all voices if none pass the filter
+  var displayVoices = meaningfulVoices.length > 0 ? meaningfulVoices : vv;
+
   var vh='<div class="seclbl">Your Voice — Today\'s Customer Feedback</div><div class="voice-grid">';
-  if(vv.length===0) vh+='<div class="empty-sm" style="grid-column:span 3">No open feedback today</div>';
+  if(displayVoices.length===0) vh+='<div class="empty-sm" style="grid-column:span 3">No open feedback today</div>';
   else{
-    vv.slice(0,3).forEach(function(v){
+    displayVoices.slice(0,3).forEach(function(v){
+      // Fix time — if it contains 1899 or is a raw decimal, skip it
+      var timeStr = v.time ? String(v.time) : "";
+      var showTime = timeStr && timeStr.indexOf("1899") === -1 && timeStr.indexOf("1900") === -1;
       vh+='<div class="voice-item">"'+esc(v.text)+'"' +
-        '<div class="voice-meta">'+esc(v.area||"")+(v.time?" · "+esc(v.time):"")+'</div></div>';
+        '<div class="voice-meta">'+esc(v.area||"")+(showTime?" · "+esc(timeStr):"")+'</div></div>';
     });
-    for(var i=vv.length;i<3;i++) vh+='<div></div>';
+    for(var i=displayVoices.length;i<3;i++) vh+='<div></div>';
   }
   vh+='</div>';
   h+='<div class="card span4">'+vh+'</div>';
