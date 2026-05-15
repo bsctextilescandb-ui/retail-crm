@@ -1043,7 +1043,7 @@ function boot() {
   // Navigate immediately — don't wait for settings
   var defaultPage = "footfall";
   if (SESSION.user.role === "super_admin" || SESSION.user.role === "admin") defaultPage = "dashboard";
-  if (SESSION.user.role === "purchase_manager") defaultPage = "divert";
+  if (SESSION.user.role === "purchase_manager") { window.location.href = "pm-view.html"; return; }
   navigate(defaultPage);
 
   // Load company name in background — updates sidebar when ready
