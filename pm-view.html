@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>PM View — Retail CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#F9F7F0;--white:#fff;--surface:#F3F1E8;--border:#E8E4D8;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(26,26,46,.08);--shadow-md:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{min-height:100%;background:var(--ivory);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:0;outline:0}
+input,select,textarea{font-family:inherit;outline:0}
+
+/* ── Top bar ── */
+.top-bar{background:var(--navy);padding:14px 18px;
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:50;border-bottom:2px solid var(--gold)}
+.top-logo{width:34px;height:34px;background:var(--white);border-radius:8px;
+  overflow:hidden;flex-shrink:0}
+.top-logo img{width:100%;height:100%;object-fit:contain}
+.top-info{flex:1;min-width:0}
+.top-name{color:var(--white);font-size:15px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-role{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.top-right{display:flex;align-items:center;gap:8px}
+.refresh-btn{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);
+  padding:7px 12px;border-radius:var(--radius-sm);font-size:12px;
+  display:flex;align-items:center;gap:5px}
+.refresh-btn:hover{background:rgba(255,255,255,.2)}
+.sign-out-btn{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);
+  padding:7px 12px;border-radius:var(--radius-sm);font-size:12px}
+
+/* ── Filter tabs ── */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);
+  padding:12px 18px;display:flex;gap:8px;align-items:center;
+  position:sticky;top:61px;z-index:40;overflow-x:auto}
+.filter-tab{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;
+  border:1.5px solid var(--border);color:var(--ink-60);
+  cursor:pointer;white-space:nowrap;transition:all .15s;background:var(--white)}
+.filter-tab.active{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.count-badge{margin-left:auto;font-size:12px;color:var(--ink-30);white-space:nowrap;flex-shrink:0}
+
+/* ── Stats ── */
+.stats-strip{display:flex;gap:10px;padding:14px 18px;overflow-x:auto;flex-shrink:0}
+.stat-pill{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);padding:12px 16px;
+  display:flex;flex-direction:column;min-width:110px;flex-shrink:0}
+.stat-pill.red{border-top:3px solid var(--crimson)}
+.stat-pill.orange{border-top:3px solid var(--orange)}
+.stat-pill.green{border-top:3px solid var(--green)}
+.stat-pill.navy{border-top:3px solid var(--navy)}
+.sp-lbl{font-size:9px;font-weight:500;color:var(--ink-30);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.sp-val{font-family:'DM Serif Display',serif;font-size:26px;line-height:1;color:var(--ink)}
+.sp-val.red{color:var(--crimson)}
+.sp-val.orange{color:var(--orange)}
+.sp-val.green{color:var(--green)}
+.sp-val.navy{color:var(--navy)}
+
+/* ── Main content ── */
+.main{padding:14px 18px 80px}
+
+/* ── Divert cards ── */
+.divert-list{display:flex;flex-direction:column;gap:12px}
+
+.div-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.div-card.status-open{border-left:4px solid var(--crimson)}
+.div-card.status-sourcing{border-left:4px solid var(--orange)}
+.div-card.status-available{border-left:4px solid var(--green)}
+
+/* Card header */
+.div-card-header{padding:14px 16px;display:flex;align-items:flex-start;
+  justify-content:space-between;gap:10px}
+.div-product{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.div-section{font-size:12px;color:var(--ink-60);margin-bottom:6px}
+.div-meta{display:flex;flex-wrap:wrap;gap:8px}
+.div-meta-item{font-size:12px;color:var(--ink-60);
+  display:flex;align-items:center;gap:4px}
+
+/* Status badge */
+.status-badge{padding:4px 12px;border-radius:999px;font-size:11px;
+  font-weight:600;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0}
+.badge-open{background:var(--crimson-l);color:var(--crimson)}
+.badge-sourcing{background:var(--orange-l);color:var(--orange)}
+.badge-available{background:var(--green-l);color:var(--green)}
+
+/* Customer info strip */
+.cust-strip{background:var(--surface);padding:10px 16px;
+  display:flex;align-items:center;gap:12px;border-top:1px solid var(--border)}
+.cust-name{font-size:13px;font-weight:500;color:var(--ink);flex:1}
+.cust-phone{font-size:12px;color:var(--navy);font-weight:500}
+.call-btn{background:var(--navy-l);color:var(--navy);padding:6px 14px;
+  border-radius:var(--radius-sm);font-size:12px;font-weight:500;
+  display:flex;align-items:center;gap:5px;flex-shrink:0}
+.call-btn:active{background:var(--navy);color:var(--white)}
+
+/* Details row */
+.div-details{padding:10px 16px;display:grid;
+  grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--border)}
+.detail-item{background:var(--surface);border-radius:var(--radius-sm);padding:8px 10px}
+.detail-lbl{font-size:9px;font-weight:500;color:var(--ink-30);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.detail-val{font-size:13px;font-weight:500;color:var(--ink)}
+
+/* Action panel */
+.action-panel{padding:14px 16px;border-top:1px solid var(--border);
+  background:var(--ivory)}
+.action-title{font-size:11px;font-weight:500;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+
+/* Status buttons */
+.status-btns{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.status-btn{flex:1;min-width:90px;padding:10px 8px;border-radius:var(--radius-sm);
+  font-size:12px;font-weight:600;text-align:center;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--white);color:var(--ink-60);
+  transition:all .15s}
+.status-btn:hover{transform:translateY(-1px)}
+.status-btn.selected-sourcing{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.status-btn.selected-available{background:var(--green);border-color:var(--green);color:var(--white)}
+.status-btn.selected-cannot{background:var(--crimson);border-color:var(--crimson);color:var(--white)}
+
+/* Note input */
+.note-input{width:100%;padding:10px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:13px;color:var(--ink);
+  background:var(--white);resize:none;height:64px;margin-bottom:10px}
+.note-input:focus{border-color:var(--navy);outline:none;
+  box-shadow:0 0 0 3px var(--navy-l)}
+
+/* Update button */
+.update-btn{width:100%;padding:13px;border-radius:var(--radius-sm);
+  background:var(--navy);color:var(--white);font-size:14px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .15s}
+.update-btn:hover{background:var(--navy-d)}
+.update-btn:disabled{opacity:.5;cursor:not-allowed}
+.update-btn.success{background:var(--green)}
+
+/* Toggle expand */
+.expand-btn{width:100%;padding:10px;text-align:center;
+  font-size:12px;color:var(--ink-60);font-weight:500;
+  background:var(--surface);border-top:1px solid var(--border);
+  cursor:pointer;transition:background .15s;display:flex;
+  align-items:center;justify-content:center;gap:5px}
+.expand-btn:hover{background:var(--border)}
+
+/* Alert */
+.alert{padding:9px 13px;border-radius:var(--radius-sm);font-size:12px;
+  margin-bottom:8px;display:none}
+.alert.show{display:block}
+.alert-error{background:var(--crimson-l);color:var(--crimson)}
+.alert-success{background:var(--green-l);color:var(--green)}
+
+/* Spinner */
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:var(--white);border-radius:50%;
+  animation:spin .6s linear infinite;display:none}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Empty */
+.empty{text-align:center;padding:48px 24px;color:var(--ink-60)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:6px}
+.empty-sub{font-size:13px}
+
+/* Coming back chip */
+.cb-chip{display:inline-flex;align-items:center;gap:4px;
+  background:var(--navy-l);color:var(--navy);
+  padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500}
+
+/* Aging indicator */
+.aging-warn{color:var(--orange);font-weight:600;font-size:11px}
+.aging-danger{color:var(--crimson);font-weight:600;font-size:11px}
+
+.fade-in{animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-logo">
+    <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/>
+  </div>
+  <div class="top-info">
+    <div class="top-name" id="pmName">Purchase Manager</div>
+    <div class="top-role" id="pmSection">Loading sections…</div>
+  </div>
+  <div class="top-right">
+    <button class="refresh-btn" onclick="loadDiverts()">↺ Refresh</button>
+    <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="filter-bar">
+  <div class="filter-tab active" id="tab-open"     onclick="setFilter('open')">Open</div>
+  <div class="filter-tab"        id="tab-sourcing" onclick="setFilter('sourcing')">Sourcing</div>
+  <div class="filter-tab"        id="tab-available"onclick="setFilter('available')">Available</div>
+  <div class="filter-tab"        id="tab-all"      onclick="setFilter('all')">All Active</div>
+  <span class="count-badge" id="countBadge">—</span>
+</div>
+
+<!-- Stats strip -->
+<div class="stats-strip" id="statsStrip">
+  <div class="stat-pill red">
+    <div class="sp-lbl">Open</div>
+    <div class="sp-val red" id="st-open">—</div>
+  </div>
+  <div class="stat-pill orange">
+    <div class="sp-lbl">Sourcing</div>
+    <div class="sp-val orange" id="st-sourcing">—</div>
+  </div>
+  <div class="stat-pill green">
+    <div class="sp-lbl">Available</div>
+    <div class="sp-val green" id="st-available">—</div>
+  </div>
+  <div class="stat-pill navy">
+    <div class="sp-lbl">Coming Back</div>
+    <div class="sp-val navy" id="st-cb">—</div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main" id="mainContent">
+  <div style="text-align:center;padding:48px;color:var(--ink-60)">⏳ Loading diverts…</div>
+</div>
+
+<!-- Language widget -->
+<div id="langBtn" onclick="toggleLangMenu()" style="position:fixed;bottom:20px;right:20px;z-index:9999;
+  background:#1E2D5A;border:1.5px solid #B8860B;border-radius:10px;
+  padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);font-family:'DM Sans',Arial,sans-serif">
+  <span style="font-size:16px">🌐</span>
+  <span id="langLabel" style="font-size:12px;font-weight:500;color:#fff">Language</span>
+  <span style="font-size:10px;color:#B8860B">▲</span>
+</div>
+<div id="langMenu" style="position:fixed;bottom:62px;right:20px;z-index:9998;
+  background:#1E2D5A;border:1.5px solid #B8860B;border-radius:10px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3);display:none;min-width:180px">
+  <div style="padding:8px 0">
+    <div onclick="setLang('en','English')"      class="lang-opt">English</div>
+    <div onclick="setLang('ta','தமிழ்')"        class="lang-opt">தமிழ் (Tamil)</div>
+    <div onclick="setLang('hi','हिन्दी')"       class="lang-opt">हिन्दी (Hindi)</div>
+    <div onclick="setLang('kn','ಕನ್ನಡ')"       class="lang-opt">ಕನ್ನಡ (Kannada)</div>
+    <div onclick="setLang('te','తెలుగు')"       class="lang-opt">తెలుగు (Telugu)</div>
+    <div onclick="setLang('ml','മലയാളം')"      class="lang-opt">മലയാളം (Malayalam)</div>
+    <div onclick="setLang('mr','मराठी')"        class="lang-opt">मराठी (Marathi)</div>
+  </div>
+</div>
+<style>
+.lang-opt{padding:10px 18px;font-size:13px;color:rgba(255,255,255,.8);
+  cursor:pointer;transition:background .15s;font-family:'DM Sans',sans-serif}
+.lang-opt:hover{background:rgba(184,134,11,.25);color:#fff}
+.goog-te-banner-frame{display:none!important}
+body{top:0!important}
+</style>
+<div id="google_translate_element" style="display:none"></div>
+<script>
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({pageLanguage:'en',
+    includedLanguages:'en,ta,hi,kn,te,ml,mr',autoDisplay:false},
+    'google_translate_element');
+}
+function toggleLangMenu(){
+  var m=document.getElementById('langMenu');
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  document.getElementById('langBtn').querySelector('span:last-child').textContent=open?'▲':'▼';
+}
+function setLang(code,label){
+  var e=new Date();e.setFullYear(e.getFullYear()+1);
+  document.cookie='googtrans=/en/'+code+';expires='+e.toUTCString()+';path=/';
+  document.cookie='googtrans=/en/'+code+';expires='+e.toUTCString()+';path=/;domain='+location.hostname;
+  document.getElementById('langLabel').textContent=label;
+  document.getElementById('langMenu').style.display='none';
+  try{localStorage.setItem('crm_lang',code);localStorage.setItem('crm_lang_label',label);}catch(e){}
+  location.reload();
+}
+(function(){
+  try{var l=localStorage.getItem('crm_lang_label');if(l)document.getElementById('langLabel').textContent=l;}catch(e){}
+  document.addEventListener('click',function(e){
+    var b=document.getElementById('langBtn'),m=document.getElementById('langMenu');
+    if(b&&m&&!b.contains(e.target)&&!m.contains(e.target)){
+      m.style.display='none';b.querySelector('span:last-child').textContent='▲';
+    }
+  });
+})();
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+/* ── Config ── */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+
+/* ── Session ── */
+var SESSION = null;
+function getSession(){
+  var t=sessionStorage.getItem("crm_token"),u=sessionStorage.getItem("crm_user");
+  if(!t||!u) return null;
+  try{return{token:t,user:JSON.parse(u)};}catch(e){return null;}
+}
+
+/* ── API ── */
+function api(body){
+  body.token=SESSION.token;
+  return fetch(API_URL,{method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+/* ── State ── */
+var ALL_DIVERTS = [];
+var currentFilter = "open";
+var expandedId    = null;
+var selectedStatus = {}; // divert_id → selected status
+
+/* ── IST ── */
+function nowIST(){
+  var d=new Date();
+  return new Date(d.getTime()+d.getTimezoneOffset()*60000+330*60000);
+}
+function parseDate(str){
+  if(!str) return null;
+  var s=String(str).trim();
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){
+    var p=s.slice(0,10).split("/");
+    return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s.slice(0,10));
+  return null;
+}
+function fmtDate(val,dateOnly){
+  if(!val||val==="—") return "—";
+  var s=String(val).trim();
+  if(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/.test(s)){
+    var c=s.replace(" IST","").slice(0,16);
+    return dateOnly?c.slice(0,10):c;
+  }
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+  if(/^\d{4}-\d{2}-\d{2}T/.test(s)){
+    var d=new Date(s);if(isNaN(d)) return s;
+    var ist=new Date(d.getTime()+330*60000);
+    var dd=String(ist.getUTCDate()).padStart(2,"0");
+    var mm=String(ist.getUTCMonth()+1).padStart(2,"0");
+    var yy=ist.getUTCFullYear();
+    return dateOnly?dd+"/"+mm+"/"+yy:dd+"/"+mm+"/"+yy+" "+
+      String(ist.getUTCHours()).padStart(2,"0")+":"+String(ist.getUTCMinutes()).padStart(2,"0");
+  }
+  return s;
+}
+
+/* ── Boot ── */
+function boot(){
+  SESSION = getSession();
+  if(!SESSION){ window.location.href="index.html"; return; }
+  if(SESSION.user.role !== "purchase_manager"){
+    window.location.href="app.html"; return;
+  }
+
+  // Set PM info
+  document.getElementById("pmName").textContent = SESSION.user.name || "Purchase Manager";
+  var sects = SESSION.user.sections_assigned || "All Sections";
+  document.getElementById("pmSection").textContent = "📦 " + sects;
+
+  loadDiverts();
+}
+
+function signOut(){
+  api({action:"logout"}).finally(function(){
+    sessionStorage.clear();
+    window.location.href="index.html";
+  });
+}
+
+/* ── Load ── */
+function loadDiverts(){
+  document.getElementById("mainContent").innerHTML =
+    '<div style="text-align:center;padding:48px;color:var(--ink-60)">⏳ Loading…</div>';
+
+  api({action:"get_diverts"}).then(function(res){
+    if(!res.ok){
+      document.getElementById("mainContent").innerHTML =
+        '<div class="empty"><div class="empty-icon">⚠️</div><p>'+esc(res.error)+'</p></div>';
+      return;
+    }
+
+    // PM only sees their sections — filter here as well as backend
+    var diverts = res.diverts || [];
+    var sections = SESSION.user.sections_assigned || "";
+
+    if(sections && sections !== "ALL"){
+      var sectList = sections.split(",").map(function(s){return s.trim().toLowerCase();});
+      diverts = diverts.filter(function(d){
+        return sectList.indexOf((d.section_id||"").toLowerCase()) !== -1 ||
+               sectList.indexOf((d.section_name||"").toLowerCase()) !== -1;
+      });
+    }
+
+    // Only show active diverts (not closed/cannot_fulfill)
+    ALL_DIVERTS = diverts.filter(function(d){
+      return d.status === "open" || d.status === "sourcing" || d.status === "available";
+    });
+
+    updateStats();
+    renderList();
+  }).catch(function(e){
+    document.getElementById("mainContent").innerHTML =
+      '<div class="empty"><div class="empty-icon">⚠️</div><p>'+esc(e.message)+'</p></div>';
+  });
+}
+
+/* ── Stats ── */
+function updateStats(){
+  var open     = ALL_DIVERTS.filter(function(d){return d.status==="open";}).length;
+  var sourcing = ALL_DIVERTS.filter(function(d){return d.status==="sourcing";}).length;
+  var avail    = ALL_DIVERTS.filter(function(d){return d.status==="available";}).length;
+  var cb       = ALL_DIVERTS.filter(function(d){return d.coming_back==="Yes";}).length;
+
+  setText("st-open",     open);
+  setText("st-sourcing", sourcing);
+  setText("st-available",avail);
+  setText("st-cb",       cb);
+}
+
+/* ── Filter ── */
+function setFilter(f){
+  currentFilter = f;
+  document.querySelectorAll(".filter-tab").forEach(function(el){
+    el.classList.remove("active");
+  });
+  var tab = document.getElementById("tab-"+f);
+  if(tab) tab.classList.add("active");
+  renderList();
+}
+
+function filtered(){
+  if(currentFilter === "all") return ALL_DIVERTS;
+  return ALL_DIVERTS.filter(function(d){ return d.status === currentFilter; });
+}
+
+/* ── Render list ── */
+function renderList(){
+  var list = filtered();
+  document.getElementById("countBadge").textContent = list.length + " diverts";
+
+  if(list.length === 0){
+    var msg = currentFilter === "open"     ? "No open diverts for your section" :
+              currentFilter === "sourcing" ? "No diverts currently being sourced" :
+              currentFilter === "available"? "No diverts marked as available" :
+              "No active diverts";
+    document.getElementById("mainContent").innerHTML =
+      '<div class="empty fade-in">' +
+        '<div class="empty-icon">✅</div>' +
+        '<div class="empty-title">All Clear!</div>' +
+        '<div class="empty-sub">'+msg+'</div>' +
+      '</div>';
+    return;
+  }
+
+  // Sort: open first, then sourcing, then available; within each by date (oldest first)
+  var order = {open:0, sourcing:1, available:2};
+  list = list.slice().sort(function(a,b){
+    var so = (order[a.status]||0) - (order[b.status]||0);
+    if(so!==0) return so;
+    return (parseDate(a.date)||0) - (parseDate(b.date)||0);
+  });
+
+  var html = '<div class="divert-list fade-in">';
+  list.forEach(function(d){ html += renderCard(d); });
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+/* ── Render one card ── */
+function renderCard(d){
+  var isExpanded = expandedId === d.divert_id;
+  var statusCls  = "status-"+d.status;
+  var badgeCls   = "badge-"+d.status;
+  var badgeLbl   = {open:"Open",sourcing:"Sourcing",available:"Available"}[d.status]||d.status;
+
+  // Days open
+  var raisedDt = parseDate(d.date);
+  var daysOpen = raisedDt ? Math.floor((nowIST()-raisedDt)/86400000) : null;
+  var agingCls = daysOpen >= 7 ? "aging-danger" : daysOpen >= 3 ? "aging-warn" : "";
+  var agingTxt = daysOpen !== null ? daysOpen+"d old" : "";
+
+  var html = '<div class="div-card '+statusCls+'" id="dc_'+esc(d.divert_id)+'">';
+
+  /* Header */
+  html += '<div class="div-card-header">' +
+    '<div style="flex:1;min-width:0">' +
+      '<div class="div-product">'+esc(d.product_wanted)+'</div>' +
+      '<div class="div-section">'+esc(d.section_name)+'</div>' +
+      '<div class="div-meta">' +
+        '<span class="div-meta-item">📅 '+esc(fmtDate(d.date,true))+'</span>' +
+        (agingTxt?'<span class="div-meta-item '+agingCls+'">⏱ '+agingTxt+'</span>':'') +
+        (d.coming_back==="Yes"?'<span class="cb-chip">↩ Coming Back</span>':'') +
+      '</div>' +
+    '</div>' +
+    '<span class="status-badge '+badgeCls+'">'+badgeLbl+'</span>' +
+  '</div>';
+
+  /* Customer strip */
+  if(d.cust_name || d.cust_mobile){
+    html += '<div class="cust-strip">' +
+      '<div>' +
+        (d.cust_name?'<div class="cust-name">'+esc(d.cust_name)+'</div>':'') +
+        (d.cust_mobile?'<div class="cust-phone">📞 '+esc(d.cust_mobile)+'</div>':'') +
+      '</div>' +
+      (d.cust_mobile?
+        '<a href="tel:'+esc(d.cust_mobile)+'" class="call-btn">📞 Call</a>' : '') +
+    '</div>';
+  }
+
+  /* Expand toggle */
+  html += '<div class="expand-btn" onclick="toggleExpand(\''+esc(d.divert_id)+'\')">' +
+    (isExpanded ? '▲ Hide details' : '▼ View details & update status') +
+  '</div>';
+
+  /* Expanded section */
+  if(isExpanded){
+    /* Details grid */
+    html += '<div class="div-details">';
+    html += detailItem("Reason",         d.reason_text||"—");
+    html += detailItem("Qty",            d.qty||"—");
+    html += detailItem("Price Range",    d.price_range||"—");
+    html += detailItem("Fabric/Occ.",   d.fabric_occasion||"—");
+    html += detailItem("Expected Date",  fmtDate(d.expected_date,true));
+    html += detailItem("Raised At",      fmtDate(d.raised_at));
+    html += '</div>';
+
+    /* Remarks if any */
+    if(d.detailed_remarks){
+      html += '<div style="padding:0 16px 10px;font-size:12px;color:var(--ink-60)">'+
+        '<strong>Note:</strong> '+esc(d.detailed_remarks)+'</div>';
+    }
+
+    /* Action panel */
+    html += '<div class="action-panel">' +
+      '<div class="action-title">Update Status</div>' +
+      '<div id="updAlert_'+esc(d.divert_id)+'" class="alert alert-error"></div>';
+
+    /* Status buttons */
+    var sel = selectedStatus[d.divert_id] || "";
+    html += '<div class="status-btns">';
+    if(d.status !== "sourcing"){
+      html += statusBtn(d.divert_id, "sourcing", "🔍 Sourcing", sel);
+    }
+    html += statusBtn(d.divert_id, "available",     "✅ Available",     sel);
+    html += statusBtn(d.divert_id, "cannot_fulfill","❌ Cannot Fulfill", sel);
+    html += '</div>';
+
+    /* Note */
+    html += '<textarea class="note-input" id="note_'+esc(d.divert_id)+'" ' +
+      'placeholder="Add a note or remark… (optional)"></textarea>';
+
+    /* Update button */
+    html += '<button class="update-btn" id="updbtn_'+esc(d.divert_id)+'" ' +
+      'onclick="updateDivert(\''+esc(d.divert_id)+'\')">' +
+      '<span id="updsp_'+esc(d.divert_id)+'" class="spinner"></span>' +
+      'Update Status' +
+    '</button>';
+
+    html += '</div>'; /* action-panel */
+  }
+
+  html += '</div>'; /* div-card */
+  return html;
+}
+
+function detailItem(lbl, val){
+  return '<div class="detail-item">' +
+    '<div class="detail-lbl">'+esc(lbl)+'</div>' +
+    '<div class="detail-val">'+esc(String(val))+'</div>' +
+  '</div>';
+}
+
+function statusBtn(divId, status, label, selected){
+  var cls = selected === status ? "status-btn selected-"+
+    (status==="sourcing"?"sourcing":status==="available"?"available":"cannot") : "status-btn";
+  return '<button class="'+cls+'" onclick="selectStatus(\''+esc(divId)+'\',\''+status+'\')">'+
+    label+'</button>';
+}
+
+/* ── Toggle expand ── */
+function toggleExpand(id){
+  if(expandedId === id){
+    expandedId = null;
+  } else {
+    expandedId = id;
+  }
+  renderList();
+  // Scroll to card
+  setTimeout(function(){
+    var el = document.getElementById("dc_"+id);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+  },100);
+}
+
+/* ── Select status ── */
+function selectStatus(divId, status){
+  selectedStatus[divId] = selectedStatus[divId] === status ? "" : status;
+  // Re-render just the status buttons
+  var btns = document.querySelector("#dc_"+divId+" .status-btns");
+  if(!btns) return;
+  var d = ALL_DIVERTS.find(function(x){return x.divert_id===divId;});
+  if(!d) return;
+  var sel = selectedStatus[divId]||"";
+  var html = "";
+  if(d.status !== "sourcing") html += statusBtn(divId,"sourcing","🔍 Sourcing",sel);
+  html += statusBtn(divId,"available","✅ Available",sel);
+  html += statusBtn(divId,"cannot_fulfill","❌ Cannot Fulfill",sel);
+  btns.innerHTML = html;
+}
+
+/* ── Update divert ── */
+function updateDivert(divId){
+  var status = selectedStatus[divId] || "";
+  var note   = document.getElementById("note_"+divId);
+  var noteVal= note ? note.value.trim() : "";
+  var alertEl= document.getElementById("updAlert_"+divId);
+  var btn    = document.getElementById("updbtn_"+divId);
+  var spin   = document.getElementById("updsp_"+divId);
+
+  if(!status && !noteVal){
+    showAlert(alertEl,"Please select a status or add a note.");
+    return;
+  }
+
+  if(btn) btn.disabled=true;
+  if(spin) spin.classList.add("show");
+  hideAlert(alertEl);
+
+  var body = { action:"update_divert", divert_id:divId };
+  if(status)  body.status = status;
+  if(noteVal) body.note   = noteVal;
+
+  api(body).then(function(res){
+    if(btn) btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+
+    if(res.ok){
+      // Update local state
+      var d = ALL_DIVERTS.find(function(x){return x.divert_id===divId;});
+      if(d && status){
+        d.status = status;
+        // Remove from active list if cannot_fulfill
+        if(status === "cannot_fulfill"){
+          ALL_DIVERTS = ALL_DIVERTS.filter(function(x){return x.divert_id!==divId;});
+        }
+      }
+      delete selectedStatus[divId];
+      expandedId = null;
+
+      // Toast
+      toast("Updated successfully","","success");
+      updateStats();
+      renderList();
+    } else {
+      showAlert(alertEl, res.error||"Update failed.");
+    }
+  }).catch(function(){
+    if(btn) btn.disabled=false;
+    if(spin) spin.classList.remove("show");
+    showAlert(alertEl,"Connection error. Try again.");
+  });
+}
+
+/* ── Helpers ── */
+function setText(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
+function showAlert(el,msg){if(!el)return;el.textContent=msg;el.classList.add("show");}
+function hideAlert(el){if(el)el.classList.remove("show");}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function toast(title,sub,type){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;"+
+    "background:"+(type==="success"?"var(--green)":"var(--crimson)")+";color:#fff;"+
+    "padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;"+
+    "box-shadow:0 4px 20px rgba(0,0,0,.2);font-family:'DM Sans',sans-serif;white-space:nowrap";
+  el.textContent=title;
+  document.body.appendChild(el);
+  setTimeout(function(){
+    el.style.opacity="0";el.style.transition="opacity .3s";
+    setTimeout(function(){el.remove();},300);
+  },2500);
+}
+
+boot();
+</script>
+</body>
+</html>
