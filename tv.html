@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>BSC Live Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Cambria,Georgia,serif}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ivory:#F9F7F0;--white:#fff;
+  --surface:#F3F1E8;--border:#E8E4D8;
+}
+html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
+
+/* ── PIN SCREEN ── */
+#pinScreen{
+  position:fixed;inset:0;background:var(--navy);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:1000}
+.pin-logo{width:72px;height:72px;background:var(--white);border-radius:16px;
+  overflow:hidden;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.pin-logo img{width:100%;height:100%;object-fit:contain}
+.pin-brand{font-size:22px;font-weight:700;color:var(--white);margin-bottom:4px}
+.pin-sub{font-size:12px;color:rgba(255,255,255,.45);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:32px}
+.pin-label{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px;
+  text-transform:uppercase;letter-spacing:.1em}
+.pin-dots{display:flex;gap:14px;margin-bottom:24px}
+.pin-dot{width:16px;height:16px;border-radius:50%;
+  background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);
+  transition:all .15s}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pin-key{width:72px;height:72px;border-radius:12px;
+  background:rgba(255,255,255,.1);color:var(--white);
+  font-size:22px;font-weight:700;border:1.5px solid rgba(255,255,255,.15);
+  cursor:pointer;transition:all .12s;
+  display:flex;align-items:center;justify-content:center}
+.pin-key:hover{background:rgba(255,255,255,.2);transform:scale(1.04)}
+.pin-key:active{transform:scale(.96)}
+.pin-key.zero{grid-column:2}
+.pin-key.del{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.3);color:#f87171}
+.pin-error{font-size:13px;color:#f87171;margin-top:14px;
+  height:18px;text-align:center;font-style:italic}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}40%{transform:translateX(8px)}
+  60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.shake{animation:shake .4s ease}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none;flex-direction:column;min-height:100vh}
+.tv-header{background:var(--navy);padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:3px solid var(--gold);flex-shrink:0}
+.tv-brand{display:flex;align-items:center;gap:10px}
+.tv-logo{width:34px;height:34px;background:var(--white);border-radius:7px;
+  overflow:hidden;flex-shrink:0}
+.tv-logo img{width:100%;height:100%;object-fit:contain}
+.tv-name{color:var(--white);font-size:15px;font-weight:700}
+.tv-sub{color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;
+  letter-spacing:.1em;margin-top:1px}
+.tv-right{display:flex;align-items:center;gap:18px}
+.live-pill{display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.1);padding:4px 10px;border-radius:20px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;
+  animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.live-txt{font-size:10px;color:rgba(255,255,255,.7);font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em}
+.tv-time{font-size:20px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.tv-date{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px;text-align:right}
+.refresh-info{font-size:10px;color:rgba(255,255,255,.3)}
+
+/* Body grid */
+.tv-body{flex:1;padding:12px 14px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* Cards */
+.card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:12px 14px}
+.card.gold{border-top:3px solid var(--gold)}
+.card.red{border-top:3px solid var(--crimson)}
+.card.green{border-top:3px solid var(--green)}
+.card.navy{border-top:3px solid var(--navy)}
+.clbl{font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;
+  letter-spacing:.09em;margin-bottom:6px}
+.cbig{font-size:32px;font-weight:700;line-height:1;color:var(--ink)}
+.cbig.gold{color:var(--gold)}.cbig.red{color:var(--crimson)}
+.cbig.green{color:var(--green)}.cbig.navy{color:var(--navy)}
+.csub{font-size:10px;color:#9CA3AF;margin-top:3px}
+.span3{grid-column:span 3}.span4{grid-column:span 4}
+.seclbl{font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;
+  letter-spacing:.09em;margin-bottom:8px}
+
+/* Slots */
+.slot-grid{display:flex;flex-wrap:wrap;gap:5px}
+.slot{padding:4px 9px;border-radius:5px;font-size:10px;font-weight:700;min-width:60px;text-align:center}
+.s-done{background:var(--green-l);color:var(--green);border:1px solid rgba(30,122,30,.2)}
+.s-active{background:var(--gold-l);color:var(--gold);border:1.5px solid var(--gold)}
+.s-miss{background:var(--crimson-l);color:var(--crimson);border:1px solid rgba(192,57,43,.2)}
+.s-pend{background:var(--surface);color:#9CA3AF;border:1px solid var(--border)}
+
+/* Bars */
+.bar-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.bar-lbl{font-size:10px;color:#9CA3AF;width:52px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:16px;background:var(--surface);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:var(--navy)}
+.bar-fill.gold{background:var(--gold)}
+.bar-val{font-size:10px;font-weight:700;color:var(--ink);width:30px;text-align:right;flex-shrink:0}
+
+/* Scores */
+.score-row{display:flex;gap:8px;margin-bottom:8px}
+.score-box{flex:1;background:var(--surface);border-radius:7px;padding:10px;text-align:center}
+.score-num{font-size:28px;font-weight:700;line-height:1}
+.score-sub{font-size:9px;color:#9CA3AF;margin-top:3px}
+.nps-row{display:flex;gap:5px}
+.nps-seg{flex:1;border-radius:5px;padding:5px 3px;text-align:center;font-size:9px;font-weight:700}
+
+/* Diverts */
+.div-item{display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;border-bottom:1px solid var(--surface)}
+.div-item:last-child{border-bottom:none}
+.div-name{font-size:12px;color:var(--ink);font-weight:600}
+.div-cnt{font-size:22px;font-weight:700;color:var(--crimson)}
+
+/* Aging */
+.aging-item{background:var(--crimson-l);border-radius:6px;padding:7px 10px;
+  margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;
+  border:1px solid rgba(192,57,43,.15)}
+.aging-prod{font-size:11px;font-weight:700;color:var(--crimson)}
+.aging-meta{font-size:10px;color:#9CA3AF;margin-top:2px}
+.aging-days{font-size:12px;font-weight:700;color:var(--crimson);white-space:nowrap}
+
+/* Coming back */
+.cb-item{background:var(--surface);border-radius:6px;padding:7px 10px;
+  margin-bottom:5px;border-left:3px solid var(--green)}
+.cb-name{font-size:11px;font-weight:700;color:var(--ink)}
+.cb-meta{font-size:10px;color:#9CA3AF;margin-top:2px}
+
+/* Voice */
+.voice-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.voice-item{background:var(--gold-l);border-left:3px solid var(--gold);
+  padding:8px 10px;border-radius:0 6px 6px 0;
+  font-size:11px;color:var(--ink);line-height:1.5;font-style:italic}
+.voice-meta{font-size:9px;color:#9CA3AF;margin-top:3px;font-style:normal}
+
+/* Empty */
+.empty-sm{text-align:center;padding:16px;color:#9CA3AF;font-size:12px}
+
+/* Loading */
+.tv-loading{display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:14px;color:#9CA3AF;padding:60px 0}
+.tv-spinner{width:32px;height:32px;border:3px solid var(--border);
+  border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer */
+.tv-footer{background:var(--navy);padding:7px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.footer-l{font-size:10px;color:rgba(255,255,255,.3)}
+.footer-r{font-size:10px;color:rgba(255,255,255,.25);display:flex;align-items:center;gap:5px}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pinScreen">
+  <div class="pin-logo">
+    <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/>
+  </div>
+  <div class="pin-brand">BSC The Textile Mall</div>
+  <div class="pin-sub">Live Dashboard · Belagavi</div>
+  <div class="pin-label">Enter PIN to continue</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-keypad">
+    <div class="pin-key" onclick="pp('1')">1</div>
+    <div class="pin-key" onclick="pp('2')">2</div>
+    <div class="pin-key" onclick="pp('3')">3</div>
+    <div class="pin-key" onclick="pp('4')">4</div>
+    <div class="pin-key" onclick="pp('5')">5</div>
+    <div class="pin-key" onclick="pp('6')">6</div>
+    <div class="pin-key" onclick="pp('7')">7</div>
+    <div class="pin-key" onclick="pp('8')">8</div>
+    <div class="pin-key" onclick="pp('9')">9</div>
+    <div class="pin-key zero" onclick="pp('0')">0</div>
+    <div class="pin-key del" onclick="pd()">⌫</div>
+  </div>
+  <div class="pin-error" id="pinError"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="tv-header">
+    <div class="tv-brand">
+      <div class="tv-logo">
+        <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/>
+      </div>
+      <div>
+        <div class="tv-name">BSC The Textile Mall</div>
+        <div class="tv-sub">Live Store Dashboard · Belagavi</div>
+      </div>
+    </div>
+    <div class="tv-right">
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        <div class="live-txt">Live</div>
+      </div>
+      <div class="refresh-info" id="refreshInfo">Refreshing in 5:00</div>
+      <div>
+        <div class="tv-time" id="tvTime">--:--:-- --</div>
+        <div class="tv-date" id="tvDate">--</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tv-body" id="tvBody">
+    <div class="tv-loading" style="grid-column:span 4">
+      <div class="tv-spinner"></div>
+      <div>Loading live data…</div>
+    </div>
+  </div>
+
+  <div class="tv-footer">
+    <div class="footer-l">BSC The Textile Mall — Belagavi · CRM Live Dashboard</div>
+    <div class="footer-r">
+      <div class="live-dot" style="width:5px;height:5px;background:#4ade80"></div>
+      Auto-refreshes every 5 minutes
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Config — change PIN here ── */
+var PIN     = "9911";
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+var PIN_KEY = "bsc_tv_unlocked";
+
+/* ── PIN ── */
+var pinVal = "";
+
+function pp(d){
+  if(pinVal.length>=4) return;
+  pinVal+=d; upDots();
+  if(pinVal.length===4) setTimeout(checkPin,150);
+}
+function pd(){
+  pinVal=pinVal.slice(0,-1); upDots();
+  document.getElementById("pinError").textContent="";
+}
+function upDots(){
+  for(var i=0;i<4;i++){
+    var el=document.getElementById("d"+i);
+    if(el) el.classList.toggle("filled",i<pinVal.length);
+  }
+}
+function checkPin(){
+  if(pinVal===PIN){
+    try{localStorage.setItem(PIN_KEY,"1");}catch(e){}
+    unlock();
+  } else {
+    var dots=document.getElementById("pinDots");
+    if(dots){dots.classList.add("shake");setTimeout(function(){dots.classList.remove("shake");},400);}
+    document.getElementById("pinError").textContent="Incorrect PIN. Please try again.";
+    pinVal=""; upDots();
+  }
+}
+function unlock(){
+  document.getElementById("pinScreen").style.display="none";
+  document.getElementById("dashboard").style.display="flex";
+  startClock(); loadData(); startRefresh();
+}
+
+/* ── Boot ── */
+(function(){
+  var ok=false;
+  try{ok=localStorage.getItem(PIN_KEY)==="1";}catch(e){}
+  if(ok) unlock();
+})();
+
+/* ── Keyboard PIN ── */
+document.addEventListener("keydown",function(e){
+  var ps=document.getElementById("pinScreen");
+  if(!ps||ps.style.display==="none") return;
+  if(e.key>="0"&&e.key<="9") pp(e.key);
+  else if(e.key==="Backspace") pd();
+});
+
+/* ── Clock ── */
+function startClock(){ tick(); setInterval(tick,1000); }
+function tick(){
+  var d=new Date(),h=d.getHours(),m=d.getMinutes(),s=d.getSeconds();
+  var sf=h>=12?"PM":"AM",hh=h%12||12;
+  var te=document.getElementById("tvTime"),de=document.getElementById("tvDate");
+  if(te) te.textContent=p2(hh)+":"+p2(m)+":"+p2(s)+" "+sf;
+  if(de) de.textContent=d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+function p2(n){return String(n).padStart(2,"0");}
+
+/* ── Refresh countdown ── */
+var rem=300,cdT=null;
+function startRefresh(){
+  rem=300; if(cdT) clearInterval(cdT);
+  cdT=setInterval(function(){
+    rem--;
+    var el=document.getElementById("refreshInfo");
+    if(el) el.textContent="Refreshing in "+Math.floor(rem/60)+":"+p2(rem%60);
+    if(rem<=0){loadData();rem=300;}
+  },1000);
+}
+
+/* ── IST ── */
+function nowIST(){
+  var d=new Date();
+  return new Date(d.getTime()+d.getTimezoneOffset()*60000+330*60000);
+}
+function dateKeyIST(){
+  var d=nowIST();
+  return p2(d.getDate())+"/"+p2(d.getMonth()+1)+"/"+d.getFullYear();
+}
+function parseDt(str){
+  if(!str) return null;
+  var s=String(str).trim();
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){
+    var p=s.slice(0,10).split("/");
+    return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s.slice(0,10));
+  return null;
+}
+function fmtDate(val,dateOnly){
+  if(!val||val==="—") return "—";
+  var s=String(val).trim();
+  if(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/.test(s)){
+    var c=s.replace(" IST","").slice(0,16);
+    return dateOnly?c.slice(0,10):c;
+  }
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+  if(/^\d{4}-\d{2}-\d{2}T/.test(s)){
+    var d=new Date(s);if(isNaN(d)) return s;
+    var ist=new Date(d.getTime()+330*60000);
+    var dd=p2(ist.getUTCDate()),mm=p2(ist.getUTCMonth()+1),yy=ist.getUTCFullYear();
+    return dateOnly?dd+"/"+mm+"/"+yy:dd+"/"+mm+"/"+yy+" "+p2(ist.getUTCHours())+":"+p2(ist.getUTCMinutes());
+  }
+  return s;
+}
+function fmtTime(h){var s=h%12||12,sf=h>=12?"PM":"AM";return p2(s)+":00 "+sf;}
+
+/* ── API ── */
+function getToken(){
+  var t="";
+  try{t=sessionStorage.getItem("crm_token")||localStorage.getItem("bsc_tv_token")||"";}catch(e){}
+  return t;
+}
+function loadData(){
+  var body={action:"get_dashboard",date:dateKeyIST(),token:getToken()};
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
+  .then(function(r){return r.json();})
+  .then(function(res){
+    if(res.ok){
+      renderDashboard(res);
+    } else {
+      // Try TV auth token
+      fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({action:"tv_auth"})})
+      .then(function(r){return r.json();})
+      .then(function(r2){
+        if(r2.ok){
+          try{localStorage.setItem("bsc_tv_token",r2.token);}catch(e){}
+          body.token=r2.token;
+          fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
+          .then(function(r){return r.json();})
+          .then(function(res2){
+            if(res2.ok) renderDashboard(res2);
+            else showErr(res2.error||"No data");
+          }).catch(function(e){showErr(e.message);});
+        } else {
+          showErr("Open the CRM app once on this device to connect.");
+        }
+      }).catch(function(e){showErr(e.message);});
+    }
+  }).catch(function(e){showErr("Connection error: "+e.message);});
+}
+
+function showErr(msg){
+  document.getElementById("tvBody").innerHTML=
+    '<div class="tv-loading" style="grid-column:span 4">' +
+    '<div style="font-size:32px">⚠️</div>' +
+    '<div style="color:var(--crimson)">'+esc(msg)+'</div>' +
+    '<div style="font-size:11px;color:#9CA3AF;margin-top:8px">Retrying in 30 seconds…</div></div>';
+  setTimeout(loadData,30000);
+}
+
+/* ── Render ── */
+function renderDashboard(d){
+  var p     = d.pulse||{};
+  var today = dateKeyIST();
+  var slots = d.slots||[];
+  var wk    = d.week_footfall||{};
+  var ds    = d.divert_by_section||{};
+  var aged  = d.aged_diverts||[];
+  var cbs   = d.coming_back||[];
+  var vv    = d.today_voices||[];
+  var csi   = d.csi||{};
+  var nps   = d.nps||{};
+
+  var wkKeys = Object.keys(wk);
+  var wkMax  = Math.max.apply(null,wkKeys.map(function(k){return wk[k];}).concat([1]));
+  var secKeys= Object.keys(ds).filter(function(k){return ds[k]>0;}).sort(function(a,b){return ds[b]-ds[a];});
+
+  var csiCol = csi.score===null?"#9CA3AF":csi.score>=75?"var(--green)":csi.score>=50?"var(--orange)":"var(--crimson)";
+  var npsCol = nps.score===null?"#9CA3AF":nps.score>=50?"var(--green)":nps.score>=0?"var(--gold)":"var(--crimson)";
+
+  var h = "";
+
+  /* Row 1 — Pulse */
+  h += C("gold", L("Today's Footfall")+B("gold",p.footfall||0)+S("visitors logged today"));
+  h += C("navy", L("Bills Count")+B("navy",p.bills||"—")+S("Conversion: "+(p.conversion?p.conversion+"%":"—")));
+  h += C("",     L("Feedbacks Today")+B("navy",p.feedbacks||0)+S("collected today"));
+  h += C("red",  L("Open Diverts")+B("red",p.open_diverts||0)+S("pending action"));
+
+  /* Row 2 — Slots + Section */
+  var sh='<div class="seclbl">Hourly Slot Progress — '+today+'</div><div class="slot-grid">';
+  slots.forEach(function(s){
+    var cls=s.status==="completed"?"s-done":s.status==="active"?"s-active":s.status==="missed"?"s-miss":"s-pend";
+    var lx=fmtTime(s.hour);
+    var sx=s.status==="completed"?" ✓ "+s.count:s.status==="active"?" ⬤":s.status==="missed"?" ✗":"";
+    sh+='<div class="slot '+cls+'">'+lx+sx+'</div>';
+  });
+  sh+='</div>';
+  h+='<div class="card span3">'+sh+'</div>';
+
+  var dh='<div class="seclbl">Diverts by Section</div>';
+  if(secKeys.length===0) dh+='<div class="empty-sm" style="color:var(--green)">✓ No open diverts</div>';
+  else secKeys.slice(0,5).forEach(function(k){
+    dh+='<div class="div-item"><span class="div-name">'+esc(k)+'</span><span class="div-cnt">'+ds[k]+'</span></div>';
+  });
+  h+=C("",dh);
+
+  /* Row 3 — Weekly + CSI/NPS + Aging + Coming back */
+  var wh='<div class="seclbl">This Week — Footfall</div>';
+  wkKeys.forEach(function(k){
+    var v=wk[k],pct=wkMax>0?Math.round(v/wkMax*100):0;
+    var dt=parseDt(k);
+    var lb=dt?dt.toLocaleDateString("en-IN",{weekday:"short"}):k;
+    var gold_=k===today?" gold":"";
+    wh+='<div class="bar-row">' +
+      '<div class="bar-lbl">'+esc(lb)+'</div>' +
+      '<div class="bar-track"><div class="bar-fill'+gold_+'" style="width:'+Math.max(pct,1)+'%"></div></div>' +
+      '<div class="bar-val">'+(v||"—")+'</div>' +
+    '</div>';
+  });
+  h+=C("",wh);
+
+  var nh='<div class="seclbl">Customer Satisfaction</div>' +
+    '<div class="score-row">' +
+      '<div class="score-box"><div class="clbl">CSI</div>' +
+        '<div class="score-num" style="color:'+csiCol+'">'+(csi.score!==null?csi.score+"%":"—")+'</div>' +
+        '<div class="score-sub">'+(csi.count||0)+' responses</div></div>' +
+      '<div class="score-box"><div class="clbl">NPS</div>' +
+        '<div class="score-num" style="color:'+npsCol+'">'+(nps.score!==null?nps.score:"—")+'</div>' +
+        '<div class="score-sub">score</div></div>' +
+    '</div>' +
+    '<div class="nps-row">' +
+      '<div class="nps-seg" style="background:var(--green-l);color:var(--green)">'+(nps.promoters||0)+' Promoters</div>' +
+      '<div class="nps-seg" style="background:var(--surface);color:#9CA3AF">'+(nps.passives||0)+' Passive</div>' +
+      '<div class="nps-seg" style="background:var(--crimson-l);color:var(--crimson)">'+(nps.detractors||0)+' Detractors</div>' +
+    '</div>';
+  h+=C("",nh);
+
+  var ah='<div class="seclbl">⚠ Aging Diverts (3d+)</div>';
+  if(aged.length===0) ah+='<div class="empty-sm" style="color:var(--green)">✓ No aging diverts</div>';
+  else{
+    aged.slice(0,3).forEach(function(div){
+      var r=parseDt(div.date),days=r?Math.floor((nowIST()-r)/86400000):"?";
+      ah+='<div class="aging-item">' +
+        '<div><div class="aging-prod">'+esc(div.product_wanted)+'</div>' +
+        '<div class="aging-meta">'+esc(div.section_name)+(div.cust_mobile?' · 📞 '+esc(div.cust_mobile):'')+
+        '</div></div><div class="aging-days">'+days+'d</div></div>';
+    });
+    if(aged.length>3) ah+='<div style="text-align:center;font-size:10px;color:var(--crimson);font-weight:700;margin-top:4px">+'+(aged.length-3)+' more</div>';
+  }
+  h+=C("red",ah);
+
+  var cbh='<div class="seclbl">Coming Back Customers</div>';
+  if(cbs.length===0) cbh+='<div class="empty-sm">No customers waiting</div>';
+  else{
+    cbs.slice(0,3).forEach(function(div){
+      cbh+='<div class="cb-item">' +
+        '<div class="cb-name">'+esc(div.cust_name||"Customer")+'</div>' +
+        '<div class="cb-meta">'+(div.cust_mobile?'📞 '+esc(div.cust_mobile)+' · ':'')+
+        esc(div.section_name)+(div.expected_date?' · Due: '+fmtDate(div.expected_date,true):'')+
+        '</div></div>';
+    });
+    if(cbs.length>3) cbh+='<div style="text-align:center;font-size:10px;color:var(--green);font-weight:700;margin-top:5px">+'+(cbs.length-3)+' more waiting</div>';
+  }
+  h+=C("green",cbh);
+
+  /* Row 4 — Your Voice */
+  var vh='<div class="seclbl">Your Voice — Today\'s Customer Feedback</div><div class="voice-grid">';
+  if(vv.length===0) vh+='<div class="empty-sm" style="grid-column:span 3">No open feedback today</div>';
+  else{
+    vv.slice(0,3).forEach(function(v){
+      vh+='<div class="voice-item">"'+esc(v.text)+'"' +
+        '<div class="voice-meta">'+esc(v.area||"")+(v.time?" · "+esc(v.time):"")+'</div></div>';
+    });
+    for(var i=vv.length;i<3;i++) vh+='<div></div>';
+  }
+  vh+='</div>';
+  h+='<div class="card span4">'+vh+'</div>';
+
+  document.getElementById("tvBody").innerHTML=h;
+}
+
+function C(border,content){return '<div class="card'+(border?" "+border:"")+'">'+content+'</div>';}
+function L(t){return '<div class="clbl">'+esc(t)+'</div>';}
+function B(c,v){return '<div class="cbig '+c+'">'+esc(String(v))+'</div>';}
+function S(t){return '<div class="csub">'+esc(t)+'</div>';}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+</script>
+</body>
+</html>
