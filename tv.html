@@ -144,14 +144,23 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
 
 /* Ticker */
 .ticker-wrap{overflow:hidden;width:100%;position:relative;padding:4px 0}
-.ticker-track{display:flex;animation:ticker linear infinite}
-.ticker-track:hover{animation-play-state:paused}
-@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-item{background:var(--gold-l);border-left:3px solid var(--gold);
-  padding:9px 14px;border-radius:0 8px 8px 0;
-  margin-right:14px;width:320px;flex-shrink:0;white-space:normal}
-.ticker-text{font-size:12px;color:var(--ink);line-height:1.5;font-style:italic}
-.ticker-meta{font-size:10px;color:#9CA3AF;margin-top:3px}
+.ticker-track{
+  display:flex;
+  flex-wrap:nowrap;
+  width:max-content;
+  animation:tickerScroll linear infinite;
+  will-change:transform}
+@keyframes tickerScroll{
+  0%  {transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+.ticker-item{
+  background:var(--gold-l);border-left:3px solid var(--gold);
+  padding:10px 16px;border-radius:0 8px 8px 0;
+  margin-right:16px;width:310px;flex-shrink:0;
+  white-space:normal;display:inline-block;vertical-align:top}
+.ticker-text{font-size:12px;color:var(--ink);line-height:1.6;font-style:italic}
+.ticker-meta{font-size:10px;color:#9CA3AF;margin-top:4px;font-style:normal}
 
 /* Line chart */
 .lc-wrap{width:100%;overflow:hidden}
@@ -516,40 +525,45 @@ function renderDashboard(d){
   }
   h+=C("green",cbh);
 
-  /* Row 4 — Scrolling Voice Ticker */
-  var meaningfulVoices = vv.filter(function(v){
-    return v.text && v.text.trim().split(/\s+/).length >= 4;
-  });
-  var displayVoices = meaningfulVoices.length > 0 ? meaningfulVoices : vv;
-
+  /* Row 4 — Infinite Scrolling Voice Ticker */
+  // Show ALL feedback — no filtering by word count
   var tickerItems = "";
-  if(displayVoices.length === 0){
-    tickerItems = '<div class="ticker-item"><div class="ticker-text">No customer feedback today</div></div>';
+  if(!vv || vv.length === 0){
+    tickerItems =
+      '<div class="ticker-item"><div class="ticker-text">No customer feedback today</div></div>' +
+      '<div class="ticker-item"><div class="ticker-text">No customer feedback today</div></div>';
   } else {
-    // Duplicate items for seamless loop
-    var allItems = displayVoices.concat(displayVoices);
-    allItems.forEach(function(v){
-      var timeStr = v.time ? String(v.time) : "";
+    // Duplicate ALL entries for seamless infinite loop
+    var allVoices = vv.concat(vv);
+    allVoices.forEach(function(v){
+      var timeStr  = v.time ? String(v.time) : "";
       var showTime = timeStr && timeStr.indexOf("1899")===-1 && timeStr.indexOf("1900")===-1;
-      tickerItems += '<div class="ticker-item">' +
-        '<div class="ticker-text">"'+esc(v.text)+'"</div>' +
-        '<div class="ticker-meta">'+esc(v.area||"")+(showTime?" · "+esc(timeStr):"")+'</div>' +
-      '</div>';
+      var meta     = [v.area, showTime ? timeStr : ""].filter(Boolean).join(" · ");
+      tickerItems +=
+        '<div class="ticker-item">' +
+          '<div class="ticker-text">"' + esc(v.text) + '"</div>' +
+          (meta ? '<div class="ticker-meta">' + esc(meta) + '</div>' : '') +
+        '</div>';
     });
   }
 
-  // Speed based on number of items — more items = faster
-  var speed = Math.max(20, displayVoices.length * 12);
-  var tickerWidth = displayVoices.length * 334; // approx width per item
+  // Speed: each item is ~334px wide, want ~40px/sec scroll speed
+  // Total width of ONE set = items * 334px
+  // Duration = totalWidth / 40
+  var itemCount  = vv.length || 1;
+  var itemWidth  = 334; // px per card including gap
+  var totalWidth = itemCount * itemWidth;
+  var duration   = Math.round(totalWidth / 40); // seconds
 
-  var vh = '<div class="seclbl">Customer\'s Voice — Today\'s Feedback</div>' +
+  var vh =
+    '<div class="seclbl">Customer\'s Voice — Today\'s Feedback</div>' +
     '<div class="ticker-wrap">' +
-      '<div class="ticker-track" id="voiceTicker" style="animation-duration:' + speed + 's">' +
+      '<div class="ticker-track" style="animation-duration:' + duration + 's">' +
         tickerItems +
       '</div>' +
     '</div>';
 
-  h+='<div class="card span4">'+vh+'</div>';
+  h += '<div class="card span4">' + vh + '</div>';
 
   document.getElementById("tvBody").innerHTML=h;
 }
