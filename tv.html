@@ -342,7 +342,10 @@ function startRefresh(){
     rem--;
     var el=document.getElementById("refreshInfo");
     if(el) el.textContent="Refreshing in "+Math.floor(rem/60)+":"+p2(rem%60);
-    if(rem<=0){loadData();rem=300;}
+    if(rem<=0){
+      // Silent page reload — PIN already stored in localStorage so PIN screen won't show
+      window.location.reload();
+    }
   },1000);
 }
 
