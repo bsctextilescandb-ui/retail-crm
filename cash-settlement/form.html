@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>BSC Belagavi — Settlement</title>
+<style>
+/* ── Base ─────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#E8EDF8;
+  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FDECEA;
+  --green:#1E7A1E;--green-l:#EBF5EB;
+  --ivory:#F9F7F0;--white:#FFFFFF;
+  --surface:#F3F1E8;--border:#D8D4C8;--border-l:#EAE6DA;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.55);--ink-30:rgba(26,26,46,.22);
+  --radius:10px;--radius-sm:7px;
+}
+html,body{
+  font-family:'Cambria',Georgia,serif;
+  background:var(--ivory);
+  color:var(--ink);font-size:15px;
+  min-height:100vh;
+}
+
+/* ── Header ──────────────────────────────────── */
+.header{
+  background:var(--navy);
+  padding:0 16px;
+  height:58px;
+  display:flex;align-items:center;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+}
+.header-logo{
+  width:38px;height:38px;
+  background:#fff;border-radius:8px;
+  overflow:hidden;padding:3px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-right:11px;
+}
+.header-logo img{width:100%;height:100%;object-fit:contain;}
+.header-info{flex:1;}
+.header-title{
+  color:#fff;font-size:15px;font-weight:700;
+  font-family:'Cambria',Georgia,serif;
+  letter-spacing:.3px;line-height:1.2;
+}
+.header-date{
+  color:rgba(255,255,255,.55);font-size:12px;
+  font-family:'Cambria',Georgia,serif;
+}
+.logout-btn{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.85);
+  font-family:'Cambria',Georgia,serif;
+  font-size:12px;padding:6px 13px;
+  border-radius:var(--radius-sm);cursor:pointer;
+  transition:background .15s;
+}
+.logout-btn:active{background:rgba(255,255,255,.22);}
+
+/* ── Suggestion strip ─────────────────────────── */
+.suggest-strip{
+  background:var(--gold-l);
+  border-bottom:1.5px solid #E0C060;
+  padding:9px 16px;
+  display:flex;align-items:flex-start;gap:8px;
+}
+.suggest-icon{font-size:15px;margin-top:1px;flex-shrink:0;}
+.suggest-text{
+  font-size:12.5px;color:var(--gold-d);
+  font-family:'Cambria',Georgia,serif;
+  line-height:1.5;
+}
+.suggest-text strong{font-weight:700;}
+
+/* ── Body ─────────────────────────────────────── */
+.body{padding:14px 14px 110px;}
+
+/* ── Section block ────────────────────────────── */
+.section{margin-bottom:14px;}
+.section-head{
+  font-size:11px;font-weight:700;
+  color:var(--navy);
+  text-transform:uppercase;letter-spacing:.9px;
+  padding:0 0 7px 2px;
+  font-family:'Cambria',Georgia,serif;
+  border-bottom:1.5px solid var(--navy-l);
+  margin-bottom:12px;
+}
+
+/* ── Input card ───────────────────────────────── */
+.input-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.field-row{
+  display:grid;gap:0;
+}
+.field-row.cols-2{grid-template-columns:1fr 1fr;}
+.field-row.cols-1{grid-template-columns:1fr;}
+.field{
+  padding:11px 14px 10px;
+  border-bottom:1px solid var(--border-l);
+  border-right:1px solid var(--border-l);
+  position:relative;
+}
+.field:nth-child(2n){border-right:none;}
+.field.last-row,.field-row:last-child .field{border-bottom:none;}
+.field.full{grid-column:1/-1;border-right:none;}
+.field label{
+  display:block;font-size:10.5px;font-weight:700;
+  color:var(--ink-60);margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.6px;
+  font-family:'Cambria',Georgia,serif;
+}
+.field input{
+  width:100%;border:none;outline:none;
+  font-size:18px;font-weight:600;
+  color:var(--ink);background:transparent;
+  font-family:'Cambria',Georgia,serif;
+  padding:0;
+}
+.field input::placeholder{color:#ccc;font-weight:400;font-size:16px;}
+.field input[type=date]{font-size:15px;font-weight:500;color:var(--ink);}
+
+/* ABV chip */
+.abv-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold-l);
+  border:1.5px solid #D4A820;
+  border-radius:8px;padding:6px 14px;
+  margin-top:4px;
+}
+.abv-chip .lbl{
+  font-size:11px;font-weight:700;color:var(--gold-d);
+  text-transform:uppercase;letter-spacing:.5px;
+  font-family:'Cambria',Georgia,serif;
+}
+.abv-chip .val{
+  font-size:20px;font-weight:700;color:var(--gold-d);
+  font-family:'Cambria',Georgia,serif;
+}
+
+/* ── Diff strip ───────────────────────────────── */
+.diff-strip{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  overflow:hidden;margin-top:10px;
+}
+.diff-cell{
+  padding:12px 10px;text-align:center;
+  border-right:1px solid var(--border-l);
+}
+.diff-cell:last-child{border-right:none;}
+.diff-cell-lbl{
+  font-size:10px;font-weight:700;
+  color:var(--ink-60);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:5px;
+  font-family:'Cambria',Georgia,serif;
+}
+.diff-cell-val{
+  font-size:20px;font-weight:700;
+  color:var(--navy);
+  font-family:'Cambria',Georgia,serif;
+}
+.diff-cell-val.nonzero{color:var(--crimson);}
+
+/* ── Counter table ────────────────────────────── */
+.table-wrap{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{
+  width:100%;border-collapse:collapse;
+  font-family:'Cambria',Georgia,serif;
+  font-size:13px;min-width:620px;
+}
+thead tr{background:var(--navy);}
+th{
+  color:#fff;padding:10px 8px;
+  text-align:center;font-size:11px;
+  font-weight:700;white-space:nowrap;
+  font-family:'Cambria',Georgia,serif;
+  letter-spacing:.3px;
+}
+th:first-child,th:nth-child(2){text-align:left;}
+tbody tr:nth-child(odd){background:#fff;}
+tbody tr:nth-child(even){background:#FAFAF7;}
+tbody tr:hover{background:var(--navy-l);}
+td{
+  padding:0;border-bottom:1px solid var(--border-l);
+  vertical-align:middle;
+}
+td.lbl{
+  padding:9px 8px;font-weight:700;
+  color:var(--navy);font-size:12px;
+  white-space:nowrap;
+}
+td select,td input{
+  width:100%;border:none;outline:none;
+  background:transparent;
+  font-size:13px;color:var(--ink);
+  padding:9px 7px;
+  font-family:'Cambria',Georgia,serif;
+  text-align:center;
+}
+td select{cursor:pointer;text-align:left;}
+td input.name-in{text-align:left;}
+td.tdiff{
+  padding:9px 7px;text-align:center;
+  font-weight:700;font-size:13px;
+  font-family:'Cambria',Georgia,serif;
+}
+td.tdiff.pos{color:var(--crimson);}
+td.tdiff.neg{color:var(--green);}
+td.tdiff.zero{color:var(--ink-60);}
+td.del-td{padding:0 6px;width:36px;}
+.del-btn{
+  width:28px;height:28px;border-radius:6px;border:none;
+  background:var(--crimson-l);color:var(--crimson);
+  font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s;
+}
+.del-btn:active{background:#f5c0b8;}
+tfoot tr{background:var(--gold-l);}
+tfoot td{
+  padding:10px 8px;font-weight:700;
+  font-size:13px;text-align:center;
+  color:var(--gold-d);
+  border-top:2px solid #D4A820;
+  font-family:'Cambria',Georgia,serif;
+}
+tfoot td.lbl{text-align:left;color:var(--gold-d);}
+.add-row-btn{
+  width:100%;padding:12px;
+  border:none;border-top:1px solid var(--border-l);
+  background:var(--navy-l);
+  color:var(--navy);font-size:13px;font-weight:700;
+  font-family:'Cambria',Georgia,serif;
+  cursor:pointer;letter-spacing:.3px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:background .15s;
+}
+.add-row-btn:active{background:#D5DCF0;}
+
+/* ── Bottom bar ───────────────────────────────── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);
+  border-top:1px solid var(--border);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  display:flex;gap:10px;z-index:200;
+}
+.btn-reset{
+  padding:13px 16px;border-radius:var(--radius);
+  border:1.5px solid var(--border);
+  background:var(--white);color:var(--ink-60);
+  font-size:13px;font-family:'Cambria',Georgia,serif;
+  cursor:pointer;font-weight:600;
+}
+.btn-save{
+  flex:1;padding:13px;border-radius:var(--radius);
+  border:none;background:var(--navy);
+  color:#fff;font-size:15px;font-weight:700;
+  font-family:'Cambria',Georgia,serif;
+  cursor:pointer;letter-spacing:.3px;
+  transition:background .15s;
+}
+.btn-save:active{background:var(--navy-d);}
+
+/* ── Preview overlay ──────────────────────────── */
+.preview-overlay{
+  display:none;position:fixed;inset:0;
+  background:var(--ivory);z-index:300;
+  flex-direction:column;
+  overflow-y:auto;
+}
+.preview-overlay.show{display:flex;}
+.preview-header{
+  background:var(--navy);padding:0 16px;height:58px;
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:10;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+}
+.preview-header-title{
+  color:#fff;font-size:15px;font-weight:700;flex:1;
+  font-family:'Cambria',Georgia,serif;
+}
+.preview-body{padding:14px;flex:1;}
+.preview-img-wrap{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;margin-bottom:14px;
+}
+#settlementCanvas{width:100%;display:block;}
+.preview-actions{
+  display:flex;gap:10px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:var(--white);
+  border-top:1px solid var(--border);
+  position:sticky;bottom:0;
+}
+.btn-edit{
+  flex:1;padding:14px;border-radius:var(--radius);
+  border:1.5px solid var(--navy);background:#fff;
+  color:var(--navy);font-size:14px;font-weight:700;
+  font-family:'Cambria',Georgia,serif;cursor:pointer;
+}
+.btn-wa{
+  flex:2;padding:14px;border-radius:var(--radius);
+  border:none;background:#1DAA61;color:#fff;
+  font-size:14px;font-weight:700;
+  font-family:'Cambria',Georgia,serif;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+
+/* ── Saving overlay ───────────────────────────── */
+.saving-ov{
+  display:none;position:fixed;inset:0;
+  background:rgba(26,26,46,.65);
+  z-index:999;align-items:center;
+  justify-content:center;flex-direction:column;gap:14px;
+}
+.saving-ov.show{display:flex;}
+.spin{
+  width:42px;height:42px;
+  border:3px solid rgba(255,255,255,.25);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-txt{color:#fff;font-size:14px;font-family:'Cambria',Georgia,serif;}
+
+/* ── Toast ────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:90px;left:50%;
+  transform:translateX(-50%);
+  background:var(--ink);color:#fff;
+  padding:9px 20px;border-radius:20px;
+  font-size:13px;font-family:'Cambria',Georgia,serif;
+  opacity:0;transition:opacity .28s;
+  pointer-events:none;z-index:9999;white-space:nowrap;
+}
+.toast.show{opacity:1;}
+
+/* datalist styling helper */
+input[list]{-webkit-appearance:none;}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ════════════════════════════════════ -->
+<div class="header">
+  <div class="header-logo">
+    <img src="../logo.jpg" alt="BSC" onerror="this.parentElement.innerHTML='<b style=\'color:#1E2D5A;font-size:13px;\'>BSC</b>'">
+  </div>
+  <div class="header-info">
+    <div class="header-title">BSC Belagavi</div>
+    <div class="header-date" id="hDate"></div>
+  </div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<!-- ══ SUGGESTION STRIP ══════════════════════════ -->
+<div class="suggest-strip" id="suggestStrip">
+  <div class="suggest-icon">💡</div>
+  <div class="suggest-text" id="suggestText">Fill in today's sale, bills and counter-wise differences, then tap <strong>Preview &amp; Save</strong>.</div>
+</div>
+
+<!-- ══ BODY ══════════════════════════════════════ -->
+<div class="body">
+
+  <!-- TODAY'S SUMMARY -->
+  <div class="section">
+    <div class="section-head">Today's Summary</div>
+    <div class="input-card">
+      <div class="field-row cols-1">
+        <div class="field full">
+          <label>Date</label>
+          <input type="date" id="fDate" oninput="syncDate();recalc()">
+        </div>
+      </div>
+      <div class="field-row cols-2">
+        <div class="field">
+          <label>Today's Sale (₹)</label>
+          <input type="number" id="fSale" placeholder="0" inputmode="numeric" oninput="recalc()">
+        </div>
+        <div class="field last-row">
+          <label>Total Bills</label>
+          <input type="number" id="fBills" placeholder="0" inputmode="numeric" oninput="recalc()">
+        </div>
+      </div>
+      <div class="field-row cols-1">
+        <div class="field full last-row" style="background:#FEFDF8;">
+          <label>ABV — Average Bill Value</label>
+          <div class="abv-chip" id="abvChip">
+            <span class="lbl">₹</span>
+            <span class="val" id="fAbv">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLLECTION -->
+  <div class="section">
+    <div class="section-head">Collection</div>
+    <div class="input-card">
+      <div class="field-row cols-2">
+        <div class="field">
+          <label>Cash (₹)</label>
+          <input type="number" id="fCash" placeholder="0" inputmode="numeric" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>Card (₹)</label>
+          <input type="number" id="fCard" placeholder="0" inputmode="numeric" oninput="recalc()">
+        </div>
+      </div>
+      <div class="field-row cols-1">
+        <div class="field full last-row">
+          <label>UPI (₹)</label>
+          <input type="number" id="fUpi" placeholder="0" inputmode="numeric" oninput="recalc()">
+        </div>
+      </div>
+    </div>
+
+    <div class="diff-strip">
+      <div class="diff-cell">
+        <div class="diff-cell-lbl">Cash Diff</div>
+        <div class="diff-cell-val" id="dCash">0</div>
+      </div>
+      <div class="diff-cell">
+        <div class="diff-cell-lbl">Card Diff</div>
+        <div class="diff-cell-val" id="dCard">0</div>
+      </div>
+      <div class="diff-cell">
+        <div class="diff-cell-lbl">UPI Diff</div>
+        <div class="diff-cell-val" id="dUpi">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COUNTER TABLE -->
+  <div class="section">
+    <div class="section-head">Cash Counter Report</div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;width:75px;">Counter</th>
+              <th style="text-align:left;width:115px;">Cashier</th>
+              <th>Cash Diff</th>
+              <th>Card Diff</th>
+              <th>UPI Diff</th>
+              <th>Total Diff</th>
+              <th>Staff Disc</th>
+              <th>Cust Disc</th>
+              <th style="width:36px;"></th>
+            </tr>
+          </thead>
+          <tbody id="cBody"></tbody>
+          <tfoot>
+            <tr>
+              <td class="lbl" colspan="2">TOTAL</td>
+              <td id="ftC">0</td>
+              <td id="ftK">0</td>
+              <td id="ftU">0</td>
+              <td id="ftD" style="font-size:14px;color:var(--navy);">0</td>
+              <td id="ftS">0</td>
+              <td id="ftCu">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addRow()">＋ &nbsp;Add Counter Row</button>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<!-- ══ BOTTOM BAR ════════════════════════════════ -->
+<div class="bottom-bar">
+  <button class="btn-reset" onclick="resetForm()">Reset</button>
+  <button class="btn-save" onclick="doPreview()">Preview &amp; Save →</button>
+</div>
+
+<!-- ══ PREVIEW OVERLAY ═══════════════════════════ -->
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-header">
+    <div class="preview-header-title">Settlement Preview</div>
+  </div>
+  <div class="preview-body">
+    <div class="preview-img-wrap">
+      <canvas id="settlementCanvas"></canvas>
+    </div>
+  </div>
+  <div class="preview-actions">
+    <button class="btn-edit" onclick="closePreview()">✎ Edit</button>
+    <button class="btn-wa" onclick="shareWA()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2C6.476 2 2 6.476 2 12.004c0 1.77.463 3.431 1.258 4.88L2 22l5.248-1.234A9.96 9.96 0 0012.004 22C17.532 22 22 17.524 22 12.004 22 6.476 17.532 2 12.004 2zm0 18.186a8.166 8.166 0 01-4.167-1.143l-.299-.178-3.105.73.761-3.024-.196-.311A8.131 8.131 0 013.814 12c0-4.517 3.673-8.19 8.19-8.19 4.518 0 8.19 3.673 8.19 8.19 0 4.518-3.672 8.186-8.19 8.186z"/></svg>
+      Share &amp; Save
+    </button>
+  </div>
+</div>
+
+<!-- ══ SAVING OVERLAY ════════════════════════════ -->
+<div class="saving-ov" id="savingOv">
+  <div class="spin"></div>
+  <div class="spin-txt" id="savingTxt">Saving to Google Sheet…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<datalist id="cashierList"></datalist>
+
+<script>
+// ══ CONFIG ════════════════════════════════════════
+const PIN_URL       = "index.html";
+const APPS_SCRIPT   = "https://script.google.com/macros/s/AKfycbyFaLQExagFdrNb1f1cGLRSzpAFM6mtKwVOHUDiCxxbIIofvairM8rClauGHwMUxAZEfg/exec";
+const SESSION_MS    = 3600000;
+
+// ══ SESSION GUARD ═════════════════════════════════
+(function(){
+  const t = sessionStorage.getItem("bsc_auth");
+  if(!t || (Date.now()-parseInt(t)) >= SESSION_MS){
+    window.location.href = PIN_URL;
+  }
+})();
+
+// Refresh session timestamp on activity
+document.addEventListener("touchstart", ()=> sessionStorage.setItem("bsc_auth", Date.now()));
+document.addEventListener("click",      ()=> sessionStorage.setItem("bsc_auth", Date.now()));
+
+// Auto-logout check
+setInterval(()=>{
+  const t = sessionStorage.getItem("bsc_auth");
+  if(!t || (Date.now()-parseInt(t)) >= SESSION_MS) logout();
+}, 30000);
+
+function logout(){
+  sessionStorage.clear();
+  window.location.href = PIN_URL;
+}
+
+// ══ DEFAULT DATA ══════════════════════════════════
+let counterIds   = ["CS1","CS2","CS3","CS4","CS5","CS6","CS7","CS8"];
+let cashierNames = ["DURGAPPA","PRASHANT","NITIN","SHRIDAR","SACHIN","ANIL","PRAKASH","CASHIER2"];
+const DEFAULT_ROWS = 5;
+
+// ══ INIT ══════════════════════════════════════════
+window.addEventListener("load", ()=>{
+  setToday();
+  fetchMaster();
+  buildTable();
+  restoreDraft();
+  updateSuggest();
+});
+
+function setToday(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm   = String(d.getMonth()+1).padStart(2,"0");
+  const dd   = String(d.getDate()).padStart(2,"0");
+  document.getElementById("fDate").value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById("hDate").textContent = `${dd}-${mm}-${yyyy}`;
+}
+
+function syncDate(){
+  const v = document.getElementById("fDate").value;
+  if(!v) return;
+  const [y,m,d] = v.split("-");
+  document.getElementById("hDate").textContent = `${d}-${m}-${y}`;
+}
+
+// ══ MASTER DATA ═══════════════════════════════════
+function fetchMaster(){
+  fetch(APPS_SCRIPT)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.counterIds?.length)   counterIds   = data.counterIds;
+      if(data.cashierNames?.length) cashierNames = data.cashierNames;
+      buildDatalist();
+      buildTable();
+    })
+    .catch(()=>{ buildDatalist(); });
+}
+
+function buildDatalist(){
+  const dl = document.getElementById("cashierList");
+  dl.innerHTML = cashierNames.map(n=>`<option value="${n}">`).join("");
+}
+
+// ══ TABLE ═════════════════════════════════════════
+function buildTable(){
+  const tbody = document.getElementById("cBody");
+  tbody.innerHTML = "";
+  for(let i=0;i<DEFAULT_ROWS;i++) addRow(counterIds[i]||"CS"+(i+1));
+  calcTotals();
+}
+
+function addRow(fixedId){
+  const tbody = document.getElementById("cBody");
+  const idx   = tbody.rows.length;
+  const cid   = fixedId || "";
+
+  const idOpts = counterIds.map(c=>`<option value="${c}"${c===cid?" selected":""}>${c}</option>`).join("");
+  const newOpt = `<option value="__NEW__">+ New ID</option>`;
+
+  const tr = document.createElement("tr");
+  tr.dataset.idx = idx;
+  tr.innerHTML = `
+    <td>
+      <select onchange="onIdChange(this,${idx})">
+        ${idOpts}${newOpt}
+      </select>
+    </td>
+    <td><input class="name-in" type="text" placeholder="Cashier name" list="cashierList" oninput="calcTotals();saveDraft()"></td>
+    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td class="tdiff zero" id="rtd${idx}">0</td>
+    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td class="del-td">
+      <button class="del-btn" onclick="delRow(this)" title="Delete row">✕</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function delRow(btn){
+  const tr = btn.closest("tr");
+  tr.parentNode.removeChild(tr);
+  // re-index rtd ids
+  document.querySelectorAll("#cBody tr").forEach((r,i)=>{
+    r.dataset.idx = i;
+    const td = r.querySelector("[id^='rtd']");
+    if(td) td.id = "rtd"+i;
+    const sel = r.querySelector("select");
+    if(sel) sel.setAttribute("onchange",`onIdChange(this,${i})`);
+    const delB = r.querySelector(".del-btn");
+  });
+  calcTotals(); saveDraft();
+}
+
+function onIdChange(sel, idx){
+  if(sel.value === "__NEW__"){
+    const raw = prompt("Enter new Counter ID (e.g. CS9):");
+    if(raw && raw.trim()){
+      const id = raw.trim().toUpperCase();
+      if(!counterIds.includes(id)) counterIds.push(id);
+      const opt = document.createElement("option");
+      opt.value = id; opt.textContent = id;
+      sel.insertBefore(opt, sel.querySelector('[value="__NEW__"]'));
+      sel.value = id;
+    } else {
+      sel.value = counterIds[0]||"";
+    }
+  }
+}
+
+// ══ CALCULATIONS ══════════════════════════════════
+function n(id){ return parseFloat(document.getElementById(id)?.value)||0; }
+function fIN(v){ return Number(v).toLocaleString("en-IN"); }
+
+function calcTotals(){
+  const rows = document.querySelectorAll("#cBody tr");
+  let tC=0,tK=0,tU=0,tS=0,tCu=0;
+
+  rows.forEach((r,i)=>{
+    const ins = r.querySelectorAll("input[type=number]");
+    const c  = parseFloat(ins[0]?.value)||0;
+    const k  = parseFloat(ins[1]?.value)||0;
+    const u  = parseFloat(ins[2]?.value)||0;
+    const s  = parseFloat(ins[3]?.value)||0;
+    const cu = parseFloat(ins[4]?.value)||0;
+    const d  = c+k+u;
+
+    const td = document.getElementById("rtd"+i);
+    if(td){
+      td.textContent = fIN(d);
+      td.className   = "tdiff "+(d<0?"neg":d>0?"pos":"zero");
+    }
+    tC+=c; tK+=k; tU+=u; tS+=s; tCu+=cu;
+  });
+
+  setText("ftC",  fIN(tC));
+  setText("ftK",  fIN(tK));
+  setText("ftU",  fIN(tU));
+  setText("ftD",  fIN(tC+tK+tU));
+  setText("ftS",  fIN(tS));
+  setText("ftCu", fIN(tCu));
+
+  // update diff strip from counter totals
+  setDiff("dCash", tC);
+  setDiff("dCard", tK);
+  setDiff("dUpi",  tU);
+
+  updateSuggest();
+  saveDraft();
+}
+
+function setDiff(id, val){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = fIN(val);
+  el.className   = "diff-cell-val"+(val!==0?" nonzero":"");
+}
+
+function setText(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+
+function recalc(){
+  const sale  = parseFloat(document.getElementById("fSale").value)||0;
+  const bills = parseFloat(document.getElementById("fBills").value)||0;
+  const abvEl = document.getElementById("fAbv");
+  abvEl.textContent = (sale&&bills) ? fIN(Math.round(sale/bills)) : "—";
+  calcTotals();
+}
+
+// ══ SUGGESTION STRIP ══════════════════════════════
+function updateSuggest(){
+  const sale  = parseFloat(document.getElementById("fSale")?.value)||0;
+  const bills = parseFloat(document.getElementById("fBills")?.value)||0;
+  const cash  = parseFloat(document.getElementById("fCash")?.value)||0;
+  const card  = parseFloat(document.getElementById("fCard")?.value)||0;
+  const upi   = parseFloat(document.getElementById("fUpi")?.value)||0;
+
+  const rows    = document.querySelectorAll("#cBody tr");
+  let emptyName = 0;
+
+  rows.forEach(r=>{
+    const nameIn = r.querySelector(".name-in");
+    if(nameIn && !nameIn.value.trim()) emptyName++;
+  });
+
+  let msg = "";
+  const issues = [];
+
+  if(!sale)                    issues.push("Today's Sale");
+  if(!bills)                   issues.push("Total Bills");
+  if(!cash && !card && !upi)   issues.push("Collection amounts (Cash / Card / UPI)");
+  if(emptyName > 0)            issues.push(`${emptyName} cashier name(s) missing`);
+
+  if(issues.length === 0){
+    const tDiff = (parseFloat(document.getElementById("ftD")?.textContent?.replace(/,/g,""))||0);
+    if(tDiff !== 0){
+      msg = `⚠️ Total difference is <strong>${fIN(tDiff)}</strong>. Please verify counter entries before saving.`;
+    } else {
+      msg = `✅ All fields filled. Tap <strong>Preview &amp; Save</strong> when ready.`;
+    }
+  } else {
+    msg = `Pending: <strong>${issues.join(" · ")}</strong>`;
+  }
+
+  document.getElementById("suggestText").innerHTML = msg;
+}
+
+// ══ DRAFT ═════════════════════════════════════════
+function saveDraft(){
+  try{
+    const rows = document.querySelectorAll("#cBody tr");
+    const cData = Array.from(rows).map(r=>{
+      const sel = r.querySelector("select");
+      const ni  = r.querySelector(".name-in");
+      const ins = r.querySelectorAll("input[type=number]");
+      return { id:sel?.value||"", name:ni?.value||"",
+               c:ins[0]?.value||"", k:ins[1]?.value||"",
+               u:ins[2]?.value||"", s:ins[3]?.value||"", cu:ins[4]?.value||"" };
+    });
+    localStorage.setItem("bsc_draft", JSON.stringify({
+      date:  document.getElementById("fDate").value,
+      sale:  document.getElementById("fSale").value,
+      bills: document.getElementById("fBills").value,
+      cash:  document.getElementById("fCash").value,
+      card:  document.getElementById("fCard").value,
+      upi:   document.getElementById("fUpi").value,
+      rows:  cData
+    }));
+  }catch(e){}
+}
+
+function restoreDraft(){
+  try{
+    const raw = localStorage.getItem("bsc_draft");
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    if(d.date)  document.getElementById("fDate").value  = d.date;
+    if(d.sale)  document.getElementById("fSale").value  = d.sale;
+    if(d.bills) document.getElementById("fBills").value = d.bills;
+    if(d.cash)  document.getElementById("fCash").value  = d.cash;
+    if(d.card)  document.getElementById("fCard").value  = d.card;
+    if(d.upi)   document.getElementById("fUpi").value   = d.upi;
+    if(d.rows?.length){
+      const tbody = document.getElementById("cBody");
+      tbody.innerHTML = "";
+      d.rows.forEach((r,i)=>{
+        addRow(r.id);
+        const tr  = tbody.rows[i];
+        const ni  = tr.querySelector(".name-in");
+        const ins = tr.querySelectorAll("input[type=number]");
+        if(ni) ni.value = r.name||"";
+        if(ins[0]) ins[0].value = r.c||"";
+        if(ins[1]) ins[1].value = r.k||"";
+        if(ins[2]) ins[2].value = r.u||"";
+        if(ins[3]) ins[3].value = r.s||"";
+        if(ins[4]) ins[4].value = r.cu||"";
+      });
+    }
+    recalc();
+    syncDate();
+  }catch(e){}
+}
+
+function resetForm(){
+  if(!confirm("Reset all data?")) return;
+  localStorage.removeItem("bsc_draft");
+  ["fSale","fBills","fCash","fCard","fUpi"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  document.getElementById("fAbv").textContent = "—";
+  setToday();
+  buildTable();
+  updateSuggest();
+}
+
+// ══ COLLECT ═══════════════════════════════════════
+function collectData(){
+  const dv   = document.getElementById("fDate").value;
+  const [y,m,d] = dv.split("-");
+  const dateStr = `${d}-${m}-${y}`;
+
+  const rows    = document.querySelectorAll("#cBody tr");
+  const counters = Array.from(rows).map(r=>{
+    const sel = r.querySelector("select");
+    const ni  = r.querySelector(".name-in");
+    const ins = r.querySelectorAll("input[type=number]");
+    const c   = parseFloat(ins[0]?.value)||0;
+    const k   = parseFloat(ins[1]?.value)||0;
+    const u   = parseFloat(ins[2]?.value)||0;
+    return {
+      counterId:   sel?.value||"",
+      cashierName: ni?.value||"",
+      cashDiff: c, cardDiff: k, upiDiff: u,
+      totalDiff: c+k+u,
+      staffDisc: parseFloat(ins[3]?.value)||0,
+      custDisc:  parseFloat(ins[4]?.value)||0
+    };
+  });
+
+  const tC  = parseFloat(document.getElementById("ftC").textContent.replace(/,/g,""))||0;
+  const tK  = parseFloat(document.getElementById("ftK").textContent.replace(/,/g,""))||0;
+  const tU  = parseFloat(document.getElementById("ftU").textContent.replace(/,/g,""))||0;
+  const sale  = parseFloat(document.getElementById("fSale").value)||0;
+  const bills = parseFloat(document.getElementById("fBills").value)||0;
+
+  return {
+    date: dateStr,
+    todaySale: sale, totalBills: bills,
+    abv: bills ? Math.round(sale/bills) : 0,
+    cash: parseFloat(document.getElementById("fCash").value)||0,
+    card: parseFloat(document.getElementById("fCard").value)||0,
+    upi:  parseFloat(document.getElementById("fUpi").value)||0,
+    cashDiff: tC, cardDiff: tK, upiDiff: tU,
+    counters,
+    whatsappShared: false
+  };
+}
+
+// ══ PREVIEW ═══════════════════════════════════════
+function doPreview(){
+  const data = collectData();
+  buildCanvas(data);
+  document.getElementById("previewOverlay").classList.add("show");
+  window.scrollTo(0,0);
+}
+function closePreview(){
+  document.getElementById("previewOverlay").classList.remove("show");
+}
+
+// ══ CANVAS IMAGE ══════════════════════════════════
+function buildCanvas(data){
+  const canvas = document.getElementById("settlementCanvas");
+  const W = 900;
+  const RH = 36;
+  const H  = 340 + (data.counters.length + 2)*RH + 56;
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  const NAVY="#1E2D5A", GOLD="#B8860B", GOLD_L="#FEF3C7",
+        WHITE="#FFFFFF", BORDER="#CCCCCC",
+        INK="#1A1A2E",   GREY="#888888",
+        RED="#C0392B",   GRN="#1E7A1E";
+
+  const FONT = (sz,w)=>`${w||"normal"} ${sz}px Cambria,Georgia,serif`;
+
+  // background
+  ctx.fillStyle = WHITE;
+  ctx.fillRect(0,0,W,H);
+
+  // ── top header ──
+  ctx.fillStyle = NAVY;
+  ctx.fillRect(0,0,W,64);
+
+  ctx.fillStyle = WHITE;
+  ctx.font = FONT(22,"bold");
+  ctx.textAlign = "left";
+  ctx.fillText("BSC BELAGAVI", 20, 38);
+  ctx.font = FONT(13);
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  ctx.fillText("The Textile Mall  ·  Cash Counter Settlement", 20, 56);
+  ctx.textAlign = "right";
+  ctx.fillStyle = GOLD_L;
+  ctx.font = FONT(17,"bold");
+  ctx.fillText(data.date, W-20, 38);
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  ctx.font = FONT(12);
+  ctx.fillText("Since 1938", W-20, 56);
+  ctx.textAlign = "left";
+
+  // ── summary row 1: sale / bills / abv ──
+  let y = 74;
+  drawSummaryRow(ctx, y, W, [
+    ["TODAY'S SALE","₹"+fIN(data.todaySale)],
+    ["TOTAL BILLS", String(data.totalBills)],
+    ["ABV",         "₹"+fIN(data.abv)]
+  ], FONT, NAVY, GREY, BORDER);
+  y += 54;
+
+  // ── summary row 2: cash / card / upi ──
+  drawSummaryRow(ctx, y, W, [
+    ["CASH","₹"+fIN(data.cash)],
+    ["CARD","₹"+fIN(data.card)],
+    ["UPI", "₹"+fIN(data.upi)]
+  ], FONT, NAVY, GREY, BORDER);
+  y += 54;
+
+  // ── diff strip ──
+  ctx.fillStyle = "#EEF1FB";
+  ctx.fillRect(0,y,W,46);
+  ctx.strokeStyle = BORDER; ctx.lineWidth=0.5;
+  ctx.strokeRect(0,y,W,46);
+  const diffs=[["CASH DIFF",data.cashDiff],["CARD DIFF",data.cardDiff],["UPI DIFF",data.upiDiff]];
+  diffs.forEach(([lbl,val],i)=>{
+    const cx=(W/3)*i;
+    ctx.fillStyle=GREY; ctx.font=FONT(10,"bold"); ctx.textAlign="center";
+    ctx.fillText(lbl, cx+W/6, y+16);
+    ctx.fillStyle = val!==0 ? RED : NAVY;
+    ctx.font=FONT(17,"bold");
+    ctx.fillText(fIN(val), cx+W/6, y+36);
+    if(i<2){ ctx.beginPath(); ctx.moveTo(cx+W/3,y); ctx.lineTo(cx+W/3,y+46); ctx.strokeStyle=BORDER; ctx.stroke(); }
+  });
+  ctx.textAlign="left";
+  y += 46;
+
+  y += 14;
+
+  // ── counter table header ──
+  const cols=[
+    {l:"COUNTER",  w:80, a:"left"},
+    {l:"CASHIER",  w:140,a:"left"},
+    {l:"CASH DIFF",w:90, a:"center"},
+    {l:"CARD DIFF",w:90, a:"center"},
+    {l:"UPI DIFF", w:90, a:"center"},
+    {l:"TOTAL DIFF",w:105,a:"center"},
+    {l:"STAFF DISC",w:110,a:"center"},
+    {l:"CUST DISC", w:95, a:"center"}
+  ];
+  const tw = cols.reduce((s,c)=>s+c.w,0);
+  cols.forEach(c=>{ c.w = Math.round(c.w*W/tw); });
+
+  ctx.fillStyle = NAVY;
+  ctx.fillRect(0,y,W,36);
+  let cx2=0;
+  cols.forEach(col=>{
+    ctx.fillStyle = WHITE;
+    ctx.font = FONT(10,"bold");
+    ctx.textAlign = col.a==="center"?"center":"left";
+    ctx.fillText(col.l, col.a==="center"?cx2+col.w/2:cx2+8, y+23);
+    cx2+=col.w;
+  });
+  ctx.textAlign="left";
+  y+=36;
+
+  // ── counter rows ──
+  data.counters.forEach((row,ri)=>{
+    ctx.fillStyle = ri%2===0 ? WHITE : "#F9F7F0";
+    ctx.fillRect(0,y,W,RH);
+    ctx.strokeStyle=BORDER; ctx.lineWidth=0.5;
+    ctx.strokeRect(0,y,W,RH);
+
+    const vals=[
+      row.counterId, row.cashierName,
+      fIN(row.cashDiff), fIN(row.cardDiff), fIN(row.upiDiff),
+      fIN(row.totalDiff), fIN(row.staffDisc), fIN(row.custDisc)
+    ];
+    cx2=0;
+    vals.forEach((v,ci)=>{
+      const col=cols[ci];
+      const tx=col.a==="center"?cx2+col.w/2:cx2+8;
+      ctx.textAlign=col.a==="center"?"center":"left";
+      if(ci===0){ ctx.fillStyle=NAVY; ctx.font=FONT(12,"bold"); }
+      else if(ci===5){
+        const nv=parseFloat(v.replace(/,/g,""))||0;
+        ctx.fillStyle=nv<0?GRN:nv>0?RED:GREY;
+        ctx.font=FONT(12,"bold");
+      } else { ctx.fillStyle=INK; ctx.font=FONT(12); }
+      ctx.fillText(v, tx, y+23);
+      cx2+=col.w;
+    });
+    ctx.textAlign="left";
+    y+=RH;
+  });
+
+  // ── totals row ──
+  ctx.fillStyle = GOLD_L;
+  ctx.fillRect(0,y,W,RH+2);
+  ctx.strokeStyle=GOLD; ctx.lineWidth=1.5;
+  ctx.strokeRect(0,y,W,RH+2);
+  const tRows=document.querySelectorAll("#cBody tr");
+  let tC=0,tK=0,tU=0,tS=0,tCu=0;
+  tRows.forEach(r=>{
+    const ins=r.querySelectorAll("input[type=number]");
+    tC+=(parseFloat(ins[0]?.value)||0);
+    tK+=(parseFloat(ins[1]?.value)||0);
+    tU+=(parseFloat(ins[2]?.value)||0);
+    tS+=(parseFloat(ins[3]?.value)||0);
+    tCu+=(parseFloat(ins[4]?.value)||0);
+  });
+  const totalVals=["TOTAL","",fIN(tC),fIN(tK),fIN(tU),fIN(tC+tK+tU),fIN(tS),fIN(tCu)];
+  cx2=0;
+  totalVals.forEach((v,ci)=>{
+    const col=cols[ci];
+    const tx=col.a==="center"?cx2+col.w/2:cx2+8;
+    ctx.textAlign=col.a==="center"?"center":"left";
+    ctx.fillStyle=GOLD; ctx.font=FONT(12,"bold");
+    ctx.fillText(v, tx, y+23);
+    cx2+=col.w;
+  });
+  ctx.textAlign="left";
+  y+=RH+2;
+
+  // ── footer ──
+  y+=12;
+  ctx.fillStyle="#F3F1E8";
+  ctx.fillRect(0,y,W,34);
+  ctx.fillStyle=GREY; ctx.font=FONT(11);
+  ctx.fillText("BSC The Textile Mall, Belagavi  ·  Since 1938", 20, y+22);
+  ctx.textAlign="right";
+  ctx.fillText("Generated: "+new Date().toLocaleString("en-IN"), W-20, y+22);
+  ctx.textAlign="left";
+
+  // outer border
+  ctx.strokeStyle=BORDER; ctx.lineWidth=1;
+  ctx.strokeRect(0,0,W,H);
+}
+
+function drawSummaryRow(ctx, y, W, items, FONT, NAVY, GREY, BORDER){
+  const cellW = W/3;
+  items.forEach(([lbl,val],i)=>{
+    const cx=i*cellW;
+    ctx.strokeStyle=BORDER; ctx.lineWidth=0.5;
+    ctx.fillStyle="#F9F7F0";
+    ctx.fillRect(cx,y,cellW,54);
+    ctx.strokeRect(cx,y,cellW,54);
+    ctx.fillStyle=GREY; ctx.font=FONT(10,"bold");
+    ctx.textAlign="left";
+    ctx.fillText(lbl, cx+12, y+16);
+    ctx.fillStyle=NAVY; ctx.font=FONT(19,"bold");
+    ctx.fillText(val, cx+12, y+43);
+  });
+}
+
+// ══ WHATSAPP + SAVE ═══════════════════════════════
+async function shareWA(){
+  const data = collectData();
+  data.whatsappShared = true;
+
+  showSaving("Saving to Google Sheet…");
+  try{
+    await fetch(APPS_SCRIPT,{method:"POST",body:JSON.stringify(data)});
+  }catch(e){}
+  hideSaving();
+
+  const canvas = document.getElementById("settlementCanvas");
+
+  // Try native share (mobile) with image
+  if(navigator.share && navigator.canShare){
+    canvas.toBlob(async blob=>{
+      const file = new File([blob],`BSC_Settlement_${data.date}.png`,{type:"image/png"});
+      const sd = {files:[file], title:`BSC Settlement ${data.date}`, text: waText(data)};
+      if(navigator.canShare(sd)){
+        try{ await navigator.share(sd); }
+        catch(e){ fallbackWA(data); }
+      } else { fallbackWA(data); }
+    });
+  } else { fallbackWA(data); }
+
+  localStorage.removeItem("bsc_draft");
+  showToast("Saved to Sheet ✓");
+}
+
+function fallbackWA(data){
+  window.open("https://wa.me/?text="+encodeURIComponent(waText(data)),"_blank");
+}
+
+function waText(d){
+  const tDiff = d.cashDiff+d.cardDiff+d.upiDiff;
+  const tS  = d.counters.reduce((s,c)=>s+(c.staffDisc||0),0);
+  const tCu = d.counters.reduce((s,c)=>s+(c.custDisc||0),0);
+  const lines = d.counters.filter(c=>c.cashierName||c.counterId)
+    .map(r=>`  ${(r.counterId||"").padEnd(4)} ${(r.cashierName||"").padEnd(12)} | Cash:${r.cashDiff} Card:${r.cardDiff} UPI:${r.upiDiff} | Diff:${r.totalDiff}`)
+    .join("\n");
+  return `*BSC BELAGAVI — CASH SETTLEMENT*\n*Date:* ${d.date}\n\n*TODAY'S SALE:* ₹${fIN(d.todaySale)}\n*Total Bills:* ${d.totalBills}  |  *ABV:* ₹${fIN(d.abv)}\n\n*COLLECTION*\n  Cash : ₹${fIN(d.cash)}\n  Card : ₹${fIN(d.card)}\n  UPI  : ₹${fIN(d.upi)}\n\n*CASH COUNTER REPORT*\n${lines}\n\n*TOTALS*\n  Cash Diff : ${d.cashDiff}\n  Card Diff : ${d.cardDiff}\n  UPI Diff  : ${d.upiDiff}\n  *Total Diff: ${tDiff}*\n  Staff Disc: ${tS}  |  Cust Disc: ${tCu}\n\n_BSC The Textile Mall, Belagavi_`;
+}
+
+// ══ HELPERS ═══════════════════════════════════════
+function showSaving(t){ document.getElementById("savingTxt").textContent=t; document.getElementById("savingOv").classList.add("show"); }
+function hideSaving(){ document.getElementById("savingOv").classList.remove("show"); }
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>
