@@ -1156,7 +1156,7 @@ async function shareWA(){
   const data = collectData();
   data.whatsappShared = true;
 
-  // 1. Save to Google Sheet first
+  // 1. Save to Google Sheet
   showSaving("Saving to Google Sheet…");
   let saveOk = false;
   try{
@@ -1165,10 +1165,10 @@ async function shareWA(){
   }catch(e){ saveOk = false; }
   hideSaving();
 
-  // 2. Lock form — hide Edit, show Saved badge
+  // 2. Lock form — hide Edit & Share, show Saved badge
   _savedData = data;
-  document.getElementById("editBtn").style.display   = "none";
-  document.getElementById("shareBtn").style.display  = "none";
+  document.getElementById("editBtn").style.display    = "none";
+  document.getElementById("shareBtn").style.display   = "none";
   document.getElementById("savedBadge").style.display = "flex";
 
   // 3. Lock all form inputs
@@ -1179,34 +1179,37 @@ async function shareWA(){
   // 4. Clear draft
   localStorage.removeItem("bsc_draft");
 
-  // 5. Share on WhatsApp with image
+  // 5. Auto-download the settlement image
   const canvas = document.getElementById("settlementCanvas");
-  if(navigator.share && navigator.canShare){
-    canvas.toBlob(async blob=>{
-      const file = new File([blob],`BSC_Settlement_${data.date}.png`,{type:"image/png"});
-      const sd = {files:[file], title:`BSC Settlement ${data.date}`, text: waText(data)};
-      if(navigator.canShare(sd)){
-        try{ await navigator.share(sd); }
-        catch(e){ fallbackWA(data); }
-      } else { fallbackWA(data); }
-    });
-  } else { fallbackWA(data); }
+  try{
+    const link = document.createElement("a");
+    link.download = "BSC_Settlement_" + data.date + ".png";
+    link.href = canvas.toDataURL("image/png");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }catch(e){}
 
-  showToast(saveOk ? "Saved to Sheet ✓" : "Shared! (Sheet save failed — check connection)");
+  // 6. Small delay then open WhatsApp with pre-filled text
+  setTimeout(()=>{
+    const url = "https://wa.me/?text=" + encodeURIComponent(waText(data));
+    window.open(url, "_blank");
+  }, 800);
+
+  showToast(saveOk ? "Saved ✓  Image downloaded!" : "Image downloaded! (Sheet save failed)");
 }
 
-function fallbackWA(data){
-  window.open("https://wa.me/?text="+encodeURIComponent(waText(data)),"_blank");
-}
+
 
 function waText(d){
-  const tDiff = d.cashDiff+d.cardDiff+d.upiDiff;
-  const tS  = d.counters.reduce((s,c)=>s+(c.staffDisc||0),0);
-  const tCu = d.counters.reduce((s,c)=>s+(c.custDisc||0),0);
-  const lines = d.counters.filter(c=>c.cashierName||c.counterId)
-    .map(r=>`  ${(r.counterId||"").padEnd(4)} ${(r.cashierName||"").padEnd(12)} | Cash:${r.cashDiff} Card:${r.cardDiff} UPI:${r.upiDiff} | Diff:${r.totalDiff}`)
-    .join("\n");
-  return `*BSC BELAGAVI — CASH SETTLEMENT*\n*Date:* ${d.date}\n\n*TODAY'S SALE:* ₹${fIN(d.todaySale)}\n*Total Bills:* ${d.totalBills}  |  *ABV:* ₹${fIN(d.abv)}\n\n*COLLECTION*\n  Cash : ₹${fIN(d.cash)}\n  Card : ₹${fIN(d.card)}\n  UPI  : ₹${fIN(d.upi)}\n\n*CASH COUNTER REPORT*\n${lines}\n\n*TOTALS*\n  Cash Diff : ${d.cashDiff}\n  Card Diff : ${d.cardDiff}\n  UPI Diff  : ${d.upiDiff}\n  *Total Diff: ${tDiff}*\n  Staff Disc: ${tS}  |  Cust Disc: ${tCu}\n\n_BSC The Textile Mall, Belagavi_`;
+  return `*BSC BELAGAVI — CASH SETTLEMENT*
+
+Date - ${d.date}
+Total Sales - ₹${fIN(d.todaySale)}
+Total Bills - ${fIN(d.totalBills)}
+ABV - ₹${fIN(d.abv)}
+
+_BSC The Textile Mall, Belagavi_`;
 }
 
 // ══ HELPERS ═══════════════════════════════════════
