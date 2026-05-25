@@ -4,1078 +4,161 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>BSC Belagavi — Cash Settlement</title>
 <style>
-/* ── Reset & Base ────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
-  --gold:#B8860B;--gold-d:#8B6508;--gold-l:#FEF3C7;
-  --crimson:#C0392B;--crimson-l:#FDECEA;
-  --green:#1E7A1E;--green-l:#EBF5EB;
-  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.18);
-  --ivory:#F9F7F0;--white:#FFFFFF;--surface:#F3F1E8;--border:#E8E4D8;
-  --radius:10px;--radius-sm:7px;
+  --navy:#1E2D5A;--navy-d:#151F3E;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;
+  --ivory:#F9F7F0;
+  --ink:#1A1A2E;
 }
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--ivory);color:var(--ink);font-size:15px;}
-
-/* ── Screens ─────────────────────────────────────── */
-.screen{display:none;min-height:100vh;}
-.screen.active{display:block;}
-
-/* ══════════════════════════════════════════════════
-   PIN SCREEN
-══════════════════════════════════════════════════ */
-#pinScreen{
+html,body{
+  height:100%;
+  font-family:'Cambria',Georgia,serif;
   background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  overflow:hidden;
+}
+.wrap{
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  min-height:100vh;padding:32px 24px;
+  padding:40px 28px;width:100%;max-width:360px;
 }
-.pin-logo{
-  width:90px;height:90px;background:#fff;border-radius:20px;
+.logo-box{
+  width:96px;height:96px;
+  background:#fff;border-radius:22px;
   display:flex;align-items:center;justify-content:center;
-  margin-bottom:18px;overflow:hidden;padding:6px;
+  margin-bottom:20px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.25);
+  overflow:hidden;padding:6px;
 }
-.pin-store{color:#fff;font-size:22px;font-weight:700;letter-spacing:.5px;margin-bottom:4px;text-align:center;}
-.pin-sub{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:40px;text-align:center;}
-.pin-dots{display:flex;gap:14px;margin-bottom:32px;}
-.pin-dot{
-  width:16px;height:16px;border-radius:50%;
-  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);
-  transition:background .15s,border-color .15s;
+.logo-box img{width:100%;height:100%;object-fit:contain;}
+.store-name{
+  color:#fff;font-size:24px;font-weight:700;
+  letter-spacing:.5px;margin-bottom:4px;text-align:center;
+  font-family:'Cambria',Georgia,serif;
 }
-.pin-dot.filled{background:#fff;border-color:#fff;}
-.pin-dot.error{background:var(--crimson);border-color:var(--crimson);}
-.pin-error{color:#ff6b6b;font-size:13px;text-align:center;height:20px;margin-bottom:12px;}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;}
-.pin-btn{
-  height:64px;border-radius:var(--radius);border:none;
-  background:rgba(255,255,255,.1);color:#fff;
-  font-size:22px;font-weight:500;cursor:pointer;
-  transition:background .1s,transform .1s;
-  display:flex;align-items:center;justify-content:center;
+.store-sub{
+  color:rgba(255,255,255,.5);font-size:13px;
+  margin-bottom:44px;text-align:center;
+  font-family:'Cambria',Georgia,serif;
+  letter-spacing:.3px;
 }
-.pin-btn:active{background:rgba(255,255,255,.25);transform:scale(.95);}
-.pin-btn.del{font-size:18px;}
-.pin-btn.empty{background:transparent;pointer-events:none;}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-.shake{animation:shake .35s ease;}
-
-/* ══════════════════════════════════════════════════
-   MAIN FORM SCREEN
-══════════════════════════════════════════════════ */
-#formScreen{background:var(--ivory);}
-
-.top-bar{
-  background:var(--navy);padding:14px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
+.dots{display:flex;gap:16px;margin-bottom:10px;}
+.dot{
+  width:14px;height:14px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  border:2px solid rgba(255,255,255,.35);
+  transition:all .15s;
 }
-.top-bar-title{color:#fff;font-size:16px;font-weight:600;}
-.top-bar-date{color:rgba(255,255,255,.7);font-size:13px;}
-.top-bar-logout{
-  background:rgba(255,255,255,.15);border:none;color:#fff;
-  border-radius:var(--radius-sm);padding:6px 12px;font-size:12px;cursor:pointer;
+.dot.filled{background:#fff;border-color:#fff;}
+.dot.err{background:var(--crimson);border-color:var(--crimson);}
+.err-msg{
+  color:#ff7675;font-size:13px;text-align:center;
+  height:22px;margin-bottom:20px;
+  font-family:'Cambria',Georgia,serif;
 }
-
-.form-body{padding:14px 14px 100px;}
-
-/* Section cards */
-.card{
-  background:var(--white);border-radius:var(--radius);
-  border:1px solid var(--border);margin-bottom:12px;overflow:hidden;
-}
-.card-head{
-  background:var(--navy-l);padding:10px 14px;
-  font-size:11px;font-weight:700;color:var(--navy);
-  text-transform:uppercase;letter-spacing:.8px;
-  border-bottom:1px solid var(--border);
-}
-
-/* Summary grid */
-.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
-.sum-field{padding:12px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
-.sum-field:nth-child(2n){border-right:none;}
-.sum-field:nth-last-child(-n+2){border-bottom:none;}
-.sum-field.full{grid-column:1/-1;border-right:none;}
-.sum-field label{display:block;font-size:11px;color:var(--ink-60);margin-bottom:5px;font-weight:600;}
-.sum-field input,.sum-field .computed{
-  width:100%;border:none;outline:none;font-size:17px;font-weight:600;
-  color:var(--ink);background:transparent;font-family:inherit;
-}
-.sum-field .computed{color:var(--navy);pointer-events:none;}
-.sum-field input::placeholder{color:#ccc;font-weight:400;}
-.sum-field.highlight label{color:var(--gold-d);}
-.sum-field.highlight .computed{color:var(--gold-d);font-size:18px;}
-
-/* Diff row */
-.diff-strip{
+.pad{
   display:grid;grid-template-columns:repeat(3,1fr);
-  background:var(--navy-l);border-top:1px solid var(--border);
+  gap:14px;width:100%;max-width:280px;
 }
-.diff-cell{padding:10px 12px;text-align:center;border-right:1px solid var(--border);}
-.diff-cell:last-child{border-right:none;}
-.diff-cell-lbl{font-size:10px;color:var(--navy);font-weight:700;text-transform:uppercase;}
-.diff-cell-val{font-size:16px;font-weight:700;color:var(--navy);margin-top:3px;}
-.diff-cell-val.pos{color:var(--crimson);}
-.diff-cell-val.neg{color:var(--green);}
-
-/* Counter table */
-.counter-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
-thead tr{background:var(--navy);}
-th{color:#fff;padding:9px 8px;text-align:center;font-size:11px;font-weight:600;white-space:nowrap;}
-th.left{text-align:left;}
-tbody tr:nth-child(even){background:#FAFAF7;}
-tbody tr:nth-child(odd){background:#fff;}
-td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle;}
-td.lbl{padding:8px;font-weight:600;color:var(--navy);font-size:12px;white-space:nowrap;}
-td input,td select{
-  width:100%;border:none;outline:none;background:transparent;
-  font-size:13px;color:var(--ink);padding:8px 6px;font-family:inherit;
-  text-align:center;
+.key{
+  height:68px;border-radius:14px;border:none;
+  background:rgba(255,255,255,.1);
+  color:#fff;font-size:24px;
+  font-family:'Cambria',Georgia,serif;
+  font-weight:600;cursor:pointer;
+  transition:background .1s,transform .08s;
+  display:flex;align-items:center;justify-content:center;
 }
-td select{cursor:pointer;}
-td input.name-inp{text-align:left;}
-td.total-diff{font-weight:700;text-align:center;padding:8px 6px;font-size:13px;}
-td.total-diff.pos{color:var(--crimson);}
-td.total-diff.neg{color:var(--green);}
-td.total-diff.zero{color:var(--ink-60);}
-tfoot tr{background:var(--gold-l);}
-tfoot td{padding:9px 8px;font-weight:700;font-size:13px;text-align:center;color:var(--navy);border-top:2px solid var(--gold);}
-tfoot td.lbl{text-align:left;color:var(--gold-d);}
-
-.add-row-btn{
-  width:100%;padding:12px;border:none;background:var(--navy-l);
-  color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;
-  border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:6px;
+.key:active{background:rgba(255,255,255,.28);transform:scale(.93);}
+.key.blank{background:transparent;pointer-events:none;}
+.key.del{font-size:20px;}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%,60%{transform:translateX(-10px)}
+  40%,80%{transform:translateX(10px)}
 }
-
-/* Bottom action bar */
-.bottom-bar{
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--white);border-top:1px solid var(--border);
-  padding:12px 14px calc(12px + env(safe-area-inset-bottom));
-  display:flex;gap:10px;z-index:100;
-}
-.btn-save{
-  flex:1;padding:14px;border-radius:var(--radius);border:none;
-  background:var(--navy);color:#fff;font-size:15px;font-weight:600;cursor:pointer;
-}
-.btn-reset{
-  padding:14px 18px;border-radius:var(--radius);border:1px solid var(--border);
-  background:var(--white);color:var(--ink-60);font-size:14px;cursor:pointer;
-}
-
-/* ══════════════════════════════════════════════════
-   PREVIEW SCREEN
-══════════════════════════════════════════════════ */
-#previewScreen{background:var(--ivory);}
-.preview-bar{
-  background:var(--navy);padding:14px 16px;
-  display:flex;align-items:center;gap:12px;
-  position:sticky;top:0;z-index:100;
-}
-.preview-bar-title{color:#fff;font-size:16px;font-weight:600;flex:1;}
-.preview-bar button{
-  background:rgba(255,255,255,.15);border:none;color:#fff;
-  border-radius:var(--radius-sm);padding:7px 14px;font-size:13px;cursor:pointer;
-}
-.canvas-wrap{padding:14px;background:var(--surface);}
-#settlementCanvas{width:100%;border-radius:var(--radius);box-shadow:0 2px 16px rgba(0,0,0,.1);}
-.preview-actions{
-  padding:14px;display:flex;gap:10px;
-  position:sticky;bottom:0;background:var(--white);
-  border-top:1px solid var(--border);
-}
-.btn-edit{
-  flex:1;padding:14px;border-radius:var(--radius);
-  border:1.5px solid var(--navy);background:#fff;
-  color:var(--navy);font-size:15px;font-weight:600;cursor:pointer;
-}
-.btn-wa{
-  flex:2;padding:14px;border-radius:var(--radius);border:none;
-  background:#25D366;color:#fff;font-size:15px;font-weight:600;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn-wa svg{width:20px;height:20px;fill:#fff;}
-.saving-overlay{
-  display:none;position:fixed;inset:0;background:rgba(26,26,46,.6);
-  z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;
-}
-.saving-overlay.show{display:flex;}
-.saving-spin{
-  width:44px;height:44px;border:3px solid rgba(255,255,255,.3);
-  border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;
-}
-.saving-txt{color:#fff;font-size:15px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Toast */
-.toast{
-  position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
-  background:var(--ink);color:#fff;padding:10px 20px;border-radius:20px;
-  font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;white-space:nowrap;
-}
-.toast.show{opacity:1;}
+.shake{animation:shake .38s ease;}
 </style>
 </head>
 <body>
-
-<!-- ══ PIN SCREEN ════════════════════════════════ -->
-<div id="pinScreen" class="screen active">
-  <div class="pin-logo">
-    <img src="../logo.jpg" alt="BSC Logo" style="width:80px;height:80px;object-fit:contain;border-radius:16px;">
+<div class="wrap">
+  <div class="logo-box">
+    <img src="../logo.jpg" alt="BSC Logo" onerror="this.parentElement.innerHTML='<span style=\'font-size:28px;font-weight:900;color:#1E2D5A;\'>BSC</span>'">
   </div>
-  <div class="pin-store">BSC BELAGAVI</div>
-  <div class="pin-sub">The Textile Mall · Cash Settlement</div>
-  <div class="pin-dots" id="pinDots">
-    <div class="pin-dot" id="d0"></div>
-    <div class="pin-dot" id="d1"></div>
-    <div class="pin-dot" id="d2"></div>
-    <div class="pin-dot" id="d3"></div>
+  <div class="store-name">BSC BELAGAVI</div>
+  <div class="store-sub">The Textile Mall &nbsp;·&nbsp; Cash Settlement</div>
+
+  <div class="dots" id="dots">
+    <div class="dot" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
   </div>
-  <div class="pin-error" id="pinError"></div>
-  <div class="pin-pad">
-    <button class="pin-btn" onclick="enterPin('1')">1</button>
-    <button class="pin-btn" onclick="enterPin('2')">2</button>
-    <button class="pin-btn" onclick="enterPin('3')">3</button>
-    <button class="pin-btn" onclick="enterPin('4')">4</button>
-    <button class="pin-btn" onclick="enterPin('5')">5</button>
-    <button class="pin-btn" onclick="enterPin('6')">6</button>
-    <button class="pin-btn" onclick="enterPin('7')">7</button>
-    <button class="pin-btn" onclick="enterPin('8')">8</button>
-    <button class="pin-btn" onclick="enterPin('9')">9</button>
-    <button class="pin-btn empty"></button>
-    <button class="pin-btn" onclick="enterPin('0')">0</button>
-    <button class="pin-btn del" onclick="deletePin()">⌫</button>
-  </div>
-</div>
+  <div class="err-msg" id="errMsg"></div>
 
-<!-- ══ FORM SCREEN ═══════════════════════════════ -->
-<div id="formScreen" class="screen">
-  <div class="top-bar">
-    <div>
-      <div class="top-bar-title">BSC Belagavi</div>
-      <div class="top-bar-date" id="topDate"></div>
-    </div>
-    <button class="top-bar-logout" onclick="logout()">Logout</button>
-  </div>
-
-  <div class="form-body">
-
-    <!-- Date + Summary -->
-    <div class="card">
-      <div class="card-head">Today's Summary</div>
-      <div class="sum-grid">
-        <div class="sum-field full">
-          <label>DATE</label>
-          <input type="date" id="fDate" oninput="syncDate()">
-        </div>
-        <div class="sum-field">
-          <label>TODAY'S SALE (₹)</label>
-          <input type="number" id="fSale" placeholder="0" inputmode="numeric" oninput="recalc()">
-        </div>
-        <div class="sum-field">
-          <label>TOTAL BILLS</label>
-          <input type="number" id="fBills" placeholder="0" inputmode="numeric" oninput="recalc()">
-        </div>
-        <div class="sum-field highlight full">
-          <label>ABV — Average Bill Value (₹)</label>
-          <div class="computed" id="fAbv">—</div>
-        </div>
-      </div>
-
-      <!-- Cash / Card / UPI amounts -->
-      <div class="sum-grid" style="border-top:1px solid var(--border);">
-        <div class="sum-field">
-          <label>CASH AMOUNT (₹)</label>
-          <input type="number" id="fCash" placeholder="0" inputmode="numeric" oninput="recalc()">
-        </div>
-        <div class="sum-field">
-          <label>CARD AMOUNT (₹)</label>
-          <input type="number" id="fCard" placeholder="0" inputmode="numeric" oninput="recalc()">
-        </div>
-        <div class="sum-field full">
-          <label>UPI AMOUNT (₹)</label>
-          <input type="number" id="fUpi" placeholder="0" inputmode="numeric" oninput="recalc()">
-        </div>
-      </div>
-
-      <!-- Diff strip — pulled from counter totals -->
-      <div class="diff-strip">
-        <div class="diff-cell">
-          <div class="diff-cell-lbl">Cash Diff</div>
-          <div class="diff-cell-val" id="topCashDiff">0</div>
-        </div>
-        <div class="diff-cell">
-          <div class="diff-cell-lbl">Card Diff</div>
-          <div class="diff-cell-val" id="topCardDiff">0</div>
-        </div>
-        <div class="diff-cell">
-          <div class="diff-cell-lbl">UPI Diff</div>
-          <div class="diff-cell-val" id="topUpiDiff">0</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Counter Table -->
-    <div class="card">
-      <div class="card-head">Cash Counter Report</div>
-      <div class="counter-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="left" style="width:70px;">Counter</th>
-              <th class="left" style="width:110px;">Cashier</th>
-              <th>Cash Diff</th>
-              <th>Card Diff</th>
-              <th>UPI Diff</th>
-              <th>Total Diff</th>
-              <th>Staff Disc</th>
-              <th>Cust Disc</th>
-            </tr>
-          </thead>
-          <tbody id="counterBody"></tbody>
-          <tfoot>
-            <tr>
-              <td class="lbl" colspan="2">TOTAL</td>
-              <td id="ftCash">0</td>
-              <td id="ftCard">0</td>
-              <td id="ftUpi">0</td>
-              <td id="ftDiff" style="font-weight:800;color:var(--navy);">0</td>
-              <td id="ftStaff">0</td>
-              <td id="ftCust">0</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      <button class="add-row-btn" onclick="addCounterRow()">＋ Add Counter Row</button>
-    </div>
-
-  </div>
-
-  <div class="bottom-bar">
-    <button class="btn-reset" onclick="resetForm()">Reset</button>
-    <button class="btn-save" onclick="saveForm()">Preview & Save →</button>
+  <div class="pad">
+    <button class="key" onclick="tap('1')">1</button>
+    <button class="key" onclick="tap('2')">2</button>
+    <button class="key" onclick="tap('3')">3</button>
+    <button class="key" onclick="tap('4')">4</button>
+    <button class="key" onclick="tap('5')">5</button>
+    <button class="key" onclick="tap('6')">6</button>
+    <button class="key" onclick="tap('7')">7</button>
+    <button class="key" onclick="tap('8')">8</button>
+    <button class="key" onclick="tap('9')">9</button>
+    <button class="key blank"></button>
+    <button class="key" onclick="tap('0')">0</button>
+    <button class="key del" onclick="del()">⌫</button>
   </div>
 </div>
-
-<!-- ══ PREVIEW SCREEN ════════════════════════════ -->
-<div id="previewScreen" class="screen">
-  <div class="preview-bar">
-    <div class="preview-bar-title">Settlement Preview</div>
-  </div>
-  <div class="canvas-wrap">
-    <canvas id="settlementCanvas"></canvas>
-  </div>
-  <div class="preview-actions">
-    <button class="btn-edit" onclick="goEdit()">✎ Edit</button>
-    <button class="btn-wa" onclick="shareWhatsApp()">
-      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2C6.476 2 2 6.476 2 12.004c0 1.77.463 3.431 1.258 4.88L2 22l5.248-1.234A9.96 9.96 0 0012.004 22C17.532 22 22 17.524 22 12.004 22 6.476 17.532 2 12.004 2zm0 18.186a8.166 8.166 0 01-4.167-1.143l-.299-.178-3.105.73.761-3.024-.196-.311A8.131 8.131 0 013.814 12c0-4.517 3.673-8.19 8.19-8.19 4.518 0 8.19 3.673 8.19 8.19 0 4.518-3.672 8.186-8.19 8.186z"/></svg>
-      Share & Save
-    </button>
-  </div>
-</div>
-
-<!-- Saving overlay -->
-<div class="saving-overlay" id="savingOverlay">
-  <div class="saving-spin"></div>
-  <div class="saving-txt" id="savingTxt">Saving to Google Sheet…</div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  CONFIG — change PIN here
-// ══════════════════════════════════════════════════
-const CORRECT_PIN = "1234";
-const SESSION_HOURS = 1;
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFaLQExagFdrNb1f1cGLRSzpAFM6mtKwVOHUDiCxxbIIofvairM8rClauGHwMUxAZEfg/exec";
-const RETENTION_DAYS = 30;
+const PIN = "1234";
+const SESSION_MS = 3600000; // 1 hour
+let entry = "";
 
-// ══════════════════════════════════════════════════
-//  DEFAULT DATA
-// ══════════════════════════════════════════════════
-let counterIds = ["CS1","CS2","CS3","CS4","CS5","CS6","CS7","CS8"];
-let cashierNames = ["DURGAPPA","PRASHANT","NITIN","SHRIDAR","SACHIN","ANIL","PRAKASH","CASHIER2"];
-let extraRowCount = 0;
-
-// ══════════════════════════════════════════════════
-//  SESSION
-// ══════════════════════════════════════════════════
-function checkSession(){
-  const t = sessionStorage.getItem("bsc_session");
-  if(!t) return false;
-  const diff = (Date.now() - parseInt(t)) / 3600000;
-  return diff < SESSION_HOURS;
+function tap(d){
+  if(entry.length >= 4) return;
+  entry += d;
+  render();
+  if(entry.length === 4) verify();
 }
-function startSession(){
-  sessionStorage.setItem("bsc_session", Date.now().toString());
+function del(){
+  entry = entry.slice(0,-1);
+  render();
 }
-function logout(){
-  sessionStorage.clear();
-  localStorage.removeItem("bsc_form_draft");
-  showScreen("pinScreen");
-  pinEntry = "";
-  updateDots();
-}
-
-// Auto-logout check every minute
-setInterval(()=>{ if(!checkSession() && currentScreen!=="pinScreen"){ logout(); }}, 60000);
-
-let currentScreen = "pinScreen";
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  currentScreen = id;
-}
-
-// ══════════════════════════════════════════════════
-//  PIN
-// ══════════════════════════════════════════════════
-let pinEntry = "";
-function enterPin(d){
-  if(pinEntry.length >= 4) return;
-  pinEntry += d;
-  updateDots();
-  if(pinEntry.length === 4) checkPin();
-}
-function deletePin(){
-  pinEntry = pinEntry.slice(0,-1);
-  updateDots();
-}
-function updateDots(){
+function render(){
   for(let i=0;i<4;i++){
     const dot = document.getElementById("d"+i);
-    dot.classList.toggle("filled", i < pinEntry.length);
-    dot.classList.remove("error");
+    dot.className = "dot" + (i < entry.length ? " filled" : "");
   }
 }
-function checkPin(){
-  if(pinEntry === CORRECT_PIN){
-    document.getElementById("pinError").textContent="";
-    startSession();
-    initForm();
-    showScreen("formScreen");
+function verify(){
+  if(entry === PIN){
+    sessionStorage.setItem("bsc_auth", Date.now().toString());
+    window.location.href = "form.html";
   } else {
-    document.getElementById("pinError").textContent="Incorrect PIN. Try again.";
-    document.getElementById("pinDots").classList.add("shake");
-    for(let i=0;i<4;i++) document.getElementById("d"+i).classList.add("error");
+    document.getElementById("errMsg").textContent = "Incorrect PIN. Try again.";
+    const dotsEl = document.getElementById("dots");
+    dotsEl.classList.add("shake");
+    for(let i=0;i<4;i++) document.getElementById("d"+i).className="dot err";
     setTimeout(()=>{
-      document.getElementById("pinDots").classList.remove("shake");
-      pinEntry=""; updateDots();
-      document.getElementById("pinError").textContent="";
-    }, 800);
+      dotsEl.classList.remove("shake");
+      entry = ""; render();
+      document.getElementById("errMsg").textContent = "";
+    }, 850);
   }
 }
-
-// ══════════════════════════════════════════════════
-//  FORM INIT
-// ══════════════════════════════════════════════════
-function initForm(){
-  // Set today's date
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth()+1).padStart(2,"0");
-  const dd = String(today.getDate()).padStart(2,"0");
-  document.getElementById("fDate").value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById("topDate").textContent = `${dd}-${mm}-${yyyy}`;
-
-  // Try to load counter ids / cashier names from sheet
-  fetchMasterData();
-
-  // Build counter table
-  buildCounterTable();
-
-  // Restore draft if any
-  restoreDraft();
+// If already authenticated, skip to form
+const t = sessionStorage.getItem("bsc_auth");
+if(t && (Date.now() - parseInt(t)) < SESSION_MS){
+  window.location.href = "form.html";
 }
-
-function syncDate(){
-  const v = document.getElementById("fDate").value;
-  if(!v) return;
-  const [y,m,d] = v.split("-");
-  document.getElementById("topDate").textContent = `${d}-${m}-${y}`;
-}
-
-// ══════════════════════════════════════════════════
-//  FETCH MASTER DATA (Counter IDs + Cashier Names)
-// ══════════════════════════════════════════════════
-function fetchMasterData(){
-  fetch(APPS_SCRIPT_URL)
-    .then(r=>r.json())
-    .then(data=>{
-      if(data.counterIds && data.counterIds.length) counterIds = data.counterIds;
-      if(data.cashierNames && data.cashierNames.length) cashierNames = data.cashierNames;
-      buildCounterTable(); // rebuild with fresh data
-    })
-    .catch(()=>{}); // silent fail — use defaults
-}
-
-// ══════════════════════════════════════════════════
-//  COUNTER TABLE
-// ══════════════════════════════════════════════════
-function buildCounterTable(){
-  const tbody = document.getElementById("counterBody");
-  tbody.innerHTML = "";
-  extraRowCount = 0;
-  counterIds.forEach(id => addCounterRow(id));
-  recalcTotals();
-}
-
-function addCounterRow(fixedId){
-  const tbody = document.getElementById("counterBody");
-  const rowIdx = tbody.rows.length;
-  const counterId = fixedId || "";
-
-  const tr = document.createElement("tr");
-  tr.dataset.row = rowIdx;
-
-  // Counter ID dropdown
-  const idOptions = counterIds.map(c=>`<option value="${c}" ${c===counterId?"selected":""}>${c}</option>`).join("");
-  const newOption = `<option value="NEW">+ New ID</option>`;
-
-  tr.innerHTML = `
-    <td>
-      <select class="cid-sel" onchange="onCounterIdChange(this,${rowIdx})">
-        ${idOptions}${newOption}
-      </select>
-    </td>
-    <td><input class="name-inp" type="text" placeholder="Cashier name" list="cashierList" oninput="recalcTotals()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="recalcTotals()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="recalcTotals()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="recalcTotals()"></td>
-    <td class="total-diff zero" id="rtd${rowIdx}">0</td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="recalcTotals()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="recalcTotals()"></td>
-  `;
-
-  if(!fixedId){
-    tr.querySelector(".cid-sel").value = "";
-    extraRowCount++;
-  }
-
-  tbody.appendChild(tr);
-}
-
-function onCounterIdChange(sel, rowIdx){
-  if(sel.value === "NEW"){
-    const newId = prompt("Enter new Counter ID (e.g. CS9):");
-    if(newId && newId.trim()){
-      const clean = newId.trim().toUpperCase();
-      if(!counterIds.includes(clean)) counterIds.push(clean);
-      const opt = document.createElement("option");
-      opt.value = clean; opt.textContent = clean;
-      sel.insertBefore(opt, sel.querySelector('[value="NEW"]'));
-      sel.value = clean;
-    } else {
-      sel.value = counterIds[0] || "";
-    }
-  }
-}
-
-function recalcTotals(){
-  const rows = document.querySelectorAll("#counterBody tr");
-  let tCash=0, tCard=0, tUpi=0, tStaff=0, tCust=0;
-
-  rows.forEach((r, i) => {
-    const nums = r.querySelectorAll("input[type=number]");
-    const cash  = parseFloat(nums[0].value)||0;
-    const card  = parseFloat(nums[1].value)||0;
-    const upi   = parseFloat(nums[2].value)||0;
-    const staff = parseFloat(nums[3].value)||0;
-    const cust  = parseFloat(nums[4].value)||0;
-    const diff  = cash + card + upi;
-
-    const tdCell = document.getElementById("rtd"+i);
-    if(tdCell){
-      tdCell.textContent = fmt(diff);
-      tdCell.className = "total-diff " + (diff < 0 ? "neg" : diff > 0 ? "pos" : "zero");
-    }
-    tCash+=cash; tCard+=card; tUpi+=upi; tStaff+=staff; tCust+=cust;
-  });
-
-  document.getElementById("ftCash").textContent  = fmt(tCash);
-  document.getElementById("ftCard").textContent  = fmt(tCard);
-  document.getElementById("ftUpi").textContent   = fmt(tUpi);
-  document.getElementById("ftDiff").textContent  = fmt(tCash+tCard+tUpi);
-  document.getElementById("ftStaff").textContent = fmt(tStaff);
-  document.getElementById("ftCust").textContent  = fmt(tCust);
-
-  // Update top diff strip
-  const topCash = document.getElementById("topCashDiff");
-  const topCard = document.getElementById("topCardDiff");
-  const topUpi  = document.getElementById("topUpiDiff");
-
-  topCash.textContent = fmt(tCash);
-  topCard.textContent = fmt(tCard);
-  topUpi.textContent  = fmt(tUpi);
-  [topCash,topCard,topUpi].forEach(el=>{
-    const v = parseFloat(el.textContent.replace(/,/g,""))||0;
-    el.className = "diff-cell-val" + (v!==0?" pos":"");
-  });
-
-  saveDraft();
-}
-
-function recalc(){
-  const sale  = parseFloat(document.getElementById("fSale").value)||0;
-  const bills = parseFloat(document.getElementById("fBills").value)||0;
-  document.getElementById("fAbv").textContent = (sale&&bills) ? "₹"+fmt(Math.round(sale/bills)) : "—";
-  recalcTotals();
-}
-
-// ══════════════════════════════════════════════════
-//  DRAFT SAVE / RESTORE
-// ══════════════════════════════════════════════════
-function saveDraft(){
-  const rows = document.querySelectorAll("#counterBody tr");
-  const counterData = Array.from(rows).map(r=>{
-    const sel   = r.querySelector(".cid-sel");
-    const nameI = r.querySelector(".name-inp");
-    const nums  = r.querySelectorAll("input[type=number]");
-    return {
-      id:   sel ? sel.value : "",
-      name: nameI ? nameI.value : "",
-      cash: nums[0]?.value||"", card:nums[1]?.value||"",
-      upi:  nums[2]?.value||"", staff:nums[3]?.value||"", cust:nums[4]?.value||""
-    };
-  });
-  const draft = {
-    date:  document.getElementById("fDate").value,
-    sale:  document.getElementById("fSale").value,
-    bills: document.getElementById("fBills").value,
-    cash:  document.getElementById("fCash").value,
-    card:  document.getElementById("fCard").value,
-    upi:   document.getElementById("fUpi").value,
-    counters: counterData
-  };
-  localStorage.setItem("bsc_form_draft", JSON.stringify(draft));
-}
-
-function restoreDraft(){
-  try{
-    const raw = localStorage.getItem("bsc_form_draft");
-    if(!raw) return;
-    const d = JSON.parse(raw);
-    if(d.date)  document.getElementById("fDate").value  = d.date;
-    if(d.sale)  document.getElementById("fSale").value  = d.sale;
-    if(d.bills) document.getElementById("fBills").value = d.bills;
-    if(d.cash)  document.getElementById("fCash").value  = d.cash;
-    if(d.card)  document.getElementById("fCard").value  = d.card;
-    if(d.upi)   document.getElementById("fUpi").value   = d.upi;
-    if(d.counters && d.counters.length){
-      const rows = document.querySelectorAll("#counterBody tr");
-      d.counters.forEach((c,i)=>{
-        if(i >= rows.length) return;
-        const r = rows[i];
-        const sel   = r.querySelector(".cid-sel");
-        const nameI = r.querySelector(".name-inp");
-        const nums  = r.querySelectorAll("input[type=number]");
-        if(sel && c.id) sel.value = c.id;
-        if(nameI) nameI.value = c.name||"";
-        if(nums[0]) nums[0].value = c.cash||"";
-        if(nums[1]) nums[1].value = c.card||"";
-        if(nums[2]) nums[2].value = c.upi||"";
-        if(nums[3]) nums[3].value = c.staff||"";
-        if(nums[4]) nums[4].value = c.cust||"";
-      });
-    }
-    recalc();
-  }catch(e){}
-}
-
-// ══════════════════════════════════════════════════
-//  COLLECT FORM DATA
-// ══════════════════════════════════════════════════
-function collectData(){
-  const dateVal = document.getElementById("fDate").value;
-  const [y,m,d] = dateVal.split("-");
-  const dateStr = `${d}-${m}-${y}`;
-
-  const rows = document.querySelectorAll("#counterBody tr");
-  const counters = Array.from(rows).map(r=>{
-    const sel   = r.querySelector(".cid-sel");
-    const nameI = r.querySelector(".name-inp");
-    const nums  = r.querySelectorAll("input[type=number]");
-    const cash  = parseFloat(nums[0]?.value)||0;
-    const card  = parseFloat(nums[1]?.value)||0;
-    const upi   = parseFloat(nums[2]?.value)||0;
-    return {
-      counterId:   sel?.value||"",
-      cashierName: nameI?.value||"",
-      cashDiff: cash, cardDiff: card, upiDiff: upi,
-      totalDiff: cash+card+upi,
-      staffDisc: parseFloat(nums[3]?.value)||0,
-      custDisc:  parseFloat(nums[4]?.value)||0
-    };
-  });
-
-  const tCash  = parseFloat(document.getElementById("ftCash").textContent.replace(/,/g,""))||0;
-  const tCard  = parseFloat(document.getElementById("ftCard").textContent.replace(/,/g,""))||0;
-  const tUpi   = parseFloat(document.getElementById("ftUpi").textContent.replace(/,/g,""))||0;
-  const sale   = parseFloat(document.getElementById("fSale").value)||0;
-  const bills  = parseFloat(document.getElementById("fBills").value)||0;
-
-  return {
-    date: dateStr,
-    todaySale: sale,
-    totalBills: bills,
-    abv: bills ? Math.round(sale/bills) : 0,
-    cash:  parseFloat(document.getElementById("fCash").value)||0,
-    card:  parseFloat(document.getElementById("fCard").value)||0,
-    upi:   parseFloat(document.getElementById("fUpi").value)||0,
-    cashDiff: tCash, cardDiff: tCard, upiDiff: tUpi,
-    counters,
-    whatsappShared: false
-  };
-}
-
-// ══════════════════════════════════════════════════
-//  SAVE → BUILD PREVIEW IMAGE
-// ══════════════════════════════════════════════════
-function saveForm(){
-  const data = collectData();
-  buildPreviewImage(data);
-  showScreen("previewScreen");
-}
-
-function goEdit(){
-  showScreen("formScreen");
-}
-
-function resetForm(){
-  if(!confirm("Reset all data?")) return;
-  localStorage.removeItem("bsc_form_draft");
-  document.getElementById("fSale").value="";
-  document.getElementById("fBills").value="";
-  document.getElementById("fCash").value="";
-  document.getElementById("fCard").value="";
-  document.getElementById("fUpi").value="";
-  document.getElementById("fAbv").textContent="—";
-  buildCounterTable();
-}
-
-// ══════════════════════════════════════════════════
-//  BUILD SETTLEMENT IMAGE ON CANVAS
-// ══════════════════════════════════════════════════
-function buildPreviewImage(data){
-  const canvas = document.getElementById("settlementCanvas");
-  const W = 800;
-  const rowH = 34;
-  const counterRows = data.counters.length;
-  const H = 320 + (counterRows + 2) * rowH + 60;
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d");
-
-  const NAVY = "#1E2D5A";
-  const GOLD = "#B8860B";
-  const GOLD_L = "#FEF3C7";
-  const WHITE = "#FFFFFF";
-  const BORDER = "#CCCCCC";
-  const INK = "#1A1A2E";
-  const INK60 = "#888888";
-
-  // Background
-  ctx.fillStyle = WHITE;
-  ctx.fillRect(0,0,W,H);
-
-  // ── Header band ───────────────────────────────
-  ctx.fillStyle = NAVY;
-  ctx.fillRect(0,0,W,60);
-  ctx.fillStyle = WHITE;
-  ctx.font = "bold 22px -apple-system,Arial,sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText("BSC BELAGAVI", 20, 38);
-  ctx.font = "14px -apple-system,Arial,sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.7)";
-  ctx.fillText("The Textile Mall · Cash Counter Settlement", 20, 55);
-  ctx.textAlign = "right";
-  ctx.fillStyle = GOLD_L;
-  ctx.font = "bold 16px -apple-system,Arial,sans-serif";
-  ctx.fillText(data.date, W-20, 38);
-  ctx.fillStyle = "rgba(255,255,255,0.6)";
-  ctx.font = "12px -apple-system,Arial,sans-serif";
-  ctx.fillText("Since 1938", W-20, 55);
-  ctx.textAlign = "left";
-
-  // ── Summary box ───────────────────────────────
-  let y = 70;
-  const summaryData = [
-    ["TODAY'S SALE", "₹"+fmtIN(data.todaySale), "TOTAL BILLS", String(data.totalBills), "ABV", "₹"+fmtIN(data.abv)],
-    ["CASH", "₹"+fmtIN(data.cash), "CARD", "₹"+fmtIN(data.card), "UPI", "₹"+fmtIN(data.upi)]
-  ];
-
-  summaryData.forEach(row => {
-    // draw 3 cells
-    const cellW = W/3;
-    for(let i=0;i<3;i++){
-      const cx = i*cellW;
-      ctx.strokeStyle = BORDER;
-      ctx.lineWidth = 0.5;
-      ctx.strokeRect(cx, y, cellW, 50);
-      ctx.fillStyle = "#F9F7F0";
-      ctx.fillRect(cx+0.5, y+0.5, cellW-1, 49);
-      // label
-      ctx.fillStyle = INK60;
-      ctx.font = "10px -apple-system,Arial,sans-serif";
-      ctx.fillText(row[i*2], cx+12, y+16);
-      // value
-      ctx.fillStyle = NAVY;
-      ctx.font = "bold 18px -apple-system,Arial,sans-serif";
-      ctx.fillText(row[i*2+1], cx+12, y+40);
-    }
-    y += 50;
-  });
-
-  // Diff strip
-  ctx.fillStyle = "#EEF1FB";
-  ctx.fillRect(0, y, W, 40);
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 0.5;
-  ctx.strokeRect(0, y, W, 40);
-  const diffLabels = ["CASH DIFF", "CARD DIFF", "UPI DIFF"];
-  const diffVals   = [data.cashDiff, data.cardDiff, data.upiDiff];
-  diffLabels.forEach((lbl, i) => {
-    const cx = (W/3)*i;
-    ctx.fillStyle = NAVY;
-    ctx.font = "10px -apple-system,Arial,sans-serif";
-    ctx.fillText(lbl, cx+12, y+16);
-    ctx.fillStyle = diffVals[i]!==0 ? "#C0392B" : NAVY;
-    ctx.font = "bold 16px -apple-system,Arial,sans-serif";
-    ctx.fillText(fmt(diffVals[i]), cx+12, y+34);
-    if(i<2){ ctx.strokeStyle=BORDER; ctx.beginPath(); ctx.moveTo(cx+W/3,y); ctx.lineTo(cx+W/3,y+40); ctx.stroke(); }
-  });
-  y += 40;
-
-  // Gap
-  y += 12;
-
-  // ── Counter table header ──────────────────────
-  ctx.fillStyle = NAVY;
-  ctx.fillRect(0, y, W, 34);
-  const cols = [
-    {lbl:"COUNTER",  w:70,  align:"left"},
-    {lbl:"CASHIER",  w:130, align:"left"},
-    {lbl:"CASH DIFF",w:90,  align:"center"},
-    {lbl:"CARD DIFF",w:90,  align:"center"},
-    {lbl:"UPI DIFF", w:90,  align:"center"},
-    {lbl:"TOTAL DIFF",w:100,align:"center"},
-    {lbl:"STAFF DISC",w:110,align:"center"},
-    {lbl:"CUST DISC", w:120,align:"center"},
-  ];
-  // normalize widths
-  const totalW = cols.reduce((s,c)=>s+c.w,0);
-  cols.forEach(c=>{ c.w = Math.round(c.w * W / totalW); });
-
-  ctx.fillStyle = WHITE;
-  ctx.font = "bold 10px -apple-system,Arial,sans-serif";
-  let cx2 = 0;
-  cols.forEach(col=>{
-    const tx = col.align==="center" ? cx2+col.w/2 : cx2+8;
-    ctx.textAlign = col.align==="center" ? "center" : "left";
-    ctx.fillText(col.lbl, tx, y+22);
-    cx2 += col.w;
-  });
-  ctx.textAlign = "left";
-  y += 34;
-
-  // Counter rows
-  data.counters.forEach((row, ri) => {
-    ctx.fillStyle = ri%2===0 ? WHITE : "#F9F7F0";
-    ctx.fillRect(0, y, W, rowH);
-    ctx.strokeStyle = BORDER;
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(0, y, W, rowH);
-
-    const cells = [
-      row.counterId, row.cashierName,
-      fmt(row.cashDiff), fmt(row.cardDiff), fmt(row.upiDiff),
-      fmt(row.totalDiff), fmt(row.staffDisc), fmt(row.custDisc)
-    ];
-    cx2 = 0;
-    cells.forEach((val, ci) => {
-      const col = cols[ci];
-      const tx = col.align==="center" ? cx2+col.w/2 : cx2+8;
-      ctx.textAlign = col.align==="center" ? "center" : "left";
-      if(ci===0){ ctx.fillStyle=NAVY; ctx.font="bold 12px -apple-system,Arial,sans-serif"; }
-      else if(ci===5){
-        const n = parseFloat(val.replace(/,/g,""))||0;
-        ctx.fillStyle = n<0 ? "#1E7A1E" : n>0 ? "#C0392B" : INK60;
-        ctx.font = "bold 12px -apple-system,Arial,sans-serif";
-      }
-      else { ctx.fillStyle=INK; ctx.font="12px -apple-system,Arial,sans-serif"; }
-      ctx.fillText(val, tx, y+22);
-      cx2 += col.w;
-    });
-    ctx.textAlign = "left";
-    y += rowH;
-  });
-
-  // Totals row
-  ctx.fillStyle = GOLD_L;
-  ctx.fillRect(0, y, W, rowH+2);
-  ctx.strokeStyle = GOLD;
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(0, y, W, rowH+2);
-
-  const tRows = document.querySelectorAll("#counterBody tr");
-  let tCash=0,tCard=0,tUpi=0,tStaff=0,tCust=0;
-  tRows.forEach(r=>{
-    const n=r.querySelectorAll("input[type=number]");
-    tCash+=(parseFloat(n[0]?.value)||0);
-    tCard+=(parseFloat(n[1]?.value)||0);
-    tUpi+=(parseFloat(n[2]?.value)||0);
-    tStaff+=(parseFloat(n[3]?.value)||0);
-    tCust+=(parseFloat(n[4]?.value)||0);
-  });
-  const totalCells = ["TOTAL","",fmt(tCash),fmt(tCard),fmt(tUpi),fmt(tCash+tCard+tUpi),fmt(tStaff),fmt(tCust)];
-  cx2=0;
-  totalCells.forEach((val,ci)=>{
-    const col=cols[ci];
-    const tx=col.align==="center"?cx2+col.w/2:cx2+8;
-    ctx.textAlign=col.align==="center"?"center":"left";
-    ctx.fillStyle=GOLD; ctx.font="bold 12px -apple-system,Arial,sans-serif";
-    ctx.fillText(val,tx,y+22);
-    cx2+=col.w;
-  });
-  ctx.textAlign="left";
-  y += rowH+2;
-
-  // Footer
-  y += 16;
-  ctx.fillStyle = "#F3F1E8";
-  ctx.fillRect(0, y, W, 36);
-  ctx.fillStyle = INK60;
-  ctx.font = "11px -apple-system,Arial,sans-serif";
-  ctx.fillText("BSC The Textile Mall, Belagavi · Since 1938", 20, y+22);
-  ctx.textAlign="right";
-  ctx.fillText("Generated: "+new Date().toLocaleString("en-IN"), W-20, y+22);
-  ctx.textAlign="left";
-
-  // Outer border
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(0,0,W,H);
-}
-
-// ══════════════════════════════════════════════════
-//  SHARE ON WHATSAPP + SAVE TO SHEET
-// ══════════════════════════════════════════════════
-async function shareWhatsApp(){
-  const data = collectData();
-  data.whatsappShared = true;
-
-  // 1. Save to Google Sheet
-  showOverlay("Saving to Google Sheet…");
-  try{
-    await fetch(APPS_SCRIPT_URL, {
-      method:"POST",
-      body: JSON.stringify(data)
-    });
-  }catch(e){ /* silent — still share */ }
-
-  // 2. Try native share with canvas image
-  hideOverlay();
-  const canvas = document.getElementById("settlementCanvas");
-
-  if(navigator.share && navigator.canShare){
-    canvas.toBlob(async blob=>{
-      const file = new File([blob], `BSC_Settlement_${data.date}.png`, {type:"image/png"});
-      const shareData = {
-        files: [file],
-        title: `BSC Belagavi — Settlement ${data.date}`,
-        text: buildWhatsAppText(data)
-      };
-      if(navigator.canShare(shareData)){
-        try{ await navigator.share(shareData); }
-        catch(e){ fallbackWA(data); }
-      } else { fallbackWA(data); }
-    });
-  } else {
-    fallbackWA(data);
-  }
-
-  // Clear draft after successful share
-  localStorage.removeItem("bsc_form_draft");
-  showToast("Saved to Sheet ✓");
-}
-
-function fallbackWA(data){
-  const url = "https://wa.me/?text=" + encodeURIComponent(buildWhatsAppText(data));
-  window.open(url,"_blank");
-}
-
-function buildWhatsAppText(d){
-  const rows = d.counters.filter(c=>c.cashierName||c.counterId);
-  const lines = rows.map(r=>
-    `  ${(r.counterId||"").padEnd(4)} ${(r.cashierName||"").padEnd(12)} | Cash:${r.cashDiff} Card:${r.cardDiff} UPI:${r.upiDiff} | Diff:${r.totalDiff}`
-  ).join("\n");
-
-  const tDiff = d.cashDiff + d.cardDiff + d.upiDiff;
-  const tStaff = d.counters.reduce((s,c)=>s+(c.staffDisc||0),0);
-  const tCust  = d.counters.reduce((s,c)=>s+(c.custDisc||0),0);
-
-  return `*BSC BELAGAVI — CASH SETTLEMENT*\n` +
-    `*Date:* ${d.date}\n\n` +
-    `*TODAY'S SALE:* ₹${fmtIN(d.todaySale)}\n` +
-    `*Total Bills:* ${d.totalBills}  |  *ABV:* ₹${fmtIN(d.abv)}\n\n` +
-    `*COLLECTION*\n` +
-    `  Cash : ₹${fmtIN(d.cash)}\n` +
-    `  Card : ₹${fmtIN(d.card)}\n` +
-    `  UPI  : ₹${fmtIN(d.upi)}\n\n` +
-    `*CASH COUNTER REPORT*\n${lines}\n\n` +
-    `*TOTALS*\n` +
-    `  Cash Diff : ${d.cashDiff}\n` +
-    `  Card Diff : ${d.cardDiff}\n` +
-    `  UPI Diff  : ${d.upiDiff}\n` +
-    `  *Total Diff: ${tDiff}*\n` +
-    `  Staff Disc: ${tStaff}  |  Cust Disc: ${tCust}\n\n` +
-    `_BSC The Textile Mall, Belagavi_`;
-}
-
-// ══════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════
-function fmt(n){ return Number(n).toLocaleString("en-IN"); }
-function fmtIN(n){ return Number(n).toLocaleString("en-IN"); }
-
-function showOverlay(txt){
-  document.getElementById("savingTxt").textContent = txt;
-  document.getElementById("savingOverlay").classList.add("show");
-}
-function hideOverlay(){ document.getElementById("savingOverlay").classList.remove("show"); }
-
-function showToast(msg){
-  const t=document.getElementById("toast");
-  t.textContent=msg; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2500);
-}
-
-// ══════════════════════════════════════════════════
-//  CASHIER DATALIST
-// ══════════════════════════════════════════════════
-function buildDatalist(){
-  let dl = document.getElementById("cashierList");
-  if(!dl){ dl=document.createElement("datalist"); dl.id="cashierList"; document.body.appendChild(dl); }
-  dl.innerHTML = cashierNames.map(n=>`<option value="${n}">`).join("");
-}
-
-// ── On load ───────────────────────────────────────
-window.addEventListener("load",()=>{
-  buildDatalist();
-  if(checkSession()){
-    initForm();
-    showScreen("formScreen");
-  } else {
-    showScreen("pinScreen");
-  }
-});
 </script>
 </body>
 </html>
