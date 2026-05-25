@@ -63,21 +63,6 @@ html,body{
 }
 .logout-btn:active{background:rgba(255,255,255,.22);}
 
-/* ── Suggestion strip ─────────────────────────── */
-.suggest-strip{
-  background:var(--gold-l);
-  border-bottom:1.5px solid #E0C060;
-  padding:9px 16px;
-  display:flex;align-items:flex-start;gap:8px;
-}
-.suggest-icon{font-size:15px;margin-top:1px;flex-shrink:0;}
-.suggest-text{
-  font-size:12.5px;color:var(--gold-d);
-  font-family:'Cambria',Georgia,serif;
-  line-height:1.5;
-}
-.suggest-text strong{font-weight:700;}
-
 /* ── Body ─────────────────────────────────────── */
 .body{padding:14px 14px 110px;}
 
@@ -375,12 +360,6 @@ input[list]{-webkit-appearance:none;}
   <button class="logout-btn" onclick="logout()">Logout</button>
 </div>
 
-<!-- ══ SUGGESTION STRIP ══════════════════════════ -->
-<div class="suggest-strip" id="suggestStrip">
-  <div class="suggest-icon">💡</div>
-  <div class="suggest-text" id="suggestText">Fill in today's sale, bills and counter-wise differences, then tap <strong>Preview &amp; Save</strong>.</div>
-</div>
-
 <!-- ══ BODY ══════════════════════════════════════ -->
 <div class="body">
 
@@ -399,7 +378,7 @@ input[list]{-webkit-appearance:none;}
           <label>Today's Sale (₹)</label>
           <input type="number" id="fSale" placeholder="0" inputmode="numeric" oninput="recalc()">
         </div>
-        <div class="field last-row">
+        <div class="field">
           <label>Total Bills</label>
           <input type="number" id="fBills" placeholder="0" inputmode="numeric" oninput="recalc()">
         </div>
