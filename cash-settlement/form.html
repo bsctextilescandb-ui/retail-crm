@@ -312,6 +312,13 @@ tfoot td.lbl{text-align:left;color:var(--gold-d);}
   font-family:'Cambria',Georgia,serif;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
 }
+.saved-badge{
+  flex:2;padding:14px;border-radius:var(--radius);
+  background:var(--green-l);border:1.5px solid var(--green);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:15px;font-weight:700;color:var(--green);
+  font-family:'Cambria',Georgia,serif;
+}
 
 /* ── Saving overlay ───────────────────────────── */
 .saving-ov{
@@ -489,12 +496,16 @@ input[list]{-webkit-appearance:none;}
       <canvas id="settlementCanvas"></canvas>
     </div>
   </div>
-  <div class="preview-actions">
-    <button class="btn-edit" onclick="closePreview()">✎ Edit</button>
-    <button class="btn-wa" onclick="shareWA()">
+  <div class="preview-actions" id="previewActions">
+    <button class="btn-edit" id="editBtn" onclick="closePreview()">✎ Edit</button>
+    <button class="btn-wa" id="shareBtn" onclick="shareWA()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2C6.476 2 2 6.476 2 12.004c0 1.77.463 3.431 1.258 4.88L2 22l5.248-1.234A9.96 9.96 0 0012.004 22C17.532 22 22 17.524 22 12.004 22 6.476 17.532 2 12.004 2zm0 18.186a8.166 8.166 0 01-4.167-1.143l-.299-.178-3.105.73.761-3.024-.196-.311A8.131 8.131 0 013.814 12c0-4.517 3.673-8.19 8.19-8.19 4.518 0 8.19 3.673 8.19 8.19 0 4.518-3.672 8.186-8.19 8.186z"/></svg>
       Share &amp; Save
     </button>
+    <div class="saved-badge" id="savedBadge" style="display:none;">
+      <span style="font-size:20px;">✅</span>
+      <span>Saved to Sheet</span>
+    </div>
   </div>
 </div>
 
@@ -842,6 +853,15 @@ function resetForm(){
     document.getElementById(id).value="";
   });
   document.getElementById("fAbv").textContent = "—";
+  // Reset preview state
+  document.getElementById("editBtn").style.display   = "";
+  document.getElementById("shareBtn").style.display  = "";
+  document.getElementById("savedBadge").style.display = "none";
+  // Unlock form inputs
+  document.querySelectorAll("#formScreen input, #formScreen select").forEach(el=>{
+    el.disabled = false;
+  });
+  _savedData = null;
   setToday();
   buildTable();
   updateSuggest();
@@ -898,15 +918,33 @@ function doPreview(){
   window.scrollTo(0,0);
 }
 function closePreview(){
+  // If already saved, don't allow going back to edit
+  if(document.getElementById("savedBadge").style.display !== "none"){
+    showToast("Already saved — cannot edit.");
+    return;
+  }
   document.getElementById("previewOverlay").classList.remove("show");
 }
 
 // ══ CANVAS IMAGE ══════════════════════════════════
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
 function buildCanvas(data){
   const canvas = document.getElementById("settlementCanvas");
   const W = 900;
   const RH = 36;
-  const H  = 340 + (data.counters.length + 2)*RH + 56;
+  const H  = 350 + (data.counters.length + 2)*RH + 46;
   canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
@@ -923,33 +961,47 @@ function buildCanvas(data){
   ctx.fillRect(0,0,W,H);
 
   // ── top header ──
+  const HDR = 72;
   ctx.fillStyle = NAVY;
-  ctx.fillRect(0,0,W,64);
+  ctx.fillRect(0,0,W,HDR);
 
-  ctx.fillStyle = WHITE;
-  ctx.font = FONT(22,"bold");
-  ctx.textAlign = "left";
-  ctx.fillText("BSC BELAGAVI", 20, 38);
-  ctx.font = FONT(13);
-  ctx.fillStyle = "rgba(255,255,255,0.6)";
-  ctx.fillText("The Textile Mall  ·  Cash Counter Settlement", 20, 56);
-  ctx.textAlign = "right";
-  ctx.fillStyle = GOLD_L;
-  ctx.font = FONT(17,"bold");
-  ctx.fillText(data.date, W-20, 38);
-  ctx.fillStyle = "rgba(255,255,255,0.5)";
-  ctx.font = FONT(12);
-  ctx.fillText("Since 1938", W-20, 56);
-  ctx.textAlign = "left";
+  // Logo (async draw — load image)
+  const logoImg = new Image();
+  logoImg.src = "../logo.jpg";
+  const drawHeader = () => {
+    // Logo box
+    ctx.fillStyle = WHITE;
+    roundRect(ctx, 14, 10, 52, 52, 8);
+    ctx.fill();
+    try{
+      ctx.drawImage(logoImg, 16, 12, 48, 48);
+    }catch(e){}
+    // Store name
+    ctx.fillStyle = WHITE;
+    ctx.font = FONT(22,"bold");
+    ctx.textAlign = "left";
+    ctx.fillText("BSC BELAGAVI", 76, 35);
+    ctx.font = FONT(12);
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.fillText("The Textile Mall  ·  Cash Counter Settlement", 76, 56);
+    // Date on right
+    ctx.textAlign = "right";
+    ctx.fillStyle = GOLD_L;
+    ctx.font = FONT(20,"bold");
+    ctx.fillText(data.date, W-18, 42);
+    ctx.textAlign = "left";
+  };
+  if(logoImg.complete){ drawHeader(); }
+  else { logoImg.onload = drawHeader; logoImg.onerror = drawHeader; drawHeader(); }
 
   // ── summary row 1: sale / bills / abv ──
-  let y = 74;
+  let y = HDR + 8;
   drawSummaryRow(ctx, y, W, [
     ["TODAY'S SALE","₹"+fIN(data.todaySale)],
     ["TOTAL BILLS", String(data.totalBills)],
     ["ABV",         "₹"+fIN(data.abv)]
   ], FONT, NAVY, GREY, BORDER);
-  y += 54;
+  y += 46;
 
   // ── summary row 2: cash / card / upi ──
   drawSummaryRow(ctx, y, W, [
@@ -957,7 +1009,7 @@ function buildCanvas(data){
     ["CARD","₹"+fIN(data.card)],
     ["UPI", "₹"+fIN(data.upi)]
   ], FONT, NAVY, GREY, BORDER);
-  y += 54;
+  y += 46;
 
   // ── diff strip ──
   ctx.fillStyle = "#EEF1FB";
@@ -1065,13 +1117,15 @@ function buildCanvas(data){
   y+=RH+2;
 
   // ── footer ──
-  y+=12;
+  y+=8;
   ctx.fillStyle="#F3F1E8";
-  ctx.fillRect(0,y,W,34);
-  ctx.fillStyle=GREY; ctx.font=FONT(11);
-  ctx.fillText("BSC The Textile Mall, Belagavi  ·  Since 1938", 20, y+22);
+  ctx.fillRect(0,y,W,30);
+  ctx.fillStyle=GREY; ctx.font=FONT(10);
+  ctx.fillText("BSC The Textile Mall, Belagavi", 16, y+20);
   ctx.textAlign="right";
-  ctx.fillText("Generated: "+new Date().toLocaleString("en-IN"), W-20, y+22);
+  const now = new Date();
+  const ts = now.toLocaleDateString("en-IN")+", "+now.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+  ctx.fillText("Generated: "+ts, W-16, y+20);
   ctx.textAlign="left";
 
   // outer border
@@ -1084,31 +1138,49 @@ function drawSummaryRow(ctx, y, W, items, FONT, NAVY, GREY, BORDER){
   items.forEach(([lbl,val],i)=>{
     const cx=i*cellW;
     ctx.strokeStyle=BORDER; ctx.lineWidth=0.5;
-    ctx.fillStyle="#F9F7F0";
-    ctx.fillRect(cx,y,cellW,54);
-    ctx.strokeRect(cx,y,cellW,54);
-    ctx.fillStyle=GREY; ctx.font=FONT(10,"bold");
+    ctx.fillStyle= i%2===0 ? "#F9F7F0" : "#FFFFFF";
+    ctx.fillRect(cx,y,cellW,46);
+    ctx.strokeRect(cx,y,cellW,46);
+    ctx.fillStyle=GREY; ctx.font=FONT(9,"bold");
     ctx.textAlign="left";
-    ctx.fillText(lbl, cx+12, y+16);
-    ctx.fillStyle=NAVY; ctx.font=FONT(19,"bold");
-    ctx.fillText(val, cx+12, y+43);
+    ctx.fillText(lbl, cx+12, y+14);
+    ctx.fillStyle=NAVY; ctx.font=FONT(17,"bold");
+    ctx.fillText(val, cx+12, y+38);
   });
 }
 
 // ══ WHATSAPP + SAVE ═══════════════════════════════
+let _savedData = null;
+
 async function shareWA(){
   const data = collectData();
   data.whatsappShared = true;
 
+  // 1. Save to Google Sheet first
   showSaving("Saving to Google Sheet…");
+  let saveOk = false;
   try{
     await fetch(APPS_SCRIPT,{method:"POST",body:JSON.stringify(data)});
-  }catch(e){}
+    saveOk = true;
+  }catch(e){ saveOk = false; }
   hideSaving();
 
-  const canvas = document.getElementById("settlementCanvas");
+  // 2. Lock form — hide Edit, show Saved badge
+  _savedData = data;
+  document.getElementById("editBtn").style.display   = "none";
+  document.getElementById("shareBtn").style.display  = "none";
+  document.getElementById("savedBadge").style.display = "flex";
 
-  // Try native share (mobile) with image
+  // 3. Lock all form inputs
+  document.querySelectorAll("#formScreen input, #formScreen select").forEach(el=>{
+    el.disabled = true;
+  });
+
+  // 4. Clear draft
+  localStorage.removeItem("bsc_draft");
+
+  // 5. Share on WhatsApp with image
+  const canvas = document.getElementById("settlementCanvas");
   if(navigator.share && navigator.canShare){
     canvas.toBlob(async blob=>{
       const file = new File([blob],`BSC_Settlement_${data.date}.png`,{type:"image/png"});
@@ -1120,8 +1192,7 @@ async function shareWA(){
     });
   } else { fallbackWA(data); }
 
-  localStorage.removeItem("bsc_draft");
-  showToast("Saved to Sheet ✓");
+  showToast(saveOk ? "Saved to Sheet ✓" : "Shared! (Sheet save failed — check connection)");
 }
 
 function fallbackWA(data){
