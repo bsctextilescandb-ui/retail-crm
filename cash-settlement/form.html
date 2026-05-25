@@ -679,11 +679,11 @@ function fIN(v){
 function fmtInput(el){
   const pos   = el.selectionStart;
   const old   = el.value;
+  const isNeg = old.startsWith("-");
   const digits = old.replace(/[^0-9]/g,"");
-  if(!digits){ el.value=""; return; }
-  const formatted = fIN(parseInt(digits,10));
+  if(!digits){ el.value = isNeg ? "-" : ""; return; }
+  const formatted = (isNeg ? "-" : "") + fIN(parseInt(digits,10));
   el.value = formatted;
-  // adjust cursor for added commas
   const added = formatted.length - old.length;
   try{ el.setSelectionRange(pos+added, pos+added); }catch(e){}
 }
