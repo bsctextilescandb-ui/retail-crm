@@ -427,6 +427,135 @@ function canEnterFootfall() {
 function canEditFootfall() {
   return hasRole(["super_admin","admin"]);
 }
+function canPrevBills() {
+  return SESSION && ["super_admin","admin","crm_manager"].indexOf(SESSION.user.role) !== -1;
+}
+
+function getPrevDays() {
+  var days = [];
+  for (var i = 1; i <= 3; i++) {
+    var d  = nowIST();
+    d.setDate(d.getDate() - i);
+    var dd = String(d.getDate()).padStart(2,"0");
+    var mm = String(d.getMonth()+1).padStart(2,"0");
+    var yy = d.getFullYear();
+    days.push({
+      key:     dd+"/"+mm+"/"+yy,
+      display: d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})
+    });
+  }
+  return days;
+}
+
+function renderPrevBills() {
+  var days = getPrevDays();
+  var daily = ffState.allDaily || [];
+
+  var html = '<div style="margin-top:20px;background:var(--white);border-radius:var(--radius);' +
+    'border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden">';
+  html += '<div style="padding:14px 18px;border-bottom:1px solid var(--border);' +
+    'display:flex;align-items:center;gap:10px">' +
+    '<div style="font-size:14px;font-weight:500">📋 Previous Days — Bills Update</div>' +
+    '<div style="font-size:12px;color:var(--ink-30)">Last 3 days · Manager & Admin only</div>' +
+  '</div>';
+
+  html += '<div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px">';
+
+  days.forEach(function(day) {
+    var existing = daily.find(function(r){ return r.date === day.key; });
+    var bills    = existing ? existing.bills_count : "";
+    var savedLbl = bills ? String(bills)+" bills saved" : "Not entered";
+    var savedCol = bills ? "var(--green)" : "var(--crimson)";
+    var inputId  = "prevBills_"+day.key.replace(/\//g,"_");
+    var btnId    = "prevBillsBtn_"+day.key.replace(/\//g,"_");
+    var spinId   = "prevBillsSpin_"+day.key.replace(/\//g,"_");
+
+    html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;' +
+      'padding:12px 14px;background:var(--surface);border-radius:var(--radius-sm);' +
+      'border:1px solid var(--border)">' +
+      '<div style="min-width:110px">' +
+        '<div style="font-size:13px;font-weight:500">'+esc(day.display)+'</div>' +
+        '<div style="font-size:11px;color:'+savedCol+';margin-top:2px">'+esc(savedLbl)+'</div>' +
+      '</div>' +
+      '<input id="'+inputId+'" type="number" min="0" placeholder="Enter bills" ' +
+        'value="'+esc(String(bills||""))+'" ' +
+        'style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);' +
+        'font-size:14px;font-family:inherit;width:140px"' +
+        ' onfocus="this.style.borderColor=\'var(--navy)\'" ' +
+        ' onblur="this.style.borderColor=\'var(--border)\'"/>' +
+      '<button id="'+btnId+'" class="btn btn-navy btn-sm" ' +
+        'onclick="savePrevBills(\''+esc(day.key)+'\',\''+inputId+'\',\''+btnId+'\',\''+spinId+'\')">' +
+        '<span id="'+spinId+'" class="spinner"></span> Save' +
+      '</button>' +
+      '<div id="prevAlert_'+day.key.replace(/\//g,"_")+'" style="font-size:12px;display:none"></div>' +
+    '</div>';
+  });
+
+  html += '</div></div>';
+  return html;
+}
+
+function savePrevBills(date, inputId, btnId, spinId) {
+  var input = document.getElementById(inputId);
+  var btn   = document.getElementById(btnId);
+  var spin  = document.getElementById(spinId);
+  var alertId = "prevAlert_"+date.replace(/\//g,"_");
+  var alertEl = document.getElementById(alertId);
+
+  var val = input ? input.value.trim() : "";
+  if (!val || isNaN(val) || Number(val) < 0) {
+    if (alertEl){
+      alertEl.style.display="block";
+      alertEl.style.color="var(--crimson)";
+      alertEl.textContent="Please enter a valid bills count.";
+    }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (spin) spin.classList.add("show");
+  if (alertEl) alertEl.style.display = "none";
+
+  apiPost({ action:"save_daily_bills", date:date, bills_count:Number(val) })
+    .then(function(res) {
+      if (btn) btn.disabled = false;
+      if (spin) spin.classList.remove("show");
+      if (res.ok) {
+        if (alertEl){
+          alertEl.style.display="block";
+          alertEl.style.color="var(--green)";
+          alertEl.textContent="✓ Saved successfully";
+          setTimeout(function(){ alertEl.style.display="none"; }, 3000);
+        }
+        // Refresh daily data silently
+        apiPost({ action:"get_footfall", date:dateKeyIST() }).then(function(r){
+          if (r.ok && r.daily_all) {
+            ffState.allDaily = r.daily_all;
+            var prev = document.querySelector("[id^='prevBills_']");
+            if (prev) {
+              var container = prev.closest("div[style*='margin-top:20px']");
+              if (container) container.outerHTML = renderPrevBills();
+            }
+          }
+        });
+      } else {
+        if (alertEl){
+          alertEl.style.display="block";
+          alertEl.style.color="var(--crimson)";
+          alertEl.textContent=res.error||"Failed to save.";
+        }
+      }
+    }).catch(function() {
+      if (btn) btn.disabled = false;
+      if (spin) spin.classList.remove("show");
+      if (alertEl){
+        alertEl.style.display="block";
+        alertEl.style.color="var(--crimson)";
+        alertEl.textContent="Connection error.";
+      }
+    });
+}
+
 function canEnterBills() {
   return hasRole(["super_admin","admin","crm_manager","crm_staff"]);
 }
@@ -617,6 +746,7 @@ var ffState = {
   settings:     {},
   entries:      [],
   dailySummary: null,
+  allDaily:     [],
   slots:        [],
   loading:      false,
 };
@@ -647,6 +777,7 @@ function renderFootfall() {
     if (fRes.ok) {
       ffState.entries      = fRes.entries      || [];
       ffState.dailySummary = fRes.daily_summary || null;
+      ffState.allDaily     = fRes.daily_all     || [];
     }
 
     buildSlots();
@@ -759,6 +890,11 @@ function paintFootfall() {
   });
 
   html += '</div></div>';
+
+  // Previous days bills — Manager/Admin only
+  if (canPrevBills()) {
+    html += renderPrevBills();
+  }
 
   document.getElementById("content").innerHTML = html;
 }
