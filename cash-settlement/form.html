@@ -376,11 +376,11 @@ input[list]{-webkit-appearance:none;}
       <div class="field-row cols-2">
         <div class="field">
           <label>Today's Sale (₹)</label>
-          <input type="number" id="fSale" placeholder="0" inputmode="numeric" oninput="recalc()">
+          <input type="text" id="fSale" placeholder="0" inputmode="numeric" oninput="fmtInput(this);recalc()">
         </div>
         <div class="field">
           <label>Total Bills</label>
-          <input type="number" id="fBills" placeholder="0" inputmode="numeric" oninput="recalc()">
+          <input type="text" id="fBills" placeholder="0" inputmode="numeric" oninput="fmtInput(this);recalc()">
         </div>
       </div>
       <div class="field-row cols-1">
@@ -402,17 +402,17 @@ input[list]{-webkit-appearance:none;}
       <div class="field-row cols-2">
         <div class="field">
           <label>Cash (₹)</label>
-          <input type="number" id="fCash" placeholder="0" inputmode="numeric" oninput="recalc()">
+          <input type="text" id="fCash" placeholder="0" inputmode="numeric" oninput="fmtInput(this);recalc()">
         </div>
         <div class="field">
           <label>Card (₹)</label>
-          <input type="number" id="fCard" placeholder="0" inputmode="numeric" oninput="recalc()">
+          <input type="text" id="fCard" placeholder="0" inputmode="numeric" oninput="fmtInput(this);recalc()">
         </div>
       </div>
       <div class="field-row cols-1">
         <div class="field full last-row">
           <label>UPI (₹)</label>
-          <input type="number" id="fUpi" placeholder="0" inputmode="numeric" oninput="recalc()">
+          <input type="text" id="fUpi" placeholder="0" inputmode="numeric" oninput="fmtInput(this);recalc()">
         </div>
       </div>
     </div>
@@ -609,12 +609,12 @@ function addRow(fixedId){
       </select>
     </td>
     <td><input class="name-in" type="text" placeholder="Cashier name" list="cashierList" oninput="calcTotals();saveDraft()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td><input type="text" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcTotals();saveDraft()"></td>
+    <td><input type="text" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcTotals();saveDraft()"></td>
+    <td><input type="text" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcTotals();saveDraft()"></td>
     <td class="tdiff zero" id="rtd${idx}">0</td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
-    <td><input type="number" placeholder="0" inputmode="numeric" oninput="calcTotals();saveDraft()"></td>
+    <td><input type="text" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcTotals();saveDraft()"></td>
+    <td><input type="text" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcTotals();saveDraft()"></td>
     <td class="del-td">
       <button class="del-btn" onclick="delRow(this)" title="Delete row">✕</button>
     </td>
@@ -653,21 +653,54 @@ function onIdChange(sel, idx){
   }
 }
 
+// ══ INR FORMAT HELPERS ════════════════════════════
+// Strip commas and return raw number
+function raw(id){
+  const el = document.getElementById(id);
+  if(!el) return 0;
+  return parseFloat((el.value||"").replace(/,/g,""))||0;
+}
+function rawVal(str){ return parseFloat((str||"").replace(/,/g,""))||0; }
+
+// Indian number format: 12,00,000
+function fIN(v){
+  const n = Math.abs(Number(v));
+  const sign = Number(v) < 0 ? "-" : "";
+  if(n === 0) return "0";
+  const s = Math.round(n).toString();
+  if(s.length <= 3) return sign + s;
+  const last3 = s.slice(-3);
+  const rest  = s.slice(0, -3);
+  const grouped = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+  return sign + grouped + "," + last3;
+}
+
+// Live format input as user types — keeps cursor stable
+function fmtInput(el){
+  const pos   = el.selectionStart;
+  const old   = el.value;
+  const digits = old.replace(/[^0-9]/g,"");
+  if(!digits){ el.value=""; return; }
+  const formatted = fIN(parseInt(digits,10));
+  el.value = formatted;
+  // adjust cursor for added commas
+  const added = formatted.length - old.length;
+  try{ el.setSelectionRange(pos+added, pos+added); }catch(e){}
+}
+
 // ══ CALCULATIONS ══════════════════════════════════
-function n(id){ return parseFloat(document.getElementById(id)?.value)||0; }
-function fIN(v){ return Number(v).toLocaleString("en-IN"); }
 
 function calcTotals(){
   const rows = document.querySelectorAll("#cBody tr");
   let tC=0,tK=0,tU=0,tS=0,tCu=0;
 
   rows.forEach((r,i)=>{
-    const ins = r.querySelectorAll("input[type=number]");
-    const c  = parseFloat(ins[0]?.value)||0;
-    const k  = parseFloat(ins[1]?.value)||0;
-    const u  = parseFloat(ins[2]?.value)||0;
-    const s  = parseFloat(ins[3]?.value)||0;
-    const cu = parseFloat(ins[4]?.value)||0;
+    const ins = r.querySelectorAll("input[type=text]:not(.name-in)");
+    const c  = rawVal(ins[0]?.value);
+    const k  = rawVal(ins[1]?.value);
+    const u  = rawVal(ins[2]?.value);
+    const s  = rawVal(ins[3]?.value);
+    const cu = rawVal(ins[4]?.value);
     const d  = c+k+u;
 
     const td = document.getElementById("rtd"+i);
@@ -704,8 +737,8 @@ function setDiff(id, val){
 function setText(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
 
 function recalc(){
-  const sale  = parseFloat(document.getElementById("fSale").value)||0;
-  const bills = parseFloat(document.getElementById("fBills").value)||0;
+  const sale  = raw("fSale");
+  const bills = raw("fBills");
   const abvEl = document.getElementById("fAbv");
   abvEl.textContent = (sale&&bills) ? fIN(Math.round(sale/bills)) : "—";
   calcTotals();
@@ -713,11 +746,11 @@ function recalc(){
 
 // ══ SUGGESTION STRIP ══════════════════════════════
 function updateSuggest(){
-  const sale  = parseFloat(document.getElementById("fSale")?.value)||0;
-  const bills = parseFloat(document.getElementById("fBills")?.value)||0;
-  const cash  = parseFloat(document.getElementById("fCash")?.value)||0;
-  const card  = parseFloat(document.getElementById("fCard")?.value)||0;
-  const upi   = parseFloat(document.getElementById("fUpi")?.value)||0;
+  const sale  = raw("fSale");
+  const bills = raw("fBills");
+  const cash  = raw("fCash");
+  const card  = raw("fCard");
+  const upi   = raw("fUpi");
 
   const rows    = document.querySelectorAll("#cBody tr");
   let emptyName = 0;
@@ -791,13 +824,10 @@ function restoreDraft(){
         addRow(r.id);
         const tr  = tbody.rows[i];
         const ni  = tr.querySelector(".name-in");
-        const ins = tr.querySelectorAll("input[type=number]");
+        const ins = tr.querySelectorAll("input[type=text]:not(.name-in)");
         if(ni) ni.value = r.name||"";
-        if(ins[0]) ins[0].value = r.c||"";
-        if(ins[1]) ins[1].value = r.k||"";
-        if(ins[2]) ins[2].value = r.u||"";
-        if(ins[3]) ins[3].value = r.s||"";
-        if(ins[4]) ins[4].value = r.cu||"";
+        const vals=[r.c,r.k,r.u,r.s,r.cu];
+        vals.forEach((v,vi)=>{ if(ins[vi]&&v){ const dg=v.replace(/[^0-9]/g,""); ins[vi].value=dg?fIN(parseInt(dg)):"";}});
       });
     }
     recalc();
@@ -827,33 +857,33 @@ function collectData(){
   const counters = Array.from(rows).map(r=>{
     const sel = r.querySelector("select");
     const ni  = r.querySelector(".name-in");
-    const ins = r.querySelectorAll("input[type=number]");
-    const c   = parseFloat(ins[0]?.value)||0;
-    const k   = parseFloat(ins[1]?.value)||0;
-    const u   = parseFloat(ins[2]?.value)||0;
+    const ins = r.querySelectorAll("input[type=text]:not(.name-in)");
+    const c   = rawVal(ins[0]?.value);
+    const k   = rawVal(ins[1]?.value);
+    const u   = rawVal(ins[2]?.value);
     return {
       counterId:   sel?.value||"",
       cashierName: ni?.value||"",
       cashDiff: c, cardDiff: k, upiDiff: u,
       totalDiff: c+k+u,
-      staffDisc: parseFloat(ins[3]?.value)||0,
-      custDisc:  parseFloat(ins[4]?.value)||0
+      staffDisc: rawVal(ins[3]?.value),
+      custDisc:  rawVal(ins[4]?.value)
     };
   });
 
-  const tC  = parseFloat(document.getElementById("ftC").textContent.replace(/,/g,""))||0;
-  const tK  = parseFloat(document.getElementById("ftK").textContent.replace(/,/g,""))||0;
-  const tU  = parseFloat(document.getElementById("ftU").textContent.replace(/,/g,""))||0;
-  const sale  = parseFloat(document.getElementById("fSale").value)||0;
-  const bills = parseFloat(document.getElementById("fBills").value)||0;
+  const tC  = rawVal(document.getElementById("ftC").textContent);
+  const tK  = rawVal(document.getElementById("ftK").textContent);
+  const tU  = rawVal(document.getElementById("ftU").textContent);
+  const sale  = raw("fSale");
+  const bills = raw("fBills");
 
   return {
     date: dateStr,
     todaySale: sale, totalBills: bills,
     abv: bills ? Math.round(sale/bills) : 0,
-    cash: parseFloat(document.getElementById("fCash").value)||0,
-    card: parseFloat(document.getElementById("fCard").value)||0,
-    upi:  parseFloat(document.getElementById("fUpi").value)||0,
+    cash: raw("fCash"),
+    card: raw("fCard"),
+    upi:  raw("fUpi"),
     cashDiff: tC, cardDiff: tK, upiDiff: tU,
     counters,
     whatsappShared: false
@@ -1014,12 +1044,12 @@ function buildCanvas(data){
   const tRows=document.querySelectorAll("#cBody tr");
   let tC=0,tK=0,tU=0,tS=0,tCu=0;
   tRows.forEach(r=>{
-    const ins=r.querySelectorAll("input[type=number]");
-    tC+=(parseFloat(ins[0]?.value)||0);
-    tK+=(parseFloat(ins[1]?.value)||0);
-    tU+=(parseFloat(ins[2]?.value)||0);
-    tS+=(parseFloat(ins[3]?.value)||0);
-    tCu+=(parseFloat(ins[4]?.value)||0);
+    const ins=r.querySelectorAll("input[type=text]:not(.name-in)");
+    tC+=rawVal(ins[0]?.value);
+    tK+=rawVal(ins[1]?.value);
+    tU+=rawVal(ins[2]?.value);
+    tS+=rawVal(ins[3]?.value);
+    tCu+=rawVal(ins[4]?.value);
   });
   const totalVals=["TOTAL","",fIN(tC),fIN(tK),fIN(tU),fIN(tC+tK+tU),fIN(tS),fIN(tCu)];
   cx2=0;
