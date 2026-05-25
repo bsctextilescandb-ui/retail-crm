@@ -333,9 +333,31 @@ function renderForm() {
           '" onclick="setSource(\'walk_in\')">🚶 Walk-in Entry</div>' +
       '</div>' +
       '<div class="field"><label>Area / Zone <span class="req">*</span></label>' +
-        '<input id="areaInput" type="text" placeholder="e.g. Tilakwadi" ' +
+        '<input id="areaInput" type="text" placeholder="e.g. Ground Floor, Sarees Section…" ' +
         'value="' + esc(formState.area) + '" oninput="formState.area=this.value"/>' +
       '</div>' +
+    '</div>' +
+  '</div>';
+
+  // ── Personal Details (always open, optional) ──
+  html += '<div class="form-card">' +
+    '<div class="form-card-header">' +
+      '<div class="form-card-icon icon-green">👤</div>' +
+      '<div><div class="form-card-title">Customer Details</div>' +
+      '<div class="form-card-sub">All fields optional — only if customer is willing to share</div></div>' +
+    '</div>' +
+    '<div class="form-card-body">' +
+      '<div class="field-row">' +
+        '<div class="field"><label>Name</label>' +
+          '<input type="text" id="custName" placeholder="Customer name" ' +
+          'value="' + esc(formState.cust_name) + '" oninput="formState.cust_name=this.value"/></div>' +
+        '<div class="field"><label>Mobile</label>' +
+          '<input type="tel" id="custMobile" placeholder="10-digit mobile" maxlength="10" ' +
+          'value="' + esc(formState.cust_mobile) + '" oninput="formState.cust_mobile=this.value"/></div>' +
+      '</div>' +
+      '<div class="field"><label>Date of Birth</label>' +
+        '<input type="date" id="custDob" value="' + esc(formState.cust_dob) + '" ' +
+        'oninput="formState.cust_dob=this.value"/></div>' +
     '</div>' +
   '</div>';
 
@@ -372,7 +394,6 @@ function renderForm() {
 
     html += '</div>';
 
-    // Others open text box — shown if "Others" is selected
     var othersSelected = formState.answers[q.q_id] === "Others" ||
       q.options.some(function(o){ return o.toLowerCase() === "others" && formState.answers[q.q_id] === o; });
 
@@ -397,37 +418,6 @@ function renderForm() {
       '<div class="field">' +
         '<textarea id="yourVoice" placeholder="Share any specific feedback, suggestions or concerns…" ' +
         'oninput="formState.your_voice=this.value">' + esc(formState.your_voice) + '</textarea>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-
-  // ── Personal Details ──
-  html += '<div class="form-card">' +
-    '<div class="form-card-header">' +
-      '<div class="form-card-icon icon-green">👤</div>' +
-      '<div><div class="form-card-title">Personal Details</div>' +
-      '<div class="form-card-sub">All fields optional — only if customer is willing to share</div></div>' +
-    '</div>' +
-    '<div class="form-card-body">' +
-      '<div class="personal-toggle" onclick="togglePersonal()">' +
-        '<div><div class="personal-toggle-label">Add customer details</div>' +
-        '<div class="personal-toggle-sub">Name, mobile, date of birth</div></div>' +
-        '<div class="toggle-arrow' + (formState.personalOpen ? " open" : "") +
-          '" id="toggleArrow">▾</div>' +
-      '</div>' +
-      '<div class="personal-fields' + (formState.personalOpen ? " show" : "") +
-        '" id="personalFields">' +
-        '<div class="field-row">' +
-          '<div class="field"><label>Name</label>' +
-            '<input type="text" id="custName" placeholder="Customer name" ' +
-            'value="' + esc(formState.cust_name) + '" oninput="formState.cust_name=this.value"/></div>' +
-          '<div class="field"><label>Mobile</label>' +
-            '<input type="tel" id="custMobile" placeholder="10-digit mobile" maxlength="10" ' +
-            'value="' + esc(formState.cust_mobile) + '" oninput="formState.cust_mobile=this.value"/></div>' +
-        '</div>' +
-        '<div class="field"><label>Date of Birth</label>' +
-          '<input type="date" id="custDob" value="' + esc(formState.cust_dob) + '" ' +
-          'oninput="formState.cust_dob=this.value"/></div>' +
       '</div>' +
     '</div>' +
   '</div>';
