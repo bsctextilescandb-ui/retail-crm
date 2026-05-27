@@ -516,9 +516,10 @@ function renderFootfall(){
     slotMap[h] = (slotMap[h]||0) + (Number(r.count)||0);
   });
 
-  /* Daily bills */
+  /* Daily bills — filtered by date range */
   var billsMap = {};
-  DATA.daily.forEach(function(r){ if(r&&r.date) billsMap[r.date]=r.bills_count; });
+  DATA.daily.filter(function(r){ return inRange(r.date); })
+    .forEach(function(r){ if(r&&r.date) billsMap[r.date]=r.bills_count; });
 
   var days   = Object.keys(dayMap).sort(function(a,b){
     return (parseDate(a)||0)-(parseDate(b)||0);
@@ -1161,10 +1162,14 @@ function buildSummaryData(ff, fb, div) {
     if(!dayMap[r.date]) dayMap[r.date]={ff:0};
     dayMap[r.date].ff += Number(r.count)||0;
   });
-  DATA.daily.forEach(function(r){
+
+  // Filter daily summary by the same date range — not all records
+  var filteredDaily = DATA.daily.filter(function(r){ return inRange(r.date); });
+  filteredDaily.forEach(function(r){
     if(!dayMap[r.date]) dayMap[r.date]={ff:0};
     dayMap[r.date].bills = Number(r.bills_count)||0;
   });
+
   fb.forEach(function(r){
     if(!dayMap[r.date]) dayMap[r.date]={ff:0};
     dayMap[r.date].fbCount = (dayMap[r.date].fbCount||0)+1;
