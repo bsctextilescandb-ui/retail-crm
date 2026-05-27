@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -208,6 +209,13 @@ input,select{font-family:inherit;outline:0}
     <input type="date" class="filter-input" id="dateTo"/>
   </div>
   <button class="btn-apply" onclick="loadData()">Apply</button>
+  <button class="btn-apply" id="exportBtn"
+    onclick="exportExcel()"
+    style="background:var(--green);margin-left:6px;display:flex;align-items:center;gap:6px">
+    <span id="exportSpin" style="width:12px;height:12px;border:2px solid rgba(255,255,255,.3);
+      border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none"></span>
+    📥 Export Excel
+  </button>
 </div>
 
 <div class="main" id="mainContent">
@@ -980,6 +988,340 @@ function esc(s){
 }
 
 /* ── Start ── */
+/* ============================================================
+   EXCEL EXPORT
+   ============================================================ */
+
+function exportExcel(){
+  var btn  = document.getElementById("exportBtn");
+  var spin = document.getElementById("exportSpin");
+  if(btn)  btn.disabled = true;
+  if(spin) spin.style.display = "inline-block";
+
+  try {
+    var wb = XLSX.utils.book_new();
+
+    // Period label
+    var r    = getRange();
+    var from = r.from.toLocaleDateString("en-IN",{day:"2-digit",month:"2-digit",year:"numeric"});
+    var to   = r.to.toLocaleDateString("en-IN",{day:"2-digit",month:"2-digit",year:"numeric"});
+    var periodLabel = from === to ? from : from + " – " + to;
+
+    var ff  = filteredFF();
+    var fb  = filteredFB();
+    var div = filteredDiv();
+
+    // ── Sheet 1: Summary ──────────────────────────────────────
+    var summaryData = buildSummaryData(ff, fb, div);
+    addSheet(wb, "Summary", summaryData, periodLabel,
+      ["Date","Total Footfall","Bills Count","Conversion %","Feedbacks","CSI Score","NPS Score","Diverts Raised","Open Diverts"]);
+
+    // ── Sheet 2: Footfall ─────────────────────────────────────
+    var footfallData = buildFootfallData(ff);
+    var ffHeaders = buildFootfallHeaders(ff);
+    addSheet(wb, "Footfall", footfallData, periodLabel, ffHeaders);
+
+    // ── Sheet 3: Feedback ─────────────────────────────────────
+    var feedbackData = buildFeedbackData(fb);
+    addSheet(wb, "Feedback", feedbackData, periodLabel,
+      ["Date","Source","Area","Customer Name","Mobile","DOB","Visit Type",
+       "How Did You Know","Overall Experience","Staff Behaviour",
+       "Product Variety","Pricing & Value","Visit Again","Your Voice"]);
+
+    // ── Sheet 4: Diverts ──────────────────────────────────────
+    var divertData = buildDivertData(div);
+    addSheet(wb, "Diverts", divertData, periodLabel,
+      ["Date","Section","Product Wanted","Reason","Qty","Price Range",
+       "Coming Back","Expected Date","Status","Customer Name","Mobile",
+       "Raised By","Raised At","Closed At"]);
+
+    // ── Download ──────────────────────────────────────────────
+    var today    = new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
+    var filename = "BSC_Report_" + today + ".xlsx";
+    XLSX.writeFile(wb, filename);
+
+  } catch(e) {
+    alert("Export failed: " + e.message);
+  }
+
+  if(btn)  btn.disabled = false;
+  if(spin) spin.style.display = "none";
+}
+
+/* ── Sheet builder ── */
+function addSheet(wb, name, dataRows, periodLabel, headers) {
+  var NAVY  = "1E2D5A";
+  var GOLD  = "B8860B";
+  var WHITE = "FFFFFF";
+  var CREAM = "F9F7F0";
+  var company = "BSC The Textile Mall";
+
+  // Build rows array
+  var rows = [];
+  rows.push([company + " — " + name + " Report"]); // Row 1: Title
+  rows.push(["Period: " + periodLabel]);             // Row 2: Period
+  rows.push(headers);                                // Row 3: Headers
+  dataRows.forEach(function(r){ rows.push(r); });    // Row 4+: Data
+
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  var colCount = headers.length;
+  var lastColLetter = colLetter(colCount);
+
+  // Merge title row
+  ws["!merges"] = ws["!merges"] || [];
+  ws["!merges"].push({s:{r:0,c:0}, e:{r:0,c:colCount-1}});
+  ws["!merges"].push({s:{r:1,c:0}, e:{r:1,c:colCount-1}});
+
+  // Style all cells
+  var range = XLSX.utils.decode_range(ws["!ref"]);
+  for(var R=range.s.r; R<=range.e.r; R++){
+    for(var C=range.s.c; C<=range.e.c; C++){
+      var addr = XLSX.utils.encode_cell({r:R,c:C});
+      if(!ws[addr]) ws[addr] = {v:"", t:"s"};
+
+      var fill, fontColor, bold, sz, italic;
+      if(R===0){
+        // Title row
+        fill=NAVY; fontColor=WHITE; bold=true; sz=14; italic=false;
+      } else if(R===1){
+        // Period row
+        fill=GOLD; fontColor=WHITE; bold=true; sz=11; italic=true;
+      } else if(R===2){
+        // Header row
+        fill=NAVY; fontColor=WHITE; bold=true; sz=11; italic=false;
+      } else {
+        // Data rows — alternating
+        fill = (R%2===0) ? "FFFFFF" : CREAM;
+        fontColor="1A1A2E"; bold=false; sz=10; italic=false;
+      }
+
+      ws[addr].s = {
+        font: {
+          name:"Cambria", sz:sz, bold:bold, italic:italic,
+          color:{rgb:fontColor}
+        },
+        fill: { patternType:"solid", fgColor:{rgb:fill} },
+        alignment: { vertical:"center", horizontal: C===0?"left":"center", wrapText:true },
+        border: {
+          top:    {style:"thin", color:{rgb:"D1D5DB"}},
+          bottom: {style:"thin", color:{rgb:"D1D5DB"}},
+          left:   {style:"thin", color:{rgb:"D1D5DB"}},
+          right:  {style:"thin", color:{rgb:"D1D5DB"}}
+        }
+      };
+    }
+  }
+
+  // Column widths
+  var colWidths = [];
+  for(var i=0;i<colCount;i++){
+    colWidths.push({ wch: i===0 ? 14 : 18 });
+  }
+  ws["!cols"] = colWidths;
+
+  // Row heights
+  var rowHeights = [];
+  rowHeights.push({hpt:28}); // title
+  rowHeights.push({hpt:20}); // period
+  rowHeights.push({hpt:22}); // headers
+  for(var d=0;d<dataRows.length;d++) rowHeights.push({hpt:18});
+  ws["!rows"] = rowHeights;
+
+  XLSX.utils.book_append_sheet(wb, ws, name);
+}
+
+function colLetter(n){
+  var s="";
+  while(n>0){
+    var r=(n-1)%26;
+    s=String.fromCharCode(65+r)+s;
+    n=Math.floor((n-1)/26);
+  }
+  return s;
+}
+
+/* ── Summary data builder ── */
+function buildSummaryData(ff, fb, div) {
+  var dayMap = {};
+  ff.forEach(function(r){
+    if(!dayMap[r.date]) dayMap[r.date]={ff:0};
+    dayMap[r.date].ff += Number(r.count)||0;
+  });
+  DATA.daily.forEach(function(r){
+    if(!dayMap[r.date]) dayMap[r.date]={ff:0};
+    dayMap[r.date].bills = Number(r.bills_count)||0;
+  });
+  fb.forEach(function(r){
+    if(!dayMap[r.date]) dayMap[r.date]={ff:0};
+    dayMap[r.date].fbCount = (dayMap[r.date].fbCount||0)+1;
+  });
+  div.forEach(function(r){
+    if(!dayMap[r.date]) dayMap[r.date]={ff:0};
+    dayMap[r.date].divCount = (dayMap[r.date].divCount||0)+1;
+  });
+
+  // CSI/NPS overall
+  var csiData = calcCSILocal(fb);
+  var npsData = calcNPSLocal(fb);
+
+  var rows = [];
+  var days = Object.keys(dayMap).sort(function(a,b){
+    return (parseDate(a)||0)-(parseDate(b)||0);
+  });
+  days.forEach(function(d){
+    var dm   = dayMap[d];
+    var conv = dm.ff>0 && dm.bills ? ((dm.bills/dm.ff)*100).toFixed(1)+"%" : "—";
+    var divOpen = div.filter(function(x){ return x.status==="open"||x.status==="sourcing"; }).length;
+    rows.push([
+      d,
+      dm.ff||0,
+      dm.bills||"—",
+      conv,
+      dm.fbCount||0,
+      csiData.score!==null ? csiData.score+"%" : "—",
+      npsData.score!==null ? npsData.score     : "—",
+      dm.divCount||0,
+      divOpen
+    ]);
+  });
+  return rows;
+}
+
+/* ── Footfall data builder — pivot by day+slot ── */
+function buildFootfallHeaders(ff) {
+  var slots = [];
+  var slotSet = {};
+  ff.forEach(function(r){
+    var h = Number(r.slot_start);
+    if(!slotSet[h]){ slotSet[h]=true; slots.push(h); }
+  });
+  slots.sort(function(a,b){return a-b;});
+  var headers = ["Date"];
+  slots.forEach(function(h){ headers.push(fmtTime(h)+"–"+fmtTime(h+1)); });
+  headers.push("Total");
+  return headers;
+}
+
+function buildFootfallData(ff) {
+  var daySlot = {};
+  ff.forEach(function(r){
+    var h = Number(r.slot_start);
+    if(!daySlot[r.date]) daySlot[r.date]={};
+    daySlot[r.date][h] = Number(r.count)||0;
+  });
+  var slots = [];
+  var slotSet = {};
+  ff.forEach(function(r){
+    var h=Number(r.slot_start);
+    if(!slotSet[h]){slotSet[h]=true;slots.push(h);}
+  });
+  slots.sort(function(a,b){return a-b;});
+
+  var rows = [];
+  var days = Object.keys(daySlot).sort(function(a,b){
+    return (parseDate(a)||0)-(parseDate(b)||0);
+  });
+  days.forEach(function(d){
+    var row = [d];
+    var total = 0;
+    slots.forEach(function(h){
+      var v = daySlot[d][h]||0;
+      row.push(v);
+      total += v;
+    });
+    row.push(total);
+    rows.push(row);
+  });
+  return rows;
+}
+
+/* ── Feedback data builder ── */
+function buildFeedbackData(fb) {
+  var colMap = {
+    0:"q0_visit_type", 1:"q1_how_did_you_know",
+    2:"q2_overall_experience", 3:"q3_staff_behaviour",
+    4:"q4_product_variety", 5:"q5_pricing_value", 6:"q6_visit_again"
+  };
+  return fb.map(function(f){
+    return [
+      f.date||"",
+      f.source==="qr_self"?"QR Self-fill":"Staff",
+      f.area||"",
+      f.cust_name||"",
+      f.cust_mobile||"",
+      f.cust_dob||"",
+      f[colMap[0]]||f.q0||"",
+      f[colMap[1]]||f.q1||"",
+      f[colMap[2]]||f.q2||"",
+      f[colMap[3]]||f.q3||"",
+      f[colMap[4]]||f.q4||"",
+      f[colMap[5]]||f.q5||"",
+      f[colMap[6]]||f.q6||"",
+      f.your_voice||""
+    ];
+  });
+}
+
+/* ── Divert data builder ── */
+function buildDivertData(div) {
+  return div.map(function(d){
+    return [
+      d.date||"",
+      d.section_name||"",
+      d.product_wanted||"",
+      d.reason_text||"",
+      d.qty||"",
+      d.price_range||"",
+      d.coming_back||"",
+      d.expected_date||"",
+      d.status||"",
+      d.cust_name||"",
+      d.cust_mobile||"",
+      d.raised_by||"",
+      d.raised_at||"",
+      d.closed_at||""
+    ];
+  });
+}
+
+/* ── Local CSI/NPS for export ── */
+function calcCSILocal(feedbacks) {
+  if(!feedbacks||feedbacks.length===0) return {score:null,count:0};
+  var scoreMap = {
+    "Excellent":4,"Good":3,"Average":2,"Needs Improvement":1,
+    "Very Clear & Helpful":4,"Helpful":3,"Not Satisfactory":1,
+    "Very Satisfied":4,"Satisfied":3,"Limited Options":2,"Did Not Find It":1,
+    "Great Value":4,"Reasonable":3,"Slightly High":2,"Too Expensive":1
+  };
+  var keyPairs=[
+    ["q2_overall_experience","q2"],["q3_staff_behaviour","q3"],
+    ["q4_product_variety","q4"],["q5_pricing_value","q5"]
+  ];
+  var total=0,max=0,count=0;
+  feedbacks.forEach(function(f){
+    var rs=0,rm=0,has=false;
+    keyPairs.forEach(function(p){
+      var v=String(f[p[0]]||f[p[1]]||"").trim();
+      if(v&&scoreMap[v]!==undefined){rs+=scoreMap[v];rm+=4;has=true;}
+    });
+    if(has){total+=rs;max+=rm;count++;}
+  });
+  return {score:max>0?Math.round((total/max)*100):null,count:count};
+}
+
+function calcNPSLocal(feedbacks) {
+  if(!feedbacks||feedbacks.length===0) return {score:null,promoters:0,passives:0,detractors:0,count:0};
+  var p=0,pa=0,d=0;
+  feedbacks.forEach(function(f){
+    var v=String(f.q6_visit_again||f.q6||"").trim();
+    if(v==="Definitely Yes"||v==="Yes") p++;
+    else if(v==="Maybe") pa++;
+    else if(v==="No") d++;
+  });
+  var t=p+pa+d;
+  return {score:t>0?Math.round(((p-d)/t)*100):null,promoters:p,passives:pa,detractors:d,count:t};
+}
+
 boot();
 </script>
 
