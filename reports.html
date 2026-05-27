@@ -203,7 +203,7 @@ input,select{font-family:inherit;outline:0}
     <option value="month">This Month</option>
     <option value="custom">Custom Range</option>
   </select>
-  <div id="customRange" style="display:none;gap:6px;align-items:center;display:none">
+  <div id="customRange" style="display:none;gap:6px;align-items:center">
     <input type="date" class="filter-input" id="dateFrom"/>
     <span style="font-size:12px;color:var(--ink-30)">to</span>
     <input type="date" class="filter-input" id="dateTo"/>
@@ -294,9 +294,19 @@ function getRange(){
   } else {
     var df = document.getElementById("dateFrom").value;
     var dt = document.getElementById("dateTo").value;
-    from = df ? new Date(df) : new Date(now.getFullYear(), now.getMonth(), 1);
-    to   = dt ? new Date(dt) : now;
-    to.setHours(23,59,59,0);
+    // Parse YYYY-MM-DD as local date (not UTC) to avoid timezone shift
+    if(df){
+      var fp=df.split("-");
+      from=new Date(parseInt(fp[0]),parseInt(fp[1])-1,parseInt(fp[2]),0,0,0,0);
+    } else {
+      from=new Date(now.getFullYear(),now.getMonth(),1);
+    }
+    if(dt){
+      var tp=dt.split("-");
+      to=new Date(parseInt(tp[0]),parseInt(tp[1])-1,parseInt(tp[2]),23,59,59,0);
+    } else {
+      to=new Date(now); to.setHours(23,59,59,0);
+    }
   }
   return {from:from, to:to};
 }
