@@ -34,10 +34,93 @@ input,select,textarea{font-family:inherit;outline:0}
 .back-btn:hover{background:rgba(255,255,255,.25)}
 .bar-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;flex:1}
 
-/* ── Filter bar ── */
-.filter-bar{background:var(--white);border-bottom:1px solid var(--border);
-  padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
-  position:sticky;top:53px;z-index:40}
+/* ── Tabs ── */
+.tab-bar{background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;gap:0;position:sticky;top:53px;z-index:41}
+.tab-btn{padding:12px 18px;font-size:13px;font-weight:500;color:var(--ink-60);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;
+  display:flex;align-items:center;gap:6px;background:none;border-top:0;border-left:0;border-right:0}
+.tab-btn.active{color:var(--navy);border-bottom-color:var(--navy)}
+.tab-badge{padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700}
+.tab-badge.red{background:var(--crimson-l);color:var(--crimson)}
+.tab-badge.navy{background:var(--navy-l);color:var(--navy)}
+
+/* ── Call Queue ── */
+.cq-header-strip{background:var(--white);border-bottom:1px solid var(--border);
+  padding:10px 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cq-filter-btn{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;
+  border:1.5px solid var(--border);color:var(--ink-60);cursor:pointer;background:var(--white)}
+.cq-filter-btn.active-neg{background:var(--crimson);color:#fff;border-color:var(--crimson)}
+.cq-filter-btn.active-pos{background:var(--green);color:#fff;border-color:var(--green)}
+.cq-filter-btn.active-done{background:var(--navy);color:#fff;border-color:var(--navy)}
+.cq-filter-btn.active-all{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.cq-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  margin-bottom:10px;overflow:hidden}
+.cq-card.neg{border-left:4px solid var(--crimson)}
+.cq-card.pos{border-left:4px solid var(--green)}
+.cq-card.done{border-left:4px solid #9CA3AF;opacity:.7}
+
+.cq-card-top{padding:12px 16px;display:flex;align-items:center;gap:10px}
+.cq-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cq-info{flex:1;min-width:0}
+.cq-name{font-size:14px;font-weight:500;color:var(--ink)}
+.cq-issues{font-size:11px;color:var(--crimson);margin-top:2px}
+.cq-positive-txt{font-size:11px;color:var(--green);margin-top:2px}
+.cq-meta{font-size:11px;color:var(--ink-60);margin-top:3px}
+
+.cq-action-btn{padding:8px 16px;border-radius:var(--radius-sm);
+  font-size:12px;font-weight:500;border:0;cursor:pointer;white-space:nowrap}
+.cq-action-btn.neg{background:var(--crimson);color:#fff}
+.cq-action-btn.pos{background:var(--green);color:#fff}
+.cq-action-btn.done-btn{background:var(--surface);color:#9CA3AF;
+  border:1px solid var(--border);font-size:11px}
+.wa-btn{width:34px;height:34px;border-radius:50%;background:#25D366;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:0;flex-shrink:0;font-size:16px}
+
+.cq-expand{border-top:1px solid var(--border);background:var(--surface)}
+.neg-issues-box{background:var(--crimson-l);border-radius:var(--radius-sm);
+  padding:10px 14px;margin:12px;border:1px solid rgba(192,57,43,.15)}
+.neg-issues-title{font-size:10px;font-weight:700;color:var(--crimson);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.neg-issue-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.neg-issue-row:last-child{margin-bottom:0}
+.neg-issue-q{font-size:12px;color:var(--ink);flex:1}
+.neg-issue-arrow{font-size:11px;color:var(--ink-30)}
+.neg-issue-ans{font-size:12px;font-weight:600;color:var(--crimson)}
+
+.call-status-section{padding:0 12px 12px}
+.call-status-lbl{font-size:10px;font-weight:700;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.call-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.cs-btn{padding:9px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;
+  border:1.5px solid var(--border);background:var(--white);color:var(--ink-60);
+  cursor:pointer;text-align:center;transition:all .15s}
+.cs-btn.sel-resolved{background:var(--green-l);border-color:var(--green);color:var(--green)}
+.cs-btn.sel-will_visit{background:var(--navy-l);border-color:var(--navy);color:var(--navy)}
+.cs-btn.sel-no_answer{background:var(--gold-l);border-color:var(--gold);color:var(--gold)}
+.cs-btn.sel-not_reachable{background:var(--surface);border-color:#9CA3AF;color:#9CA3AF}
+.cs-btn.sel-not_satisfied{background:var(--crimson-l);border-color:var(--crimson);color:var(--crimson)}
+.cs-btn.sel-thanked{background:var(--green-l);border-color:var(--green);color:var(--green)}
+.cs-btn.span2{grid-column:span 2}
+
+.cq-note{width:100%;padding:9px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:13px;resize:none;height:60px;
+  font-family:inherit;background:var(--white);color:var(--ink);margin-bottom:10px}
+.cq-note:focus{border-color:var(--navy);outline:none}
+.cq-followup{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cq-followup label{font-size:12px;color:var(--ink-60)}
+.cq-save-btn{width:100%;padding:11px;border-radius:var(--radius-sm);
+  background:var(--navy);color:#fff;font-size:13px;font-weight:500;border:0;cursor:pointer}
+.cq-save-btn:disabled{opacity:.5;cursor:not-allowed}
+.done-badge{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600}
+.attempt-badge{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:600;
+  background:var(--gold-l);color:var(--gold);margin-top:4px;display:inline-block}
+.escalated-badge{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;
+  background:var(--crimson-l);color:var(--crimson);margin-top:4px;display:inline-block}
+
 .filter-select,.filter-input{padding:7px 12px;border:1.5px solid var(--border);
   border-radius:var(--radius-sm);font-size:12px;color:var(--ink);
   background:var(--white);font-family:inherit}
@@ -180,10 +263,23 @@ input,select,textarea{font-family:inherit;outline:0}
   <button class="back-btn" onclick="goBack()">← Back</button>
   <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg"
     style="height:32px;width:32px;object-fit:contain;border-radius:6px;background:#fff;padding:2px;flex-shrink:0"/>
-  <div class="bar-title">Feedback List</div>
+  <div class="bar-title" id="pageTitle">Feedback List</div>
 </div>
 
-<div class="filter-bar">
+<!-- Tab bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-feedback" onclick="switchTab('feedback')">
+    All Feedback
+    <span class="tab-badge navy" id="tbFeedback">—</span>
+  </button>
+  <button class="tab-btn" id="tab-callqueue" onclick="switchTab('callqueue')">
+    📞 Call Queue
+    <span class="tab-badge red" id="tbCallQueue">—</span>
+  </button>
+</div>
+
+<!-- Feedback List filters -->
+<div id="feedbackFilterBar" class="filter-bar" style="top:97px">
   <span style="font-size:12px;color:var(--ink-60);font-weight:500">Filter:</span>
   <input type="date" id="filterDate" class="filter-input" onchange="applyFilter()"/>
   <select id="filterStatus" class="filter-select" onchange="applyFilter()">
@@ -195,6 +291,17 @@ input,select,textarea{font-family:inherit;outline:0}
   </select>
   <button class="btn-filter" onclick="loadFeedback()">↺ Refresh</button>
   <span class="count-label" id="countLabel">Loading…</span>
+</div>
+
+<!-- Call Queue filters -->
+<div id="cqFilterBar" class="cq-header-strip" style="display:none;position:sticky;top:97px;z-index:40;background:var(--white)">
+  <input type="date" id="cqDate" class="filter-input" onchange="loadCallQueue()"/>
+  <button class="cq-filter-btn active-all" id="cqf-all"      onclick="setCQFilter('all')">All</button>
+  <button class="cq-filter-btn"            id="cqf-negative" onclick="setCQFilter('negative')">🔴 Negative</button>
+  <button class="cq-filter-btn"            id="cqf-positive" onclick="setCQFilter('positive')">🟢 Positive</button>
+  <button class="cq-filter-btn"            id="cqf-done"     onclick="setCQFilter('done')">✅ Done</button>
+  <button class="btn-filter" onclick="loadCallQueue()">↺ Refresh</button>
+  <span class="count-label" id="cqCountLabel"></span>
 </div>
 
 <div class="main" id="mainContent">
@@ -212,6 +319,332 @@ function getSession(){
   if(!t||!u) return null;
   try{return{token:t,user:JSON.parse(u)};}catch(e){return null;}
 }
+
+/* ── Tab state ── */
+var currentTab = "feedback";
+
+function switchTab(tab) {
+  currentTab = tab;
+  // Update tab buttons
+  document.getElementById("tab-feedback").classList.toggle("active", tab==="feedback");
+  document.getElementById("tab-callqueue").classList.toggle("active", tab==="callqueue");
+  // Show/hide filter bars
+  document.getElementById("feedbackFilterBar").style.display  = tab==="feedback"  ? "flex" : "none";
+  document.getElementById("cqFilterBar").style.display        = tab==="callqueue" ? "flex" : "none";
+  // Load content
+  if(tab==="feedback")  applyFilter();
+  if(tab==="callqueue") loadCallQueue();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CALL QUEUE
+   ══════════════════════════════════════════════════════════════ */
+var ALL_QUEUE  = [];
+var cqFilter   = "all";
+var cqExpanded = null;
+var cqSelected = {}; // feedback_id → selected call status
+
+function setCQFilter(f) {
+  cqFilter = f;
+  ["all","negative","positive","done"].forEach(function(k) {
+    var btn = document.getElementById("cqf-"+k);
+    if(!btn) return;
+    btn.className = "cq-filter-btn" + (k===f ? " active-"+(k==="negative"?"neg":k==="positive"?"pos":k==="done"?"done":"all") : "");
+  });
+  renderQueue();
+}
+
+function loadCallQueue() {
+  document.getElementById("mainContent").innerHTML =
+    '<div style="text-align:center;padding:48px;color:var(--ink-60)">⏳ Loading call queue…</div>';
+  var date = document.getElementById("cqDate").value;
+  var body = {action:"get_call_queue"};
+  if(date){var p=date.split("-");body.date=p[2]+"/"+p[1]+"/"+p[0];}
+  api(body).then(function(res){
+    if(res.ok){
+      ALL_QUEUE = res.queue||[];
+      // Update badge
+      var pending = ALL_QUEUE.filter(function(q){return !q.is_done;}).length;
+      var tbCQ = document.getElementById("tbCallQueue");
+      if(tbCQ) tbCQ.textContent = pending;
+      renderQueue();
+    } else {
+      document.getElementById("mainContent").innerHTML =
+        '<div style="text-align:center;padding:48px;color:var(--crimson)">'+esc(res.error||"Error")+'</div>';
+    }
+  });
+}
+
+function filteredQueue() {
+  if(cqFilter==="all")      return ALL_QUEUE;
+  if(cqFilter==="negative") return ALL_QUEUE.filter(function(q){return q.call_type==="negative"&&!q.is_done;});
+  if(cqFilter==="positive") return ALL_QUEUE.filter(function(q){return q.call_type==="positive"&&!q.is_done;});
+  if(cqFilter==="done")     return ALL_QUEUE.filter(function(q){return q.is_done;});
+  return ALL_QUEUE;
+}
+
+function renderQueue() {
+  var list = filteredQueue();
+  var cl   = document.getElementById("cqCountLabel");
+  if(cl) cl.textContent = list.length+" entries";
+
+  if(list.length===0){
+    document.getElementById("mainContent").innerHTML =
+      '<div style="text-align:center;padding:48px">' +
+      '<div style="font-size:36px">✅</div>' +
+      '<div style="font-size:16px;font-weight:500;margin-top:12px;color:var(--ink)">All calls done!</div>' +
+      '<div style="font-size:13px;color:var(--ink-60);margin-top:6px">No pending calls in this filter</div>' +
+      '</div>';
+    return;
+  }
+
+  var html = '<div style="padding:16px">';
+  list.forEach(function(q){ html += renderQueueCard(q); });
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+function renderQueueCard(q) {
+  var isExp  = cqExpanded === q.feedback_id;
+  var isDone = q.is_done;
+  var isNeg  = q.call_type === "negative";
+  var cardCls= isDone ? "done" : isNeg ? "neg" : "pos";
+  var dotCol = isDone ? "#9CA3AF" : isNeg ? "var(--crimson)" : "var(--green)";
+
+  var html = '<div class="cq-card '+cardCls+'" id="cqc_'+esc(q.feedback_id)+'">';
+
+  // Top row
+  html += '<div class="cq-card-top">' +
+    '<div class="cq-dot" style="background:'+dotCol+'"></div>' +
+    '<div class="cq-info">' +
+      '<div class="cq-name">'+(q.cust_name||"Customer")+'</div>';
+
+  if(isDone) {
+    var doneLabel = {
+      issue_resolved:"Issue Resolved", will_visit:"Will Visit Again",
+      thanked:"Thanked", closed_no_response:"Closed — No Response",
+      closed_not_reachable:"Closed — Not Reachable",
+      not_satisfied:"Escalated to Manager"
+    }[q.call_status]||q.call_status;
+    html += '<div style="font-size:11px;color:var(--green);margin-top:2px">✓ '+esc(doneLabel)+'</div>';
+  } else if(isNeg && q.neg_issues && q.neg_issues.length>0) {
+    html += '<div class="cq-issues">'+
+      q.neg_issues.map(function(i){return esc(i.question)+": "+esc(i.answer);}).join(" · ")+
+    '</div>';
+    if(q.call_attempts>0) html += '<span class="attempt-badge">Attempt '+q.call_attempts+' of 3</span>';
+    if(q.escalated)       html += '<span class="escalated-badge">⚠ Escalated to Manager</span>';
+  } else {
+    html += '<div class="cq-positive-txt">All responses positive · Thank you call</div>';
+  }
+
+  html += '<div class="cq-meta">'+esc(q.area||"")+(q.area&&q.date?" · ":"")+esc(q.date||"")+(q.cust_mobile?" · 📞 "+esc(q.cust_mobile):"")+
+  '</div></div>';
+
+  // WhatsApp button (always if mobile)
+  if(q.cust_mobile) {
+    var waMsg = buildWAMessage(q);
+    var waUrl = "https://wa.me/91"+q.cust_mobile+"?text="+encodeURIComponent(waMsg);
+    html += '<a href="'+waUrl+'" target="_blank" class="wa-btn" title="WhatsApp">💬</a>';
+  }
+
+  // Action button
+  if(!isDone) {
+    var btnLabel = isNeg ? "📞 Call Now" : "📞 Thank Call";
+    var btnCls   = isNeg ? "neg" : "pos";
+    html += '<button class="cq-action-btn '+btnCls+'" onclick="toggleCQExpand(\''+esc(q.feedback_id)+'\')">'+
+      (isExp?"▲ Close":btnLabel)+'</button>';
+  } else {
+    html += '<span class="done-badge" style="background:var(--green-l);color:var(--green)">✓ Done</span>';
+  }
+
+  html += '</div>'; // card-top
+
+  // Expanded section
+  if(isExp && !isDone) {
+    html += '<div class="cq-expand">';
+
+    // Show negative issues
+    if(isNeg && q.neg_issues && q.neg_issues.length>0) {
+      html += '<div class="neg-issues-box">' +
+        '<div class="neg-issues-title">Issues to address on this call</div>';
+      q.neg_issues.forEach(function(issue){
+        html += '<div class="neg-issue-row">' +
+          '<span class="neg-issue-q">'+esc(issue.question)+'</span>' +
+          '<span class="neg-issue-arrow">→</span>' +
+          '<span class="neg-issue-ans">'+esc(issue.answer)+'</span>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div class="call-status-section">';
+    html += '<div class="call-status-lbl">What happened on the call?</div>';
+
+    var sel = cqSelected[q.feedback_id]||"";
+    html += '<div class="call-status-grid">';
+
+    if(isNeg) {
+      html += cqStatusBtn(q.feedback_id,"issue_resolved","✓ Issue Resolved",sel);
+      html += cqStatusBtn(q.feedback_id,"will_visit","🔵 Will Visit Again",sel);
+      html += cqStatusBtn(q.feedback_id,"no_answer","📵 No Answer",sel);
+      html += cqStatusBtn(q.feedback_id,"not_reachable","📵 Not Reachable",sel);
+      html += '<div style="grid-column:span 2">'+cqStatusBtnRaw(q.feedback_id,"not_satisfied","⚠ Still Not Satisfied",sel)+'</div>';
+    } else {
+      html += cqStatusBtn(q.feedback_id,"thanked","✓ Thanked Customer",sel);
+      html += cqStatusBtn(q.feedback_id,"no_answer","📵 No Answer",sel);
+      html += '<div style="grid-column:span 2">'+cqStatusBtnRaw(q.feedback_id,"not_reachable","📵 Not Reachable",sel)+'</div>';
+    }
+    html += '</div>';
+
+    // Follow-up date for will_visit
+    if(sel==="will_visit") {
+      html += '<div class="cq-followup"><label>Follow-up Date:</label>' +
+        '<input type="date" id="cqFollowup_'+esc(q.feedback_id)+'" class="filter-input"/>' +
+      '</div>';
+    }
+
+    // Note
+    html += '<textarea class="cq-note" id="cqNote_'+esc(q.feedback_id)+
+      '" placeholder="Call note — what did customer say? (mandatory for Issue Resolved)"></textarea>';
+
+    // Error alert
+    html += '<div id="cqAlert_'+esc(q.feedback_id)+'" style="font-size:12px;color:var(--crimson);margin-bottom:8px;display:none"></div>';
+
+    // Save
+    html += '<button class="cq-save-btn" id="cqSave_'+esc(q.feedback_id)+
+      '" onclick="saveCQStatus(\''+esc(q.feedback_id)+'\',\''+q.call_type+'\','+q.call_attempts+')">' +
+      '<span id="cqSpin_'+esc(q.feedback_id)+'" class="spinner" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px"></span>' +
+      'Save Call Update</button>';
+
+    html += '</div></div>'; // call-status-section + cq-expand
+  }
+
+  html += '</div>'; // cq-card
+  return html;
+}
+
+function cqStatusBtn(fbId, status, label, selected) {
+  return '<button class="cs-btn'+(selected===status?" sel-"+status:"")+
+    '" onclick="selectCQStatus(\''+fbId+'\',\''+status+'\')">'+label+'</button>';
+}
+function cqStatusBtnRaw(fbId, status, label, selected) {
+  return '<button class="cs-btn span2'+(selected===status?" sel-"+status:"")+
+    '" onclick="selectCQStatus(\''+fbId+'\',\''+status+'\')">'+label+'</button>';
+}
+
+function selectCQStatus(fbId, status) {
+  cqSelected[fbId] = cqSelected[fbId]===status ? "" : status;
+  // Re-render just this card
+  var q = ALL_QUEUE.find(function(x){return x.feedback_id===fbId;});
+  if(!q) return;
+  var el = document.getElementById("cqc_"+fbId);
+  if(el) el.outerHTML = renderQueueCard(q);
+}
+
+function toggleCQExpand(fbId) {
+  cqExpanded = cqExpanded===fbId ? null : fbId;
+  renderQueue();
+  if(cqExpanded) {
+    setTimeout(function(){
+      var el=document.getElementById("cqc_"+fbId);
+      if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+    },100);
+  }
+}
+
+function saveCQStatus(fbId, callType, prevAttempts) {
+  var status   = cqSelected[fbId]||"";
+  var note     = (document.getElementById("cqNote_"+fbId)||{value:""}).value.trim();
+  var alertEl  = document.getElementById("cqAlert_"+fbId);
+  var btn      = document.getElementById("cqSave_"+fbId);
+  var spin     = document.getElementById("cqSpin_"+fbId);
+  var followup = (document.getElementById("cqFollowup_"+fbId)||{value:""}).value;
+
+  if(!status) { showCQAlert(alertEl,"Please select a call status."); return; }
+  if(status==="issue_resolved" && !note) { showCQAlert(alertEl,"Note is mandatory when issue is resolved."); return; }
+
+  if(btn) btn.disabled=true;
+  if(spin) spin.style.display="inline-block";
+  if(alertEl) alertEl.style.display="none";
+
+  var attempts = status==="no_answer" ? (Number(prevAttempts)||0)+1 : prevAttempts;
+
+  // Auto close after 3 no-answer attempts
+  var finalStatus = status;
+  if(status==="no_answer" && attempts>=3) finalStatus="closed_no_response";
+
+  api({
+    action:"update_call_status",
+    feedback_id:fbId,
+    call_type:callType,
+    call_status:finalStatus,
+    call_note:note,
+    call_attempts:attempts,
+    followup_date:followup
+  }).then(function(res){
+    if(btn) btn.disabled=false;
+    if(spin) spin.style.display="none";
+    if(res.ok){
+      delete cqSelected[fbId];
+      cqExpanded=null;
+      // Update local state
+      var q=ALL_QUEUE.find(function(x){return x.feedback_id===fbId;});
+      if(q){
+        q.call_status  =finalStatus;
+        q.call_attempts=attempts;
+        q.escalated    =finalStatus==="not_satisfied";
+        q.followup_date=followup;
+        q.is_done      =["issue_resolved","thanked","closed_no_response","closed_not_reachable"].indexOf(finalStatus)!==-1;
+      }
+      showToast(finalStatus==="no_answer"?"Call attempt saved":"Status updated","success");
+      renderQueue();
+    } else {
+      showCQAlert(alertEl,res.error||"Failed to save.");
+      if(btn) btn.disabled=false;
+    }
+  }).catch(function(){
+    if(btn) btn.disabled=false;
+    if(spin) spin.style.display="none";
+    showCQAlert(alertEl,"Connection error.");
+  });
+}
+
+function showCQAlert(el,msg){
+  if(!el) return;
+  el.textContent=msg; el.style.display="block";
+}
+
+/* ── WhatsApp prefilled messages ── */
+function buildWAMessage(q) {
+  var name = q.cust_name ? "Hello "+q.cust_name+"," : "Hello,";
+  if(q.call_type==="negative") {
+    if(q.call_status==="issue_resolved") {
+      return name+" this is BSC The Textile Mall, Belagavi. Thank you for your valuable feedback. We are glad we could resolve your concern. We look forward to welcoming you again soon! 🙏";
+    }
+    if(q.call_status==="will_visit") {
+      return name+" this is BSC The Textile Mall, Belagavi. We are looking forward to your visit! Do come and explore our new collection. 🛍️";
+    }
+    if(q.call_status==="no_answer"||q.call_status==="not_reachable") {
+      return name+" this is BSC The Textile Mall, Belagavi. We tried calling you regarding your recent feedback. Please feel free to call us or visit us anytime. We value your opinion! 🙏";
+    }
+    return name+" this is BSC The Textile Mall, Belagavi. Thank you for your feedback. We are working on it and will reach out to you soon. 🙏";
+  } else {
+    return name+" this is BSC The Textile Mall, Belagavi. Thank you so much for your kind feedback! Your words inspire us to serve you better. See you soon! 😊";
+  }
+}
+
+function showToast(msg, type) {
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;"+
+    "background:"+(type==="success"?"var(--green)":"var(--crimson)")+";color:#fff;"+
+    "padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;"+
+    "box-shadow:0 4px 20px rgba(0,0,0,.2);font-family:'DM Sans',sans-serif;white-space:nowrap";
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.opacity="0";el.style.transition="opacity .3s";
+    setTimeout(function(){el.remove();},300);},2500);
+}
+
 
 /* ── API ── */
 function api(body){
@@ -246,10 +679,17 @@ function boot(){
   SESSION = getSession();
   if(!SESSION){ window.location.href="index.html"; return; }
 
-  // Set today's date in filter
+  // Set today's date in both filters
   var now   = nowIST();
   var today = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
   document.getElementById("filterDate").value = today;
+  document.getElementById("cqDate").value     = today;
+
+  // Telecaller → default to call queue tab
+  if(SESSION.user.role === "telecaller") {
+    switchTab("callqueue");
+    return;
+  }
 
   Promise.all([
     api({action:"get_feedback"}),
@@ -257,7 +697,18 @@ function boot(){
   ]).then(function(res){
     if(res[0].ok) ALL_FB    = res[0].feedback  || [];
     if(res[1].ok) QUESTIONS = res[1].questions  || [];
+    // Update feedback badge
+    var tbFB = document.getElementById("tbFeedback");
+    if(tbFB) tbFB.textContent = ALL_FB.length;
     applyFilter();
+    // Also load call queue badge
+    api({action:"get_call_queue"}).then(function(r){
+      if(r.ok){
+        var pending=(r.queue||[]).filter(function(q){return !q.is_done;}).length;
+        var tbCQ=document.getElementById("tbCallQueue");
+        if(tbCQ) tbCQ.textContent=pending;
+      }
+    });
   }).catch(function(e){
     document.getElementById("mainContent").innerHTML =
       '<div class="empty"><div class="empty-icon">⚠️</div><p>'+esc(e.message)+'</p></div>';
