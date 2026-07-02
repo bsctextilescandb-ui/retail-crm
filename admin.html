@@ -74,6 +74,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
 .role-crm_manager{background:var(--gold-l);color:var(--gold-d)}
 .role-crm_staff{background:var(--navy-l);color:var(--navy)}
 .role-purchase_manager{background:var(--green-l);color:var(--green)}
+.role-telecaller{background:var(--crimson-l);color:var(--crimson)}
 
 /* ── Status badge ── */
 .badge-active{background:var(--green-l);color:var(--green);
@@ -359,7 +360,7 @@ function renderUsers(){
 
 function roleLabel(r){
   var map={super_admin:"Super Admin",admin:"Admin",crm_manager:"CRM Manager",
-    crm_staff:"CRM Staff",purchase_manager:"Purchase Manager"};
+    crm_staff:"CRM Staff",purchase_manager:"Purchase Manager",telecaller:"Telecaller"};
   return map[r]||r;
 }
 
@@ -394,7 +395,7 @@ function openUserModal(userId){
           '<div class="field"><label>Role <span class="req">*</span></label>' +
             '<select id="u_role" onchange="onRoleChange()">' +
               '<option value="">— Select Role —</option>' +
-              ['super_admin','admin','crm_manager','crm_staff','purchase_manager'].map(function(r){
+              ['super_admin','admin','crm_manager','crm_staff','purchase_manager','telecaller'].map(function(r){
                 return '<option value="'+r+'"'+(u&&u.role===r?' selected':'')+'>'+roleLabel(r)+'</option>';
               }).join('') +
             '</select></div>' +
