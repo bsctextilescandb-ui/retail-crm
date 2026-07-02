@@ -78,7 +78,14 @@ input,select,textarea{font-family:inherit;outline:0}
   border:1px solid var(--border);font-size:11px}
 .wa-btn{width:34px;height:34px;border-radius:50%;background:#25D366;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;border:0;flex-shrink:0;font-size:16px}
+  cursor:pointer;border:0;flex-shrink:0;text-decoration:none;transition:opacity .15s}
+.wa-btn:hover{opacity:.85}
+.wa-btn.wa-sent{background:#9CA3AF;pointer-events:none}
+.call-direct-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;
+  border-radius:var(--radius-sm);background:var(--green-l);color:var(--green);
+  font-size:13px;font-weight:600;text-decoration:none;border:1.5px solid var(--green);
+  margin-bottom:10px}
+.call-direct-btn:hover{background:var(--green);color:#fff}
 
 .cq-expand{border-top:1px solid var(--border);background:var(--surface)}
 .neg-issues-box{background:var(--crimson-l);border-radius:var(--radius-sm);
@@ -444,7 +451,16 @@ function renderQueueCard(q) {
   if(q.cust_mobile) {
     var waMsg = buildWAMessage(q);
     var waUrl = "https://wa.me/91"+q.cust_mobile+"?text="+encodeURIComponent(waMsg);
-    html += '<a href="'+waUrl+'" target="_blank" class="wa-btn" title="WhatsApp">💬</a>';
+    var waSentKey = "wa_sent_"+q.feedback_id;
+    var waSent = false;
+    try{waSent=sessionStorage.getItem(waSentKey)==="1";}catch(e){}
+    html += '<a href="'+waUrl+'" target="_blank" class="wa-btn'+(waSent?" wa-sent":"")+'" '+
+      'title="'+(waSent?"WhatsApp sent":"Send WhatsApp")+'" '+
+      'onclick="markWASent(\''+esc(q.feedback_id)+'\')">' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg">'+
+        '<path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.524 3.655 1.435 5.16L2 22l4.98-1.404A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm4.93 13.77c-.207.582-1.21 1.114-1.653 1.154-.443.04-.456.33-2.873-.672-2.418-1.003-3.88-3.476-3.997-3.637-.118-.162-.96-1.35-.912-2.548.049-1.197.663-1.773.896-2.013.232-.24.507-.3.676-.3.17 0 .338.002.487.009.156.007.366-.059.573.486.207.545.703 1.786.764 1.916.062.13.103.282.02.455-.082.172-.123.28-.244.43-.12.151-.253.337-.361.453-.12.128-.244.267-.105.524.14.257.62 1.082 1.33 1.753.913.854 1.684 1.119 1.924 1.244.24.125.38.105.52-.063.14-.168.6-.741.76-.996.16-.255.32-.212.54-.127.22.084 1.397.697 1.637.824.24.127.4.19.46.298.06.107.06.617-.148 1.21z"/>'+
+      '</svg>'+
+    '</a>';
   }
 
   // Action button
@@ -476,6 +492,16 @@ function renderQueueCard(q) {
       });
       html += '</div>';
     }
+
+    // Direct call button
+    html += '<div style="padding:0 12px 4px">' +
+      '<a href="tel:'+q.cust_mobile+'" class="call-direct-btn">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+
+          '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>'+
+        '</svg>' +
+        'Call '+esc(q.cust_mobile)+' directly' +
+      '</a>' +
+    '</div>';
 
     html += '<div class="call-status-section">';
     html += '<div class="call-status-lbl">What happened on the call?</div>';
@@ -550,6 +576,20 @@ function toggleCQExpand(fbId) {
       if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
     },100);
   }
+}
+
+function markWASent(fbId) {
+  try{sessionStorage.setItem("wa_sent_"+fbId,"1");}catch(e){}
+  // Update button to show sent state
+  setTimeout(function(){
+    var q=ALL_QUEUE.find(function(x){return x.feedback_id===fbId;});
+    if(!q) return;
+    var card=document.getElementById("cqc_"+fbId);
+    if(card){
+      var wa=card.querySelector(".wa-btn");
+      if(wa){wa.classList.add("wa-sent");wa.title="WhatsApp sent";}
+    }
+  },300);
 }
 
 function saveCQStatus(fbId, callType, prevAttempts) {
