@@ -55,8 +55,9 @@ body::before{
   width:64px;height:64px;border-radius:16px;
   background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);
   display:flex;align-items:center;justify-content:center;
-  font-size:30px;margin:0 auto 16px;
+  overflow:hidden;
 }
+.brand-icon img{width:100%;height:100%;object-fit:cover;border-radius:16px}
 .brand-title{
   font-family:'DM Serif Display',serif;font-size:22px;
   color:var(--white);margin-bottom:4px;
@@ -169,7 +170,7 @@ body::before{
 <div class="container">
   <div class="card">
     <div class="card-header">
-      <div class="brand-icon">🏪</div>
+      <div class="brand-icon"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/></div>
       <div class="brand-title">BSC Textiles</div>
       <div class="brand-sub">VM CHECKLIST SYSTEM · BELAGAVI</div>
     </div>
@@ -234,25 +235,54 @@ let selectedUser = null;
 let pinBuffer   = "";
 
 // ── LOAD USERS ─────────────────────────────────────
-window.onload = async () => {
-  // Clear any existing session
-  sessionStorage.clear();
+function jsonp(url, callbackName) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    window[callbackName] = (data) => {
+      resolve(data);
+      delete window[callbackName];
+      document.body.removeChild(script);
+    };
+    script.src = `${url}&callback=${callbackName}`;
+    script.onerror = () => reject(new Error("Script load error"));
+    document.body.appendChild(script);
+  });
+}
+
+async function apiGet(params) {
+  const q = new URLSearchParams(params).toString();
   try {
-    // We fetch users by attempting a dummy login to trigger sheet read
-    // Instead, read Users tab via a dedicated action
-    const res = await fetch(`${API}?action=get_users`);
-    const data = await res.json();
-    if (data.ok) {
-      users = data.users;
-      renderNames();
-    } else {
-      // Fallback — show error
-      document.getElementById("nameList").innerHTML =
-        `<div class="loading-names" style="color:#C0392B">Failed to load users. Please refresh.</div>`;
-    }
+    const res = await fetch(`${API}?${q}`);
+    return await res.json();
   } catch(e) {
-    document.getElementById("nameList").innerHTML =
-      `<div class="loading-names" style="color:#C0392B">Network error. Please refresh.</div>`;
+    // Fallback to no-cors iframe trick won't work — use URL redirect approach
+    return { ok: false, error: e.message };
+  }
+}
+
+window.onload = async () => {
+  sessionStorage.clear();
+  const nameList = document.getElementById("nameList");
+  try {
+    const cbName = "vmCb_" + Date.now();
+    const script = document.createElement("script");
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.body.removeChild(script);
+      if (data.ok) {
+        users = data.users;
+        renderNames();
+      } else {
+        nameList.innerHTML = `<div class="loading-names" style="color:#C0392B">Failed to load users: ${data.error}</div>`;
+      }
+    };
+    script.onerror = () => {
+      nameList.innerHTML = `<div class="loading-names" style="color:#C0392B">Network error. Please refresh.</div>`;
+    };
+    script.src = `${API}?action=get_users&callback=${cbName}`;
+    document.body.appendChild(script);
+  } catch(e) {
+    nameList.innerHTML = `<div class="loading-names" style="color:#C0392B">Error: ${e.message}</div>`;
   }
 };
 
@@ -320,8 +350,14 @@ function updateDots() {
 }
 
 async function verifyPin() {
-  const res = await fetch(`${API}?action=login&name=${encodeURIComponent(selectedUser.name)}&pin=${pinBuffer}`);
-  const data = await res.json();
+  const cbName = "vmLogin_" + Date.now();
+  const data = await new Promise((resolve) => {
+    const script = document.createElement("script");
+    window[cbName] = (d) => { delete window[cbName]; document.body.removeChild(script); resolve(d); };
+    script.onerror = () => resolve({ ok: false, error: "Network error" });
+    script.src = `${API}?action=login&name=${encodeURIComponent(selectedUser.name)}&pin=${pinBuffer}&callback=${cbName}`;
+    document.body.appendChild(script);
+  });
   if (data.ok) {
     sessionStorage.setItem("vm_user", JSON.stringify({ name: data.name, role: data.role }));
     if (data.role === "admin") {
