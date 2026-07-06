@@ -236,7 +236,7 @@ html,body{min-height:100vh;background:var(--ivory);
   <div class="loader"><div class="spinner"></div><p>Loading checklist...</p></div>
 </div>
 
-<div class="submit-footer" id="submitFooter" style="display:none">
+<div class="submit-footer" id="submitFooter">
   <button class="submit-btn" id="submitBtn" onclick="submitChecklist()">
     Submit Checklist
   </button>
@@ -367,7 +367,7 @@ function renderChecklist() {
         ${i > 0 ? `<button class="btn-nav btn-prev" onclick="goToSection(${i-1})">‹ Previous</button>` : '<div></div>'}
         ${i < sections.length - 1
           ? `<button class="btn-nav btn-next" id="nextBtn_${i}" onclick="nextSection(${i})">Next ›</button>`
-          : `<button class="btn-nav btn-save" onclick="showSubmit()">Done ✓</button>`
+          : `<button class="btn-nav btn-save" onclick="goToSection(${sections.length-1})">Done ✓</button>`
         }
       </div>`;
 
@@ -411,12 +411,6 @@ function nextSection(idx) {
   const allDone = sec.pts.every(p => answers[p["#"] || p.point_no]);
   if (allDone) document.getElementById(`pill_${idx}`).classList.add("done");
   goToSection(idx + 1);
-}
-
-function showSubmit() {
-  document.getElementById("submitFooter").style.display = "block";
-  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-  updateSubmitBtn();
 }
 
 // ── ANSWERS ───────────────────────────────────────────────────
@@ -482,30 +476,30 @@ function updateProgress() {
 function updateSubmitBtn() {
   const btn = document.getElementById("submitBtn");
   if (!btn) return;
-  const total  = points.length;
-  const done   = Object.keys(answers).filter(k => answers[k].value).length;
+  const total = points.length;
+  const done  = Object.keys(answers).filter(k => answers[k].value).length;
 
-  // Check mandatory fields for No answers
+  // Check mandatory fields for No answers only
   let mandatoryMissing = false;
   points.forEach(p => {
     const pNo = p["#"] || p.point_no;
     const ans = answers[pNo];
     if (!ans || !ans.value) return;
     if (ans.value === "no") {
-      if (!ans.remarks || ans.remarks.trim() === "") mandatoryMissing = true;
+      if (!ans.remarks    || ans.remarks.trim() === "") mandatoryMissing = true;
       if (!ans.photo_link) mandatoryMissing = true;
-    }
-    // 3-day points — remarks required if due and not done physically
-    const freq = p.FREQUENCY || p.frequency;
-    if (freq === "3 Days Once" && threeDayDue && ans.value === "no") {
-      if (!ans.remarks || ans.remarks.trim() === "") mandatoryMissing = true;
     }
   });
 
-  btn.disabled = (done < total) || mandatoryMissing;
-  btn.textContent = done < total
-    ? `Answer all points (${total - done} remaining)`
-    : "Submit Checklist ✓";
+  // Submit always available — just blocked if No answer is incomplete
+  btn.disabled = mandatoryMissing;
+  if (mandatoryMissing) {
+    btn.textContent = "⚠️ Complete remarks & photo for No answers";
+  } else if (done < total) {
+    btn.textContent = `Submit (${done}/${total} answered)`;
+  } else {
+    btn.textContent = "Submit Checklist ✓";
+  }
 }
 
 // ── PHOTO UPLOAD ──────────────────────────────────────────────
@@ -516,34 +510,41 @@ async function handlePhoto(pNo, input) {
   // Show preview immediately
   const reader = new FileReader();
   reader.onload = (ev) => {
-    const img = document.getElementById(`photoImg_${pNo}`);
-    img.src = ev.target.result;
+    document.getElementById(`photoImg_${pNo}`).src = ev.target.result;
     document.getElementById(`photoPreview_${pNo}`).style.display = "block";
   };
   reader.readAsDataURL(file);
 
-  // Upload to Drive via Apps Script
+  // Upload via POST to avoid URL length limits
   document.getElementById(`photoUploading_${pNo}`).style.display = "block";
   document.getElementById(`photoBtn_${pNo}`).textContent = "⏳ Uploading...";
 
-  const base64 = await fileToBase64(file);
-  const res    = await apiGet({
-    action   : "upload_photo",
-    photo    : base64,
-    filename : `BSC_VM_${pNo}_${Date.now()}.jpg`,
-    mimetype : file.type || "image/jpeg"
-  });
+  try {
+    const base64  = await fileToBase64(file);
+    const payload = JSON.stringify({
+      action   : "upload_photo",
+      photo    : base64,
+      filename : `BSC_VM_${pNo}_${Date.now()}.jpg`,
+      mimetype : file.type || "image/jpeg"
+    });
 
-  document.getElementById(`photoUploading_${pNo}`).style.display = "none";
+    const res  = await fetch(API, { method: "POST", body: payload });
+    const data = await res.json();
 
-  if (res.ok) {
-    answers[pNo] = answers[pNo] || {};
-    answers[pNo].photo_link = res.link;
-    answers[pNo].photo_thumb = res.thumb;
-    const btn = document.getElementById(`photoBtn_${pNo}`);
-    btn.textContent = "✅ Photo Uploaded";
-    btn.classList.add("uploaded");
-  } else {
+    document.getElementById(`photoUploading_${pNo}`).style.display = "none";
+
+    if (data.ok) {
+      answers[pNo] = answers[pNo] || {};
+      answers[pNo].photo_link  = data.link;
+      answers[pNo].photo_thumb = data.thumb;
+      const btn = document.getElementById(`photoBtn_${pNo}`);
+      btn.textContent = "✅ Photo Uploaded";
+      btn.classList.add("uploaded");
+    } else {
+      document.getElementById(`photoBtn_${pNo}`).textContent = "⚠️ Upload failed. Retry";
+    }
+  } catch(err) {
+    document.getElementById(`photoUploading_${pNo}`).style.display = "none";
     document.getElementById(`photoBtn_${pNo}`).textContent = "⚠️ Upload failed. Retry";
   }
   updateSubmitBtn();
@@ -552,11 +553,7 @@ async function handlePhoto(pNo, input) {
 function fileToBase64(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      // Strip data URL prefix — keep only base64 part
-      const base64 = e.target.result.split(",")[1];
-      resolve(base64);
-    };
+    reader.onload = (e) => resolve(e.target.result.split(",")[1]);
     reader.readAsDataURL(file);
   });
 }
