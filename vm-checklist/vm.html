@@ -113,6 +113,14 @@ html,body{min-height:100vh;background:var(--ivory);
 .yn-btn.no.active{background:var(--crimson-l);border-color:var(--crimson);color:var(--crimson)}
 .yn-btn.na.active{background:var(--navy-l);border-color:var(--navy);color:var(--navy)}
 
+/* Locked point */
+.point-card.locked{background:var(--ivory);border-color:var(--border);opacity:.75}
+.locked-badge{
+  font-size:10px;font-weight:700;color:var(--green);
+  background:var(--green-l);padding:2px 8px;border-radius:10px;
+  display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;
+}
+
 /* Photo Upload */
 .photo-wrap{margin-top:10px}
 .photo-label{font-size:11px;color:var(--ink-60);margin-bottom:6px;font-weight:600}
@@ -255,6 +263,7 @@ let sections      = [];
 let answers       = {}; // { point_no: { value, remarks } }
 let currentSec    = 0;
 let threeDayDue   = false;
+let answeredToday = {}; // point_no -> { value, remarks, photo_link } already in sheet
 
 // ── INIT ──────────────────────────────────────────────────────
 window.onload = async () => {
@@ -271,15 +280,31 @@ window.onload = async () => {
   document.getElementById("topSub").textContent =
     checklistType === "overall" ? "Daily — All Sections" : "Weekly Floor Check";
 
-  // Load points
-  const data = await apiGet({ action: "get_checklist", type: checklistType });
-  if (!data.ok || !data.points.length) {
+  // Load checklist points + today's already answered points in parallel
+  const [checklistData, todayData] = await Promise.all([
+    apiGet({ action: "get_checklist", type: checklistType }),
+    apiGet({
+      action       : "get_today_submission",
+      submitted_by : user.name,
+      type         : checklistType,
+      floor        : floorName || ""
+    })
+  ]);
+
+  if (!checklistData.ok || !checklistData.points.length) {
     document.getElementById("body").innerHTML =
       `<div class="loader"><p style="color:#C0392B">Failed to load checklist points.</p></div>`;
     return;
   }
 
-  points = data.points;
+  points        = checklistData.points;
+  answeredToday = todayData.ok ? (todayData.answered || {}) : {};
+
+  // Pre-fill answers from today's submission (locked)
+  Object.entries(answeredToday).forEach(([pNo, ans]) => {
+    answers[pNo] = { ...ans, locked: true };
+  });
+
   buildSections();
   renderChecklist();
 };
@@ -326,13 +351,23 @@ function renderChecklist() {
       const isThreeDay = freq === "3 Days Once";
 
       pointsHtml += `
-        <div class="point-card" id="pc_${pNo}">
+        <div class="point-card ${answeredToday[pNo] ? 'locked answered' : ''}" id="pc_${pNo}">
           <div class="point-label">${label}</div>
           <div class="point-freq">
             <span class="freq-badge ${isThreeDay && threeDayDue ? 'due' : ''}">
               🔄 ${freq}
             </span>
           </div>
+          ${answeredToday[pNo] ? `
+            <div class="locked-badge">✅ Submitted — Locked</div>
+            <div class="yn-wrap">
+              <button class="yn-btn yes ${answeredToday[pNo].value === 'yes' ? 'active' : ''}" disabled>✅ Yes</button>
+              <button class="yn-btn no  ${answeredToday[pNo].value === 'no'  ? 'active' : ''}" disabled>❌ No</button>
+              <button class="yn-btn na  ${answeredToday[pNo].value === 'na'  ? 'active' : ''}" disabled>⬜ N/A</button>
+            </div>
+            ${answeredToday[pNo].remarks ? `<div style="font-size:12px;color:var(--ink-60);margin-top:8px;font-style:italic">📝 ${answeredToday[pNo].remarks}</div>` : ''}
+            ${answeredToday[pNo].photo_link ? `<div style="margin-top:8px"><a href="${answeredToday[pNo].photo_link}" target="_blank" style="font-size:12px;color:var(--navy)">📷 View Photo</a></div>` : ''}
+          ` : `
           <div class="yn-wrap">
             <button class="yn-btn yes" id="yn_yes_${pNo}" onclick="setYN('${pNo}','yes')">✅ Yes</button>
             <button class="yn-btn no"  id="yn_no_${pNo}"  onclick="setYN('${pNo}','no')">❌ No</button>
@@ -358,7 +393,7 @@ function renderChecklist() {
             <div class="photo-preview" id="photoPreview_${pNo}">
               <img id="photoImg_${pNo}" src="" alt="Preview"/>
             </div>
-          </div>
+          `}
         </div>`;
     });
 
@@ -466,11 +501,13 @@ function setRemarks(pNo, val) {
 
 // ── PROGRESS ──────────────────────────────────────────────────
 function updateProgress() {
-  const total  = points.length;
-  const done   = Object.keys(answers).filter(k => answers[k].value).length;
-  const pct    = total > 0 ? (done / total) * 100 : 0;
+  const total      = points.length;
+  const lockedCount = Object.keys(answeredToday).length;
+  const newCount    = Object.keys(answers).filter(k => answers[k].value && !answeredToday[k]).length;
+  const done        = lockedCount + newCount;
+  const pct         = total > 0 ? (done / total) * 100 : 0;
   document.getElementById("progressFill").style.width = pct + "%";
-  document.getElementById("progressCount").textContent = `${done} / ${total} answered`;
+  document.getElementById("progressCount").textContent = `${done} / ${total} answered${lockedCount > 0 ? ` (${lockedCount} locked)` : ""}`;
 }
 
 function updateSubmitBtn() {
@@ -564,11 +601,11 @@ async function submitChecklist() {
   btn.disabled = true;
   btn.textContent = "Submitting...";
 
-  // Only submit answered points — unanswered daily points scored as 0 by backend
+  // Only submit NEW answers — locked (already submitted) points excluded
   const entries = points
     .filter(p => {
       const pNo = p["#"] || p.point_no;
-      return answers[pNo] && answers[pNo].value;
+      return answers[pNo] && answers[pNo].value && !answeredToday[pNo];
     })
     .map(p => {
       const pNo = p["#"] || p.point_no;
