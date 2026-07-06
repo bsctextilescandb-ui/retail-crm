@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>BSC VM — Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#D97706;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--border:#E8E4D8;
+  --shadow:0 2px 12px rgba(26,26,46,.08);
+}
+html,body{min-height:100vh;background:var(--ivory);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* ── TOPBAR ───────────────────────────────────────── */
+.topbar{
+  background:var(--navy);padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.back-btn{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.12);color:var(--white);
+  font-size:18px;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.topbar-title{font-family:'DM Serif Display',serif;color:var(--white);font-size:16px}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px}
+
+/* ── PROGRESS BAR ─────────────────────────────────── */
+.progress-wrap{
+  background:var(--white);padding:12px 20px;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:64px;z-index:90;
+}
+.progress-info{display:flex;justify-content:space-between;margin-bottom:6px}
+.progress-label{font-size:12px;font-weight:600;color:var(--ink)}
+.progress-count{font-size:12px;color:var(--ink-60)}
+.progress-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--gold);transition:width .3s ease}
+
+/* ── BODY ─────────────────────────────────────────── */
+.body{padding:16px 20px;max-width:560px;margin:0 auto}
+
+/* ── SECTION NAVIGATOR ────────────────────────────── */
+.section-nav{
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;
+  margin-bottom:20px;scrollbar-width:none;
+}
+.section-nav::-webkit-scrollbar{display:none}
+.section-pill{
+  flex-shrink:0;padding:6px 14px;border-radius:20px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  background:var(--white);border:1.5px solid var(--border);
+  color:var(--ink-60);transition:all .2s;
+}
+.section-pill.active{background:var(--navy);border-color:var(--navy);color:var(--white)}
+.section-pill.done{background:var(--green-l);border-color:var(--green);color:var(--green)}
+
+/* ── SECTION BLOCK ────────────────────────────────── */
+.section-block{display:none}
+.section-block.active{display:block;animation:fadeIn .25s ease}
+.section-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.section-num{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--navy);color:var(--white);
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.section-name{font-family:'DM Serif Display',serif;font-size:17px;color:var(--navy)}
+
+/* ── POINT CARD ───────────────────────────────────── */
+.point-card{
+  background:var(--white);border-radius:12px;padding:14px;
+  margin-bottom:10px;border:1.5px solid var(--border);
+  transition:border-color .2s;
+}
+.point-card.answered{border-color:var(--gold)}
+.point-card.answered.no-answer{border-color:var(--crimson)}
+.point-label{font-size:13px;color:var(--ink);margin-bottom:4px;line-height:1.4;font-weight:500}
+.point-freq{
+  font-size:11px;color:var(--ink-30);margin-bottom:12px;
+  display:flex;align-items:center;gap:4px;
+}
+.freq-badge{
+  display:inline-block;padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:600;background:var(--ivory);color:var(--ink-60);
+}
+.freq-badge.due{background:var(--orange-l);color:var(--orange)}
+
+/* Yes/No */
+.yn-wrap{display:flex;gap:8px}
+.yn-btn{
+  flex:1;padding:10px 8px;border-radius:8px;
+  font-size:13px;font-weight:600;font-family:inherit;
+  border:1.5px solid var(--border);background:var(--ivory);
+  color:var(--ink-60);cursor:pointer;transition:all .2s;
+}
+.yn-btn.yes.active{background:var(--green-l);border-color:var(--green);color:var(--green)}
+.yn-btn.no.active{background:var(--crimson-l);border-color:var(--crimson);color:var(--crimson)}
+
+/* Star Rating */
+.star-wrap{display:flex;gap:8px;align-items:center}
+.star{font-size:28px;cursor:pointer;color:var(--border);transition:color .15s;line-height:1}
+.star.active{color:#F59E0B}
+
+/* Remarks */
+.remarks-wrap{margin-top:10px}
+.remarks-label{font-size:11px;color:var(--ink-60);margin-bottom:4px;font-weight:600}
+.remarks-input{
+  width:100%;padding:8px 12px;border-radius:8px;
+  border:1.5px solid var(--border);font-size:12px;
+  color:var(--ink);background:var(--ivory);
+  resize:none;height:52px;font-family:inherit;
+  transition:border-color .2s;
+}
+.remarks-input:focus{border-color:var(--navy);outline:none}
+.remarks-input.required{border-color:var(--crimson)}
+
+/* ── NAV BUTTONS ──────────────────────────────────── */
+.section-nav-btns{
+  display:flex;gap:10px;margin-top:20px;margin-bottom:8px;
+}
+.btn-nav{
+  flex:1;padding:12px;border-radius:10px;
+  font-size:13px;font-weight:700;font-family:inherit;
+  border:none;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-prev{background:var(--ivory);color:var(--ink);border:1.5px solid var(--border)}
+.btn-prev:hover{background:var(--navy-l)}
+.btn-next{background:var(--navy);color:var(--white)}
+.btn-next:hover{background:var(--navy-d)}
+.btn-next:disabled{opacity:.4;cursor:not-allowed}
+.btn-save{background:var(--green);color:var(--white)}
+.btn-save:hover{background:#166016}
+
+/* ── SUBMIT FOOTER ────────────────────────────────── */
+.submit-footer{
+  background:var(--white);border-top:1px solid var(--border);
+  padding:16px 20px;position:sticky;bottom:0;
+}
+.submit-btn{
+  width:100%;padding:14px;border-radius:12px;
+  background:var(--navy);color:var(--white);
+  font-size:15px;font-weight:700;font-family:inherit;
+  border:none;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed}
+.submit-btn:not(:disabled):hover{background:var(--navy-d)}
+
+/* ── 3-DAY NOTICE ─────────────────────────────────── */
+.three-day-notice{
+  background:var(--orange-l);border:1px solid var(--orange);
+  border-radius:10px;padding:12px 14px;margin-bottom:16px;
+  font-size:12px;color:var(--orange);line-height:1.5;
+}
+
+/* ── LOADER ───────────────────────────────────────── */
+.loader{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:12px}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--navy);animation:spin .7s linear infinite}
+.loader p{font-size:13px;color:var(--ink-60)}
+
+/* ── TOAST ────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:var(--white);padding:12px 20px;border-radius:10px;
+  font-size:13px;font-weight:500;z-index:999;transition:transform .3s ease;
+  white-space:nowrap;pointer-events:none;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--crimson)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div>
+      <div class="topbar-title" id="topTitle">Checklist</div>
+      <div class="topbar-sub" id="topSub"></div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span class="progress-label">Section <span id="curSection">1</span> of <span id="totSection">1</span></span>
+    <span class="progress-count" id="progressCount">0 answered</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="body" id="body">
+  <div class="loader"><div class="spinner"></div><p>Loading checklist...</p></div>
+</div>
+
+<div class="submit-footer" id="submitFooter" style="display:none">
+  <button class="submit-btn" id="submitBtn" onclick="submitChecklist()">
+    Submit Checklist
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
+
+let user          = null;
+let checklistType = "overall"; // "overall" or "floor"
+let floorName     = null;
+let points        = [];
+let sections      = [];
+let answers       = {}; // { point_no: { value, remarks } }
+let currentSec    = 0;
+let threeDayDue   = false;
+
+// ── INIT ──────────────────────────────────────────────────────
+window.onload = async () => {
+  const stored = sessionStorage.getItem("vm_user");
+  if (!stored) { window.location.href = "login.html"; return; }
+  user          = JSON.parse(stored);
+  checklistType = sessionStorage.getItem("vm_checklist_type") || "overall";
+  floorName     = sessionStorage.getItem("vm_checklist_floor") || null;
+  threeDayDue   = sessionStorage.getItem("vm_three_day_due") === "true";
+
+  // Set topbar
+  document.getElementById("topTitle").textContent =
+    checklistType === "overall" ? "Overall Checklist" : `${floorName} Checklist`;
+  document.getElementById("topSub").textContent =
+    checklistType === "overall" ? "Daily — All Sections" : "Weekly Floor Check";
+
+  // Load points
+  const data = await apiGet({ action: "get_checklist", type: checklistType });
+  if (!data.ok || !data.points.length) {
+    document.getElementById("body").innerHTML =
+      `<div class="loader"><p style="color:#C0392B">Failed to load checklist points.</p></div>`;
+    return;
+  }
+
+  points = data.points;
+  buildSections();
+  renderChecklist();
+};
+
+// ── BUILD SECTIONS ────────────────────────────────────────────
+function buildSections() {
+  const secMap = {};
+  points.forEach(p => {
+    const asp = p.ASPECT || p.aspect;
+    if (!secMap[asp]) secMap[asp] = [];
+    secMap[asp].push(p);
+  });
+  sections = Object.entries(secMap).map(([name, pts]) => ({ name, pts }));
+  document.getElementById("totSection").textContent = sections.length;
+}
+
+// ── RENDER CHECKLIST ──────────────────────────────────────────
+function renderChecklist() {
+  const body = document.getElementById("body");
+
+  // Section pills
+  let pillsHtml = sections.map((s, i) => `
+    <div class="section-pill ${i === 0 ? 'active' : ''}" id="pill_${i}" onclick="goToSection(${i})">
+      ${s.name}
+    </div>`).join("");
+
+  // Section blocks
+  let blocksHtml = sections.map((s, i) => {
+    let pointsHtml = "";
+
+    // 3-day notice for Mannequin Styling
+    if (checklistType === "overall" && s.name === "Mannequin Styling" && threeDayDue) {
+      pointsHtml += `
+        <div class="three-day-notice">
+          ⚠️ <strong>3-Day Cycle Due:</strong> These points must be filled today.
+          If unable to update physically, add remarks explaining why.
+        </div>`;
+    }
+
+    s.pts.forEach(p => {
+      const pNo   = p["#"] || p.point_no;
+      const label = p.POINT || p.point;
+      const freq  = p.FREQUENCY || p.frequency;
+      const isThreeDay = freq === "3 Days Once";
+
+      pointsHtml += `
+        <div class="point-card" id="pc_${pNo}">
+          <div class="point-label">${label}</div>
+          <div class="point-freq">
+            <span class="freq-badge ${isThreeDay && threeDayDue ? 'due' : ''}">
+              🔄 ${freq}
+            </span>
+          </div>
+          <div class="yn-wrap">
+            <button class="yn-btn yes" onclick="setYN('${pNo}','yes')">✅ Yes</button>
+            <button class="yn-btn no"  onclick="setYN('${pNo}','no')">❌ No</button>
+          </div>
+          <div class="remarks-wrap" id="rem_${pNo}" style="display:none">
+            <div class="remarks-label">Remarks ${isThreeDay ? '(Required if not done)' : '(Optional)'}</div>
+            <textarea class="remarks-input ${isThreeDay ? 'required' : ''}"
+              placeholder="Add remarks..."
+              oninput="setRemarks('${pNo}',this.value)"
+              id="remInput_${pNo}"></textarea>
+          </div>
+        </div>`;
+    });
+
+    const navBtns = `
+      <div class="section-nav-btns">
+        ${i > 0 ? `<button class="btn-nav btn-prev" onclick="goToSection(${i-1})">‹ Previous</button>` : '<div></div>'}
+        ${i < sections.length - 1
+          ? `<button class="btn-nav btn-next" id="nextBtn_${i}" onclick="nextSection(${i})">Next ›</button>`
+          : `<button class="btn-nav btn-save" onclick="showSubmit()">Done ✓</button>`
+        }
+      </div>`;
+
+    return `
+      <div class="section-block ${i === 0 ? 'active' : ''}" id="sec_${i}">
+        <div class="section-header">
+          <div class="section-num">${i+1}</div>
+          <div class="section-name">${s.name}</div>
+        </div>
+        ${pointsHtml}
+        ${navBtns}
+      </div>`;
+  }).join("");
+
+  body.innerHTML = `
+    <div class="section-nav">${pillsHtml}</div>
+    ${blocksHtml}
+    <div style="height:8px"></div>`;
+
+  updateProgress();
+}
+
+// ── SECTION NAVIGATION ────────────────────────────────────────
+function goToSection(idx) {
+  document.querySelectorAll(".section-block").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".section-pill").forEach(p => p.classList.remove("active"));
+  document.getElementById(`sec_${idx}`).classList.add("active");
+  document.getElementById(`pill_${idx}`).classList.add("active");
+
+  // Scroll pill into view
+  document.getElementById(`pill_${idx}`).scrollIntoView({ behavior:"smooth", inline:"center", block:"nearest" });
+
+  currentSec = idx;
+  document.getElementById("curSection").textContent = idx + 1;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function nextSection(idx) {
+  // Mark section pill as done if all answered
+  const sec     = sections[idx];
+  const allDone = sec.pts.every(p => answers[p["#"] || p.point_no]);
+  if (allDone) document.getElementById(`pill_${idx}`).classList.add("done");
+  goToSection(idx + 1);
+}
+
+function showSubmit() {
+  document.getElementById("submitFooter").style.display = "block";
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  updateSubmitBtn();
+}
+
+// ── ANSWERS ───────────────────────────────────────────────────
+function setYN(pNo, val) {
+  answers[pNo] = answers[pNo] || {};
+  answers[pNo].value = val;
+
+  const card = document.getElementById(`pc_${pNo}`);
+  card.classList.add("answered");
+  if (val === "no") card.classList.add("no-answer");
+  else card.classList.remove("no-answer");
+
+  card.querySelector(".yn-btn.yes").classList.toggle("active", val === "yes");
+  card.querySelector(".yn-btn.no").classList.toggle("active", val === "no");
+
+  // Show remarks for No answers
+  document.getElementById(`rem_${pNo}`).style.display = val === "no" ? "block" : "none";
+
+  updateProgress();
+  updateSubmitBtn();
+}
+
+function setRemarks(pNo, val) {
+  answers[pNo] = answers[pNo] || {};
+  answers[pNo].remarks = val;
+  updateSubmitBtn();
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────
+function updateProgress() {
+  const total  = points.length;
+  const done   = Object.keys(answers).filter(k => answers[k].value).length;
+  const pct    = total > 0 ? (done / total) * 100 : 0;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressCount").textContent = `${done} / ${total} answered`;
+}
+
+function updateSubmitBtn() {
+  const btn = document.getElementById("submitBtn");
+  if (!btn) return;
+  const total  = points.length;
+  const done   = Object.keys(answers).filter(k => answers[k].value).length;
+
+  // Check 3-day remarks requirement
+  let remarksMissing = false;
+  points.forEach(p => {
+    const pNo  = p["#"] || p.point_no;
+    const freq = p.FREQUENCY || p.frequency;
+    if (freq === "3 Days Once" && threeDayDue) {
+      const ans = answers[pNo];
+      if (!ans || !ans.value) remarksMissing = true;
+    }
+  });
+
+  btn.disabled = (done < total) || remarksMissing;
+  btn.textContent = done < total
+    ? `Answer all points (${total - done} remaining)`
+    : "Submit Checklist ✓";
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+async function submitChecklist() {
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  const entries = points.map(p => {
+    const pNo  = p["#"] || p.point_no;
+    const ans  = answers[pNo] || {};
+    return {
+      point_no   : pNo,
+      aspect     : p.ASPECT     || p.aspect,
+      point      : p.POINT      || p.point,
+      frequency  : p.FREQUENCY  || p.frequency,
+      input_type : "yesno",
+      value      : ans.value   || "",
+      remarks    : ans.remarks || ""
+    };
+  });
+
+  const params = {
+    action       : checklistType === "overall" ? "submit_overall" : "submit_floor",
+    submitted_by : user.name,
+    data         : JSON.stringify(entries)
+  };
+  if (checklistType === "floor") params.floor = floorName;
+
+  const res = await apiGet(params);
+  if (res.ok) {
+    showToast("Checklist submitted successfully!", "success");
+    setTimeout(() => {
+      sessionStorage.removeItem("vm_checklist_type");
+      sessionStorage.removeItem("vm_checklist_floor");
+      window.location.href = "vm-dashboard.html";
+    }, 1500);
+  } else {
+    showToast(res.error || "Submission failed.", "error");
+    btn.disabled = false;
+    btn.textContent = "Submit Checklist ✓";
+  }
+}
+
+function goBack() {
+  sessionStorage.removeItem("vm_checklist_type");
+  sessionStorage.removeItem("vm_checklist_floor");
+  window.location.href = "vm-dashboard.html";
+}
+
+// ── API ───────────────────────────────────────────────────────
+function apiGet(params) {
+  return new Promise((resolve) => {
+    const cbName = "vmCb_" + Date.now();
+    const script = document.createElement("script");
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = () => resolve({ ok: false, error: "Network error" });
+    script.src = `${API}?${new URLSearchParams(params).toString()}&callback=${cbName}`;
+    document.body.appendChild(script);
+  });
+}
+
+function showToast(msg, type="") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = type;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>
