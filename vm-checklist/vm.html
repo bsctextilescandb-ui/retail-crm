@@ -309,6 +309,28 @@ window.onload = async () => {
   renderChecklist();
 };
 
+
+// ── RENDER LOCKED POINT ───────────────────────────────────────
+function renderLockedOrOpen(pNo, lockedData, isThreeDay) {
+  if (!lockedData) return "";
+  const yesActive = lockedData.value === "yes" ? "active" : "";
+  const noActive  = lockedData.value === "no"  ? "active" : "";
+  const naActive  = lockedData.value === "na"  ? "active" : "";
+  let html = '<div class="locked-badge">✅ Submitted — Locked</div>';
+  html += '<div class="yn-wrap">';
+  html += '<button class="yn-btn yes ' + yesActive + '" disabled>✅ Yes</button>';
+  html += '<button class="yn-btn no '  + noActive  + '" disabled>❌ No</button>';
+  html += '<button class="yn-btn na '  + naActive  + '" disabled>⬜ N/A</button>';
+  html += '</div>';
+  if (lockedData.remarks) {
+    html += '<div style="font-size:12px;color:var(--ink-60);margin-top:8px;font-style:italic">📝 ' + lockedData.remarks + '</div>';
+  }
+  if (lockedData.photo_link) {
+    html += '<div style="margin-top:8px"><a href="' + lockedData.photo_link + '" target="_blank" style="font-size:12px;color:var(--navy)">📷 View Photo</a></div>';
+  }
+  return html;
+}
+
 // ── BUILD SECTIONS ────────────────────────────────────────────
 function buildSections() {
   const secMap = {};
@@ -358,16 +380,8 @@ function renderChecklist() {
               🔄 ${freq}
             </span>
           </div>
-          ${answeredToday[pNo] ? `
-            <div class="locked-badge">✅ Submitted — Locked</div>
-            <div class="yn-wrap">
-              <button class="yn-btn yes ${answeredToday[pNo].value === 'yes' ? 'active' : ''}" disabled>✅ Yes</button>
-              <button class="yn-btn no  ${answeredToday[pNo].value === 'no'  ? 'active' : ''}" disabled>❌ No</button>
-              <button class="yn-btn na  ${answeredToday[pNo].value === 'na'  ? 'active' : ''}" disabled>⬜ N/A</button>
-            </div>
-            ${answeredToday[pNo].remarks ? `<div style="font-size:12px;color:var(--ink-60);margin-top:8px;font-style:italic">📝 ${answeredToday[pNo].remarks}</div>` : ''}
-            ${answeredToday[pNo].photo_link ? `<div style="margin-top:8px"><a href="${answeredToday[pNo].photo_link}" target="_blank" style="font-size:12px;color:var(--navy)">📷 View Photo</a></div>` : ''}
-          ` : `
+          ${renderLockedOrOpen(pNo, answeredToday[pNo], isThreeDay)}
+          ${answeredToday[pNo] ? "" : `
           <div class="yn-wrap">
             <button class="yn-btn yes" id="yn_yes_${pNo}" onclick="setYN('${pNo}','yes')">✅ Yes</button>
             <button class="yn-btn no"  id="yn_no_${pNo}"  onclick="setYN('${pNo}','no')">❌ No</button>
