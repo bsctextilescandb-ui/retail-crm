@@ -564,25 +564,42 @@ async function submitChecklist() {
   btn.disabled = true;
   btn.textContent = "Submitting...";
 
-  const entries = points.map(p => {
-    const pNo  = p["#"] || p.point_no;
-    const ans  = answers[pNo] || {};
-    return {
-      point_no   : pNo,
-      aspect     : p.ASPECT     || p.aspect,
-      point      : p.POINT      || p.point,
-      frequency  : p.FREQUENCY  || p.frequency,
-      input_type : "yesno",
-      value      : ans.value      || "",
-      remarks    : ans.remarks    || "",
-      photo_link : ans.photo_link || ""
-    };
-  });
+  // Only submit answered points — unanswered daily points scored as 0 by backend
+  const entries = points
+    .filter(p => {
+      const pNo = p["#"] || p.point_no;
+      return answers[pNo] && answers[pNo].value;
+    })
+    .map(p => {
+      const pNo = p["#"] || p.point_no;
+      const ans = answers[pNo] || {};
+      return {
+        point_no   : pNo,
+        aspect     : p.ASPECT    || p.aspect,
+        point      : p.POINT     || p.point,
+        frequency  : p.FREQUENCY || p.frequency,
+        input_type : "yesno",
+        value      : ans.value      || "",
+        remarks    : ans.remarks    || "",
+        photo_link : ans.photo_link || ""
+      };
+    });
+
+  if (entries.length === 0) {
+    showToast("Please answer at least one point before submitting.", "error");
+    btn.disabled = false;
+    btn.textContent = `Submit (0/${points.length} answered)`;
+    return;
+  }
+
+  // Pass total daily points count so backend can score unfilled ones as 0
+  const totalDaily = points.filter(p => (p.FREQUENCY || p.frequency) === "Daily").length;
 
   const params = {
-    action       : checklistType === "overall" ? "submit_overall" : "submit_floor",
-    submitted_by : user.name,
-    data         : JSON.stringify(entries)
+    action        : checklistType === "overall" ? "submit_overall" : "submit_floor",
+    submitted_by  : user.name,
+    total_daily   : totalDaily,
+    data          : JSON.stringify(entries)
   };
   if (checklistType === "floor") params.floor = floorName;
 
