@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>BSC VM Checklist — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--border:#E8E4D8;
+  --radius:12px;--shadow:0 4px 24px rgba(26,26,46,.12);
+}
+html,body{height:100%;background:var(--navy);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* ── BACKGROUND PATTERN ───────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 20% 50%, rgba(184,134,11,.08) 0%, transparent 60%),
+             radial-gradient(ellipse at 80% 20%, rgba(255,255,255,.04) 0%, transparent 50%);
+  pointer-events:none;
+}
+
+.container{
+  min-height:100vh;display:flex;align-items:center;
+  justify-content:center;padding:24px;
+}
+
+/* ── CARD ─────────────────────────────────────────── */
+.card{
+  background:var(--white);border-radius:24px;
+  width:100%;max-width:380px;overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.35);
+  animation:slideUp .4s cubic-bezier(.16,1,.3,1);
+}
+
+/* ── CARD HEADER ──────────────────────────────────── */
+.card-header{
+  background:var(--navy);padding:32px 28px 28px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.card-header::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;
+  background:var(--white);border-radius:24px 24px 0 0;
+}
+.brand-icon{
+  width:64px;height:64px;border-radius:16px;
+  background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;margin:0 auto 16px;
+}
+.brand-title{
+  font-family:'DM Serif Display',serif;font-size:22px;
+  color:var(--white);margin-bottom:4px;
+}
+.brand-sub{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.04em}
+
+/* ── CARD BODY ────────────────────────────────────── */
+.card-body{padding:28px}
+
+/* ── SCREEN MANAGEMENT ────────────────────────────── */
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .25s ease}
+
+/* ── NAME SELECTION ───────────────────────────────── */
+.screen-label{
+  font-size:12px;font-weight:700;color:var(--ink-60);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.screen-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.name-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.name-btn{
+  padding:14px 16px;border-radius:12px;
+  background:var(--ivory);border:1.5px solid var(--border);
+  font-size:14px;font-weight:500;color:var(--ink);
+  text-align:left;display:flex;align-items:center;gap:12px;
+  transition:all .2s;cursor:pointer;
+}
+.name-btn:hover{background:var(--navy-l);border-color:var(--navy)}
+.name-btn.selected{background:var(--navy);border-color:var(--navy);color:var(--white)}
+.name-avatar{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--navy-l);color:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;flex-shrink:0;
+}
+.name-btn.selected .name-avatar{background:rgba(255,255,255,.2);color:var(--white)}
+.name-role{font-size:11px;opacity:.6;margin-top:2px}
+
+.loading-names{
+  text-align:center;padding:32px;color:var(--ink-30);font-size:13px;
+}
+.spinner{
+  width:28px;height:28px;border-radius:50%;
+  border:2.5px solid var(--border);border-top-color:var(--navy);
+  animation:spin .7s linear infinite;margin:0 auto 12px;
+}
+
+/* ── PIN SCREEN ───────────────────────────────────── */
+.pin-user-info{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-radius:12px;
+  background:var(--navy-l);border:1.5px solid var(--navy);
+  margin-bottom:24px;
+}
+.pin-user-avatar{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--navy);color:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;
+}
+.pin-user-name{font-size:14px;font-weight:600;color:var(--navy)}
+.pin-user-role{font-size:11px;color:var(--ink-60);margin-top:2px;text-transform:capitalize}
+.pin-change{
+  margin-left:auto;font-size:12px;color:var(--gold);
+  cursor:pointer;text-decoration:underline;background:none;border:none;
+  font-family:inherit;
+}
+
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:24px}
+.pin-dot{
+  width:13px;height:13px;border-radius:50%;
+  border:2px solid var(--ink-30);background:transparent;transition:all .2s;
+}
+.pin-dot.filled{background:var(--navy);border-color:var(--navy);transform:scale(1.1)}
+
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.pin-key{
+  padding:15px 8px;border-radius:12px;
+  background:var(--ivory);border:1.5px solid var(--border);
+  font-size:20px;font-weight:600;color:var(--ink);
+  cursor:pointer;transition:all .15s;font-family:inherit;
+}
+.pin-key:active{background:var(--navy-l);border-color:var(--navy);transform:scale(.95)}
+.pin-key.del{font-size:16px;color:var(--crimson)}
+.pin-key.zero{grid-column:2}
+.pin-error{
+  font-size:13px;color:var(--crimson);text-align:center;
+  min-height:20px;margin-top:4px;
+}
+
+/* ── BUTTONS ──────────────────────────────────────── */
+.btn-primary{
+  width:100%;padding:14px;border-radius:12px;
+  background:var(--navy);color:var(--white);
+  font-size:14px;font-weight:700;font-family:inherit;
+  border:none;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary:hover{background:var(--navy-d)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <div class="brand-icon">🏪</div>
+      <div class="brand-title">BSC Textiles</div>
+      <div class="brand-sub">VM CHECKLIST SYSTEM · BELAGAVI</div>
+    </div>
+    <div class="card-body">
+
+      <!-- SCREEN 1: SELECT NAME -->
+      <div class="screen active" id="screenName">
+        <div class="screen-label">Select Your Name</div>
+        <div class="name-list" id="nameList">
+          <div class="loading-names">
+            <div class="spinner"></div>
+            Loading users...
+          </div>
+        </div>
+        <button class="btn-primary" id="continueBtn" onclick="goToPin()" disabled>
+          Continue →
+        </button>
+      </div>
+
+      <!-- SCREEN 2: ENTER PIN -->
+      <div class="screen" id="screenPin">
+        <div class="pin-user-info">
+          <div class="pin-user-avatar" id="pinAvatar"></div>
+          <div>
+            <div class="pin-user-name" id="pinName"></div>
+            <div class="pin-user-role" id="pinRole"></div>
+          </div>
+          <button class="pin-change" onclick="backToNames()">Change</button>
+        </div>
+        <div class="screen-label">Enter PIN</div>
+        <div class="pin-dots" id="pinDots">
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <div class="pin-pad">
+          <button class="pin-key" onclick="pinPress('1')">1</button>
+          <button class="pin-key" onclick="pinPress('2')">2</button>
+          <button class="pin-key" onclick="pinPress('3')">3</button>
+          <button class="pin-key" onclick="pinPress('4')">4</button>
+          <button class="pin-key" onclick="pinPress('5')">5</button>
+          <button class="pin-key" onclick="pinPress('6')">6</button>
+          <button class="pin-key" onclick="pinPress('7')">7</button>
+          <button class="pin-key" onclick="pinPress('8')">8</button>
+          <button class="pin-key" onclick="pinPress('9')">9</button>
+          <button class="pin-key zero" onclick="pinPress('0')">0</button>
+          <button class="pin-key del" onclick="pinDel()">⌫</button>
+        </div>
+        <div class="pin-error" id="pinError"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
+
+let users       = [];
+let selectedUser = null;
+let pinBuffer   = "";
+
+// ── LOAD USERS ─────────────────────────────────────
+window.onload = async () => {
+  // Clear any existing session
+  sessionStorage.clear();
+  try {
+    // We fetch users by attempting a dummy login to trigger sheet read
+    // Instead, read Users tab via a dedicated action
+    const res = await fetch(`${API}?action=get_users`);
+    const data = await res.json();
+    if (data.ok) {
+      users = data.users;
+      renderNames();
+    } else {
+      // Fallback — show error
+      document.getElementById("nameList").innerHTML =
+        `<div class="loading-names" style="color:#C0392B">Failed to load users. Please refresh.</div>`;
+    }
+  } catch(e) {
+    document.getElementById("nameList").innerHTML =
+      `<div class="loading-names" style="color:#C0392B">Network error. Please refresh.</div>`;
+  }
+};
+
+function renderNames() {
+  const list = document.getElementById("nameList");
+  if (!users || users.length === 0) {
+    list.innerHTML = `<div class="loading-names">No users found. Please check the Users sheet.</div>`;
+    return;
+  }
+  list.innerHTML = users.map(u => `
+    <button class="name-btn" onclick="selectName('${u.NAME}','${u.ROLE}')">
+      <div class="name-avatar">${u.NAME.charAt(0).toUpperCase()}</div>
+      <div>
+        <div>${u.NAME}</div>
+        <div class="name-role">${u.ROLE === 'admin' ? '⚙️ Admin' : '✅ VM Team'}</div>
+      </div>
+    </button>
+  `).join("");
+}
+
+function selectName(name, role) {
+  selectedUser = { name, role };
+  document.querySelectorAll(".name-btn").forEach(b => b.classList.remove("selected"));
+  event.currentTarget.classList.add("selected");
+  document.getElementById("continueBtn").disabled = false;
+}
+
+function goToPin() {
+  if (!selectedUser) return;
+  document.getElementById("pinAvatar").textContent = selectedUser.name.charAt(0).toUpperCase();
+  document.getElementById("pinName").textContent   = selectedUser.name;
+  document.getElementById("pinRole").textContent   = selectedUser.role === "admin" ? "⚙️ Admin" : "✅ VM Team";
+  pinBuffer = "";
+  updateDots();
+  showScreen("screenPin");
+}
+
+function backToNames() {
+  selectedUser = null;
+  pinBuffer    = "";
+  document.querySelectorAll(".name-btn").forEach(b => b.classList.remove("selected"));
+  document.getElementById("continueBtn").disabled = true;
+  document.getElementById("pinError").textContent = "";
+  showScreen("screenName");
+}
+
+// ── PIN ─────────────────────────────────────────────
+function pinPress(d) {
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += d;
+  updateDots();
+  document.getElementById("pinError").textContent = "";
+  if (pinBuffer.length >= 4) setTimeout(verifyPin, 150);
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updateDots();
+}
+
+function updateDots() {
+  document.querySelectorAll(".pin-dot").forEach((dot, i) =>
+    dot.classList.toggle("filled", i < pinBuffer.length)
+  );
+}
+
+async function verifyPin() {
+  const res = await fetch(`${API}?action=login&name=${encodeURIComponent(selectedUser.name)}&pin=${pinBuffer}`);
+  const data = await res.json();
+  if (data.ok) {
+    sessionStorage.setItem("vm_user", JSON.stringify({ name: data.name, role: data.role }));
+    if (data.role === "admin") {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "vm-dashboard.html";
+    }
+  } else {
+    document.getElementById("pinError").textContent = "Incorrect PIN. Try again.";
+    pinBuffer = "";
+    updateDots();
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+</script>
+</body>
+</html>
