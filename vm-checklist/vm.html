@@ -222,9 +222,6 @@ html,body{min-height:100vh;background:var(--ivory);
 </head>
 <body>
 
-<!-- Hidden iframe for photo upload — same origin as Apps Script = no CORS -->
-<iframe id="uploadFrame" src="" style="display:none;width:0;height:0;border:0"></iframe>
-
 <div class="topbar">
   <div class="topbar-left">
     <button class="back-btn" onclick="goBack()">‹</button>
@@ -258,9 +255,7 @@ html,body{min-height:100vh;background:var(--ivory);
 <script>
 const API = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
 
-let user          = null;
-let uploadFrameReady = false;
-let pendingUploads   = {};
+let user = null;
 let checklistType = "overall"; // "overall" or "floor"
 let floorName     = null;
 let points        = [];
@@ -276,8 +271,6 @@ window.onload = async () => {
   if (!stored) { window.location.href = "login.html"; return; }
   user          = JSON.parse(stored);
   checklistType = sessionStorage.getItem("vm_checklist_type") || "overall";
-  // Load upload iframe
-  initUploadFrame();
   floorName     = sessionStorage.getItem("vm_checklist_floor") || null;
   threeDayDue   = sessionStorage.getItem("vm_three_day_due") === "true";
 
@@ -316,50 +309,6 @@ window.onload = async () => {
   renderChecklist();
 };
 
-
-// ── IFRAME PHOTO UPLOAD ───────────────────────────────────────
-function initUploadFrame() {
-  const frame = document.getElementById("uploadFrame");
-  frame.src   = API + "?action=upload_page";
-
-  // Listen for messages from iframe
-  window.addEventListener("message", function(event) {
-    const data = event.data;
-    if (!data || typeof data !== 'object') return;
-    // Accept from any origin — Apps Script domain differs from GitHub Pages
-
-    if (data.type === "upload_ready") {
-      uploadFrameReady = true;
-      // Process any pending uploads
-      Object.keys(pendingUploads).forEach(pNo => {
-        sendPhotoToFrame(pNo, pendingUploads[pNo]);
-        delete pendingUploads[pNo];
-      });
-    }
-
-    if (data.type === "upload_result") {
-      const pNo = data.pNo;
-      document.getElementById("photoUploading_" + pNo).style.display = "none";
-      if (data.ok) {
-        answers[pNo] = answers[pNo] || {};
-        answers[pNo].photo_link  = data.link;
-        answers[pNo].photo_thumb = data.thumb;
-        const btn = document.getElementById("photoBtn_" + pNo);
-        if (btn) { btn.textContent = "✅ Photo Uploaded"; btn.classList.add("uploaded"); }
-      } else {
-        const btn = document.getElementById("photoBtn_" + pNo);
-        if (btn) btn.textContent = "⚠️ Upload failed. Retry";
-        console.error("Upload error:", data.error);
-      }
-      updateSubmitBtn();
-    }
-  });
-}
-
-function sendPhotoToFrame(pNo, payload) {
-  const frame = document.getElementById("uploadFrame");
-  frame.contentWindow.postMessage({ type: "upload_photo", ...payload }, "*");
-}
 
 // ── RENDER LOCKED POINT ───────────────────────────────────────
 function renderLockedOrOpen(pNo, lockedData, isThreeDay) {
