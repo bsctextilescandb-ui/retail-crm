@@ -306,15 +306,18 @@ function renderDashboard() {
           </div>
         </div>`;
     } else {
+      const submitted = status ? (status.submitted || 0) : 0;
+      const total     = status ? (status.total || 0) : 0;
+      const partial   = submitted > 0;
       floorHtml += `
         <div class="floor-card active fade-in" onclick="goToChecklist('floor', '${f.name}')">
           <div class="floor-icon">${f.icon}</div>
           <div class="floor-info">
             <div class="floor-name">${f.name}</div>
-            <div class="floor-meta">Tap to fill this week's checklist</div>
+            <div class="floor-meta">${partial ? submitted + "/" + total + " points done · Tap to continue" : "Tap to fill this week's checklist"}</div>
           </div>
           <div class="floor-right">
-            <div class="floor-arrow">›</div>
+            ${partial ? `<div style="font-size:13px;font-weight:600;color:var(--gold)">${submitted}/${total}</div>` : `<div class="floor-arrow">›</div>`}
           </div>
         </div>`;
     }
