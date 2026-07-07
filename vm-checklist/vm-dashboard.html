@@ -203,6 +203,7 @@ html,body{min-height:100vh;background:var(--ivory);
   </div>
 </div>
 
+<canvas id="reportCanvas" style="display:none"></canvas>
 <div id="toast"></div>
 
 <div style="text-align:center;padding:24px 20px 32px;border-top:1px solid #E8E4D8;margin-top:8px">
@@ -221,22 +222,125 @@ const FLOORS = [
   { name:"4th Floor",    icon:"4️⃣" }
 ];
 
-let user = null;
-let dashData = null;
+let user = null, dashData = null, adminDash = null, reportData = null;
+let selectedDate = "", currentTab = "dash", _cbCount = 0;
 
 // ── INIT ──────────────────────────────────────────────────────
 window.onload = () => {
   const stored = sessionStorage.getItem("vm_user");
   if (!stored) { window.location.href = "login.html"; return; }
   user = JSON.parse(stored);
+
+  // Set today's date
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  selectedDate = ist.toISOString().split("T")[0];
+  document.getElementById("dateFilter").value = selectedDate;
+  document.getElementById("dateFilter").max   = selectedDate;
+
   loadDashboard();
 };
+
+function switchTab(tab) {
+  currentTab = tab;
+  ["dash","rep"].forEach(t => {
+    const el  = document.getElementById("tab-" + t);
+    const con = document.getElementById("content-" + t);
+    if (t === tab) {
+      el.style.color       = "var(--navy)";
+      el.style.borderBottom= "2px solid var(--navy)";
+      con.style.display    = "block";
+    } else {
+      el.style.color       = "rgba(26,26,46,.5)";
+      el.style.borderBottom= "2px solid transparent";
+      con.style.display    = "none";
+    }
+  });
+  if (tab === "rep" && !reportData) loadReports();
+}
+
+function onDateChange() {
+  selectedDate = document.getElementById("dateFilter").value;
+  adminDash = null;
+  if (currentTab === "dash") {
+    document.getElementById("body").innerHTML = '<div class="loader"><div class="spinner"></div><p>Loading...</p></div>';
+    loadDashboard();
+  }
+}
 
 async function loadDashboard() {
   const data = await apiGet({ action: "get_vm_dashboard", name: user.name });
   if (!data.ok) { showToast("Failed to load dashboard", "error"); return; }
   dashData = data;
+  // Also load admin dashboard for score display
+  const adm = await apiGet({ action: "get_admin_dashboard", date: selectedDate });
+  if (adm.ok) adminDash = adm;
   renderDashboard();
+}
+
+async function loadReports() {
+  const el   = document.getElementById("content-rep");
+  const data = await apiGet({ action: "get_admin_reports" });
+  if (!data.ok) { el.innerHTML = '<p style="color:var(--crimson);text-align:center;padding:20px">Failed to load reports</p>'; return; }
+  reportData = data;
+  renderReports();
+}
+
+function renderReports() {
+  const el = document.getElementById("content-rep");
+  let html = "";
+
+  // Weekly compliance
+  html += '<div style="background:var(--white);border-radius:16px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:rgba(26,26,46,.6);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">📅 Weekly Compliance</div>';
+  if (reportData.weekly_compliance && reportData.weekly_compliance.length > 0) {
+    reportData.weekly_compliance.forEach(w => {
+      const pct = Math.round((w.days_filled / 7) * 100);
+      const clr = pct >= 80 ? "var(--green)" : pct >= 50 ? "var(--orange)" : "var(--crimson)";
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,.06)">';
+      html += '<div style="font-size:13px;color:var(--ink)">' + w.week + '</div>';
+      html += '<div style="font-size:13px;font-weight:700;color:' + clr + '">' + w.days_filled + '/7 days (' + pct + '%)</div></div>';
+    });
+  } else {
+    html += '<div style="font-size:13px;color:rgba(26,26,46,.5);text-align:center;padding:12px">No data yet</div>';
+  }
+  html += '</div>';
+
+  // Aspect performance
+  html += '<div style="background:var(--white);border-radius:16px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:rgba(26,26,46,.6);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">📊 Aspect Performance (30 Days)</div>';
+  if (reportData.aspect_report && reportData.aspect_report.length > 0) {
+    reportData.aspect_report.forEach(a => {
+      const pct = (a.score / 5) * 100;
+      const low = a.score < 3.5;
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(26,26,46,.06)">';
+      html += '<div style="flex:1;font-size:13px;color:var(--ink)">' + a.aspect + '</div>';
+      html += '<div style="width:100px;height:6px;border-radius:3px;background:var(--border);overflow:hidden;flex-shrink:0"><div style="height:100%;border-radius:3px;background:' + (low ? "var(--crimson)" : "var(--gold)") + ';width:' + pct + '%"></div></div>';
+      html += '<div style="font-size:13px;font-weight:700;color:' + (low ? "var(--crimson)" : "var(--navy)") + ';width:30px;text-align:right">' + a.score.toFixed(1) + '</div></div>';
+    });
+  } else {
+    html += '<div style="font-size:13px;color:rgba(26,26,46,.5);text-align:center;padding:12px">No data yet</div>';
+  }
+  html += '</div>';
+
+  // Floor comparison
+  html += '<div style="background:var(--white);border-radius:16px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:rgba(26,26,46,.6);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">🏢 Floor Comparison (4 Weeks)</div>';
+  if (reportData.floor_report && reportData.floor_report.length > 0) {
+    reportData.floor_report.forEach(f => {
+      if (!f.weeks || f.weeks.length === 0) return;
+      html += '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px">' + f.floor + '</div><div style="display:flex;gap:6px">';
+      f.weeks.forEach(w => {
+        const low = w.score < 3.5;
+        html += '<div style="flex:1;text-align:center"><div style="font-size:11px;font-weight:700;color:' + (low ? "var(--crimson)" : "var(--green)") + '">' + w.score.toFixed(1) + '</div>';
+        html += '<div style="height:4px;border-radius:2px;background:' + (low ? "var(--crimson)" : "var(--green)") + ';margin:3px 0;opacity:.6"></div>';
+        html += '<div style="font-size:9px;color:rgba(26,26,46,.3)">W' + (w.week.split("-W")[1] || w.week) + '</div></div>';
+      });
+      html += '</div></div>';
+    });
+  } else {
+    html += '<div style="font-size:13px;color:rgba(26,26,46,.5);text-align:center;padding:12px">No floor data yet</div>';
+  }
+  html += '</div>';
+
+  el.innerHTML = html;
 }
 
 // ── RENDER ─────────────────────────────────────────────────────
@@ -357,17 +461,110 @@ function logout() {
   window.location.href = "login.html";
 }
 
+// ── SHARE REPORT ──────────────────────────────────────────────
+async function shareReport() {
+  const adm = adminDash || await apiGet({ action: "get_admin_dashboard", date: selectedDate });
+  if (!adm || !adm.ok) { showToast("Load dashboard first", "error"); return; }
+  adminDash = adm;
+  showToast("Generating report...", "");
+
+  const canvas = document.getElementById("reportCanvas");
+  const ctx    = canvas.getContext("2d");
+  const W = 800, H = 860;
+  canvas.width = W; canvas.height = H;
+
+  const navy="#1E2D5A",gold="#B8860B",green="#1E7A1E",crimson="#C0392B",ivory="#F9F7F0",white="#FFFFFF",ink="#1A1A2E",border="#E8E4D8";
+
+  ctx.fillStyle = ivory; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = navy; roundRect(ctx,0,0,W,130,0); ctx.fill();
+  ctx.fillStyle = white; ctx.font = "bold 26px sans-serif"; ctx.fillText("BSC Textiles — VM Report", 40, 50);
+  ctx.fillStyle = "rgba(255,255,255,.65)"; ctx.font = "15px sans-serif";
+  ctx.fillText(formatDate(selectedDate) + "  ·  Belagavi Store", 40, 78);
+  ctx.fillStyle = "rgba(255,255,255,.4)"; ctx.font = "12px sans-serif";
+  ctx.fillText("Submitted by: " + (adm.submitted_by||[]).join(", ") || "Not submitted", 40, 106);
+
+  const score = adm.overall_done ? adm.overall_score : null;
+  const isGood = score !== null && score >= 3.5;
+  ctx.fillStyle = white; roundRect(ctx,30,150,W-60,110,14); ctx.fill();
+  ctx.strokeStyle=border; ctx.lineWidth=1.5; roundRect(ctx,30,150,W-60,110,14); ctx.stroke();
+  ctx.fillStyle=ink; ctx.font="bold 13px sans-serif"; ctx.fillText("OVERALL SCORE",55,182);
+  ctx.fillStyle = score===null?"#999":isGood?green:crimson;
+  ctx.font="bold 58px sans-serif"; ctx.fillText(score!==null?score.toFixed(1):"—",55,248);
+  ctx.fillStyle="#999"; ctx.font="20px sans-serif"; ctx.fillText("/5",score!==null?160:90,248);
+  ctx.fillStyle=score===null?"#EEE":isGood?"#D1FAE5":"#FEE2E2";
+  roundRect(ctx,W-220,188,170,40,20); ctx.fill();
+  ctx.fillStyle=score===null?"#999":isGood?green:crimson;
+  ctx.font="bold 13px sans-serif"; ctx.textAlign="center";
+  ctx.fillText(score===null?"Not Submitted":isGood?"✅ On Track":"⚠️ Attention",W-135,213);
+  ctx.textAlign="left";
+
+  let y = 290;
+  ctx.fillStyle=ink; ctx.font="bold 13px sans-serif"; ctx.fillText("ASPECT SCORES",40,y); y+=16;
+  (adm.aspect_scores||[]).forEach(a => {
+    y+=32;
+    ctx.fillStyle=white; roundRect(ctx,30,y-22,W-60,30,7); ctx.fill();
+    ctx.fillStyle=ink; ctx.font="12px sans-serif"; ctx.fillText(a.aspect,50,y-4);
+    const bx=W-330,bw=220,low=a.score<3.5;
+    ctx.fillStyle=border; roundRect(ctx,bx,y-14,bw,7,3); ctx.fill();
+    ctx.fillStyle=low?crimson:gold; roundRect(ctx,bx,y-14,(a.score/5)*bw,7,3); ctx.fill();
+    ctx.fillStyle=low?crimson:navy; ctx.font="bold 13px sans-serif";
+    ctx.textAlign="right"; ctx.fillText(a.score.toFixed(1),W-45,y-4); ctx.textAlign="left";
+  });
+
+  y+=50;
+  ctx.fillStyle=ink; ctx.font="bold 13px sans-serif"; ctx.fillText("THIS WEEK'S FLOORS",40,y); y+=16;
+  const fw=(W-80)/2;
+  (adm.floor_status||[]).forEach((f,i)=>{
+    const fx=30+(i%2)*(fw+20), fy=y+Math.floor(i/2)*68;
+    const done=f.done,partial=f.submitted>0&&!done;
+    ctx.fillStyle=done?"#D1FAE5":partial?"#FEF3C7":white;
+    roundRect(ctx,fx,fy+8,fw-20,52,9); ctx.fill();
+    ctx.strokeStyle=done?green:partial?gold:border; ctx.lineWidth=1.5;
+    roundRect(ctx,fx,fy+8,fw-20,52,9); ctx.stroke();
+    ctx.fillStyle=done?green:partial?gold:"#999";
+    ctx.font="bold 12px sans-serif"; ctx.fillText(f.floor,fx+10,fy+30);
+    ctx.font="11px sans-serif";
+    ctx.fillText(done?"✅ "+f.score.toFixed(1)+"/5":partial?f.submitted+"/"+f.total+" pts":"⏳ Pending",fx+10,fy+48);
+  });
+
+  y=H-55;
+  ctx.fillStyle=navy; roundRect(ctx,0,y,W,55,0); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.55)"; ctx.font="12px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("Powered by C&B Consulting & Beyond",W/2,y+32); ctx.textAlign="left";
+
+  const link=document.createElement("a");
+  link.download="BSC_VM_"+selectedDate+".png";
+  link.href=canvas.toDataURL("image/png"); link.click();
+  setTimeout(()=>{
+    const msg=encodeURIComponent("📊 *BSC VM Daily Report*
+📅 "+formatDate(selectedDate)+"
+"+(adm.overall_done?"Score: *"+adm.overall_score.toFixed(1)+"/5*":"Not submitted")+"\n_(Image attached)_");
+    window.open("https://wa.me/?text="+msg,"_blank");
+  },800);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
 // ── API ───────────────────────────────────────────────────────
 function apiGet(params) {
   return new Promise((resolve) => {
-    const cbName = "vmCb_" + Date.now();
+    const cbName = "vmCb_" + Date.now() + "_" + (++_cbCount);
+    let settled = false;
     const script = document.createElement("script");
     window[cbName] = (data) => {
+      if (settled) return; settled = true;
       delete window[cbName];
-      document.body.removeChild(script);
+      if (document.body.contains(script)) document.body.removeChild(script);
       resolve(data);
     };
-    script.onerror = () => resolve({ ok: false, error: "Network error" });
+    script.onerror = () => { if (settled) return; settled = true; resolve({ ok: false, error: "Network error" }); };
+    setTimeout(() => { if (settled) return; settled = true; resolve({ ok: false, error: "Timeout" }); }, 15000);
     script.src = `${API}?${new URLSearchParams(params).toString()}&callback=${cbName}`;
     document.body.appendChild(script);
   });
