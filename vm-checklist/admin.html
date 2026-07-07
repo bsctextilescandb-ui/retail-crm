@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>BSC VM — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#D97706;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--border:#E8E4D8;
+  --shadow:0 2px 12px rgba(26,26,46,.08);
+}
+html,body{min-height:100vh;background:var(--ivory);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.topbar{background:var(--navy);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-logo{width:34px;height:34px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.15)}
+.topbar-logo img{width:100%;height:100%;object-fit:cover}
+.topbar-title{font-family:'DM Serif Display',serif;color:var(--white);font-size:16px}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;border:none;cursor:pointer;background:rgba(255,255,255,.12);color:var(--white)}
+.tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 20px;overflow-x:auto;scrollbar-width:none;position:sticky;top:64px;z-index:90}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 16px;font-size:13px;font-weight:600;color:var(--ink-60);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.tab-content{display:none;padding:20px;max-width:680px;margin:0 auto}
+.tab-content.active{display:block}
+.card{background:var(--white);border-radius:16px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(26,26,46,.08)}
+.card-title{font-size:12px;font-weight:700;color:var(--ink-60);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px}
+.score-hero{background:var(--navy);border-radius:18px;padding:24px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.score-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
+.score-label{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.score-value{font-family:'DM Serif Display',serif;font-size:56px;color:var(--white);line-height:1}
+.score-value span{font-size:20px;opacity:.5}
+.score-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-top:10px}
+.score-badge.good{background:rgba(30,122,30,.3);color:#7EE87E}
+.score-badge.warn{background:rgba(192,57,43,.3);color:#FF8B7E}
+.score-badge.na{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6)}
+.score-meta{font-size:11px;color:rgba(255,255,255,.5);margin-top:6px}
+.compliance-circle{width:72px;height:72px;border-radius:50%;border:4px solid rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.compliance-val{font-size:18px;font-weight:700;color:var(--white)}
+.compliance-label{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase}
+.aspect-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ink-10)}
+.aspect-row:last-child{border-bottom:none}
+.aspect-name{font-size:13px;color:var(--ink);flex:1}
+.aspect-bar-wrap{width:120px;flex-shrink:0}
+.aspect-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.aspect-bar-fill{height:100%;border-radius:3px;background:var(--gold);transition:width .6s ease}
+.aspect-bar-fill.low{background:var(--crimson)}
+.aspect-score{font-size:13px;font-weight:700;color:var(--navy);width:36px;text-align:right;flex-shrink:0}
+.aspect-score.low{color:var(--crimson)}
+.floor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.floor-card{background:var(--ivory);border-radius:12px;border:1.5px solid var(--border);padding:14px;cursor:default}
+.floor-card.done{background:var(--green-l);border-color:var(--green)}
+.floor-card.warn{background:var(--crimson-l);border-color:var(--crimson)}
+.floor-card.clickable{cursor:pointer}
+.floor-card-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.floor-card.done .floor-card-name{color:var(--green)}
+.floor-card.warn .floor-card-name{color:var(--crimson)}
+.floor-card-score{font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy)}
+.floor-card-score span{font-size:12px;color:var(--ink-30)}
+.floor-card-meta{font-size:11px;color:var(--ink-60);margin-top:4px}
+.history-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:8px}
+.hbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.hbar{width:100%;border-radius:4px 4px 0 0;background:var(--navy-l);min-height:4px}
+.hbar.today{background:var(--navy)}
+.hbar.low{background:var(--crimson-l)}
+.hbar.today.low{background:var(--crimson)}
+.hbar.na{background:var(--border)}
+.hbar-date{font-size:9px;color:var(--ink-30);white-space:nowrap}
+.hbar-score{font-size:9px;color:var(--ink-60);font-weight:600}
+.report-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--ink-10);gap:12px}
+.report-row:last-child{border-bottom:none}
+.report-label{font-size:13px;color:var(--ink);flex:1}
+.report-val{font-size:13px;font-weight:700;color:var(--navy);flex-shrink:0}
+.badge{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:600;flex-shrink:0}
+.badge.good{background:var(--green-l);color:var(--green)}
+.badge.warn{background:var(--orange-l);color:var(--orange)}
+.badge.bad{background:var(--crimson-l);color:var(--crimson)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--white);border-radius:20px 20px 0 0;width:100%;max-height:80vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s ease;padding:24px 20px}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy);margin-bottom:16px}
+.detail-row{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--ink-10);gap:12px}
+.detail-row:last-child{border-bottom:none}
+.detail-label{font-size:12px;color:var(--ink);flex:1;line-height:1.4}
+.detail-remarks{font-size:11px;color:var(--ink-60);margin-top:3px;font-style:italic}
+.detail-val{font-size:12px;font-weight:700;flex-shrink:0}
+.detail-val.yes{color:var(--green)}
+.detail-val.no{color:var(--crimson)}
+.detail-val.na{color:var(--ink-30)}
+.loader{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:12px}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--navy);animation:spin .7s linear infinite}
+.loader p{font-size:13px;color:var(--ink-60)}
+.empty{text-align:center;padding:40px 20px}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty h3{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy);margin-bottom:6px}
+.empty p{font-size:13px;color:var(--ink-60)}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--white);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--crimson)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">
+      <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/>
+    </div>
+    <div>
+      <div class="topbar-title">VM Admin</div>
+      <div class="topbar-sub">BSC Textiles — Belagavi</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="topbar-btn" onclick="window.location.href='admin-edit.html'">✏️ Edit Points</button>
+    <button class="topbar-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('today')">Today</div>
+  <div class="tab" onclick="switchTab('floors')">Floors</div>
+  <div class="tab" onclick="switchTab('reports')">Reports</div>
+  <div class="tab" onclick="switchTab('history')">History</div>
+</div>
+
+<div class="tab-content active" id="tab-today">
+  <div class="loader"><div class="spinner"></div><p>Loading dashboard...</p></div>
+</div>
+
+<div class="tab-content" id="tab-floors">
+  <div class="loader"><div class="spinner"></div><p>Loading floor data...</p></div>
+</div>
+
+<div class="tab-content" id="tab-reports">
+  <div class="loader"><div class="spinner"></div><p>Loading reports...</p></div>
+</div>
+
+<div class="tab-content" id="tab-history">
+  <div class="loader"><div class="spinner"></div><p>Loading history...</p></div>
+</div>
+
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">Checklist Detail</div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div style="text-align:center;padding:24px 20px 32px;border-top:1px solid var(--border);margin-top:8px">
+  <div style="font-size:10px;color:rgba(26,26,46,.3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Powered by</div>
+  <img src="https://bsctextilescandb-ui.github.io/retail-crm/cnb-logo.png" alt="C&B" style="height:28px;opacity:.7"/>
+</div>
+
+<script>
+const API    = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
+const FLOORS = ["Ground Floor","1st Floor","2nd Floor","3rd Floor","4th Floor"];
+let user = null, dashData = null, reportData = null, histData = null, _cbCount = 0;
+
+window.onload = () => {
+  const stored = sessionStorage.getItem("vm_user");
+  if (!stored) { window.location.href = "login.html"; return; }
+  user = JSON.parse(stored);
+  if (user.role !== "admin") { window.location.href = "vm-dashboard.html"; return; }
+  loadToday();
+};
+
+function switchTab(tab) {
+  document.querySelectorAll(".tab").forEach((t,i) => {
+    t.classList.toggle("active", ["today","floors","reports","history"][i] === tab);
+  });
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+  if (tab === "today"   && !dashData)   loadToday();
+  if (tab === "floors"  && !dashData)   loadToday();
+  if (tab === "reports" && !reportData) loadReports();
+  if (tab === "history" && !histData)   loadHistory();
+}
+
+async function loadToday() {
+  const data = await apiGet({ action: "get_admin_dashboard" });
+  if (!data.ok) { showError("tab-today"); showError("tab-floors"); return; }
+  dashData = data;
+  renderToday();
+  renderFloors();
+}
+
+function renderToday() {
+  const d = dashData;
+  const el = document.getElementById("tab-today");
+  const isGood = d.overall_score >= 3.5;
+
+  el.innerHTML = `
+    <div class="score-hero fade-in">
+      <div>
+        <div class="score-label">Today's Overall Score</div>
+        <div class="score-value">${d.overall_done ? d.overall_score.toFixed(1) : "—"}<span>${d.overall_done ? " / 5" : ""}</span></div>
+        <div class="score-badge ${d.overall_done ? (isGood ? 'good' : 'warn') : 'na'}">
+          ${d.overall_done ? (isGood ? '✅ On Track' : '⚠️ Needs Attention') : '📋 Not Submitted'}
+        </div>
+        <div class="score-meta">${formatDate(d.date)} · ${d.overall_done ? 'By: ' + (d.submitted_by || []).join(', ') : 'Awaiting submission'}</div>
+      </div>
+      <div>
+        <div class="compliance-circle">
+          <div class="compliance-val">${(d.floor_status || []).filter(f => f.done).length}/5</div>
+          <div class="compliance-label">Floors</div>
+        </div>
+      </div>
+    </div>`;
+
+  if (d.overall_done && d.aspect_scores && d.aspect_scores.length > 0) {
+    let html = `<div class="card fade-in"><div class="card-title">📊 Aspect-wise Scores</div>`;
+    d.aspect_scores.forEach(a => {
+      const pct = (a.score / 5) * 100;
+      const low = a.score < 3.5;
+      html += `
+        <div class="aspect-row">
+          <div class="aspect-name">${a.aspect}</div>
+          <div class="aspect-bar-wrap"><div class="aspect-bar">
+            <div class="aspect-bar-fill ${low ? 'low' : ''}" style="width:${pct}%"></div>
+          </div></div>
+          <div class="aspect-score ${low ? 'low' : ''}">${a.score.toFixed(1)}</div>
+        </div>`;
+    });
+    html += `</div>`;
+    el.innerHTML += html;
+  } else if (!d.overall_done) {
+    el.innerHTML += `
+      <div class="empty fade-in">
+        <div class="empty-icon">📋</div>
+        <h3>Not Submitted Yet</h3>
+        <p>VM team hasn't submitted today's overall checklist.</p>
+      </div>`;
+  }
+
+  if (d.overall_done) {
+    el.innerHTML += `
+      <button onclick="openDetailModal('overall','${d.date}',null)"
+        style="width:100%;padding:13px;border-radius:10px;background:var(--navy-l);color:var(--navy);
+        font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:16px">
+        📄 View Full Checklist Detail
+      </button>`;
+  }
+}
+
+function renderFloors() {
+  const d  = dashData;
+  const el = document.getElementById("tab-floors");
+
+  let html = `<div class="card fade-in"><div class="card-title">📅 This Week — ${d.week}</div><div class="floor-grid">`;
+  (d.floor_status || []).forEach(f => {
+    const isLow  = f.score !== null && f.score < 3.5;
+    const cls    = f.done ? "done" : (isLow ? "warn" : "");
+    const click  = f.submitted > 0 ? `openDetailModal('floor','${d.date}','${f.floor}')` : "";
+    html += `
+      <div class="floor-card ${cls} ${f.submitted > 0 ? 'clickable' : ''}" onclick="${click}">
+        <div class="floor-card-name">${f.floor}</div>
+        <div class="floor-card-score">${f.score !== null ? f.score.toFixed(1) : "—"}<span>${f.score !== null ? "/5" : ""}</span></div>
+        <div class="floor-card-meta">
+          ${f.done ? "✅ Complete" : f.submitted > 0 ? f.submitted + "/" + f.total + " pts" : "⏳ Pending"}
+          ${f.date ? " · " + formatDateShort(f.date) : ""}
+        </div>
+      </div>`;
+  });
+  html += `</div></div>`;
+
+  const lowFloors = (d.floor_status || []).filter(f => f.done && f.score < 3.5);
+  html += `<div class="card fade-in"><div class="card-title">💡 Attention Needed</div>`;
+  if (lowFloors.length > 0) {
+    lowFloors.forEach(f => {
+      html += `<div class="report-row"><div class="report-label">${f.floor}</div><div class="badge bad">⚠️ ${f.score.toFixed(1)}/5</div></div>`;
+    });
+  } else {
+    html += `<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">All completed floors are on track ✅</div>`;
+  }
+  html += `</div>`;
+
+  el.innerHTML = html;
+}
+
+async function loadReports() {
+  const el   = document.getElementById("tab-reports");
+  const data = await apiGet({ action: "get_admin_reports" });
+  if (!data.ok) { showError("tab-reports"); return; }
+  reportData = data;
+
+  let html = "";
+
+  // Weekly compliance
+  html += `<div class="card fade-in"><div class="card-title">📅 Weekly Compliance</div>`;
+  if (reportData.weekly_compliance && reportData.weekly_compliance.length > 0) {
+    reportData.weekly_compliance.forEach(w => {
+      const pct = Math.round((w.days_filled / 7) * 100);
+      const cls = pct >= 80 ? "good" : pct >= 50 ? "warn" : "bad";
+      html += `<div class="report-row"><div class="report-label">${w.week}</div><div class="report-val">${w.days_filled}/7 days</div><div class="badge ${cls}">${pct}%</div></div>`;
+    });
+  } else {
+    html += `<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data yet</div>`;
+  }
+  html += `</div>`;
+
+  // Aspect performance
+  html += `<div class="card fade-in"><div class="card-title">📊 Aspect Performance (Last 30 Days)</div>`;
+  if (reportData.aspect_report && reportData.aspect_report.length > 0) {
+    reportData.aspect_report.forEach(a => {
+      const pct = (a.score / 5) * 100;
+      const low = a.score < 3.5;
+      html += `
+        <div class="aspect-row">
+          <div class="aspect-name">${a.aspect}</div>
+          <div class="aspect-bar-wrap"><div class="aspect-bar">
+            <div class="aspect-bar-fill ${low ? 'low' : ''}" style="width:${pct}%"></div>
+          </div></div>
+          <div class="aspect-score ${low ? 'low' : ''}">${a.score.toFixed(1)}</div>
+        </div>`;
+    });
+  } else {
+    html += `<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data yet</div>`;
+  }
+  html += `</div>`;
+
+  // Staff report
+  html += `<div class="card fade-in"><div class="card-title">👥 Staff Submission Count</div>`;
+  if (reportData.staff_report && reportData.staff_report.length > 0) {
+    reportData.staff_report.forEach(s => {
+      html += `<div class="report-row"><div class="report-label">${s.name}</div><div class="report-val">${s.total_days} days</div></div>`;
+    });
+  } else {
+    html += `<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data yet</div>`;
+  }
+  html += `</div>`;
+
+  el.innerHTML = html;
+}
+
+async function loadHistory() {
+  const el   = document.getElementById("tab-history");
+  const data = await apiGet({ action: "get_history" });
+  if (!data.ok) { showError("tab-history"); return; }
+  histData = data;
+
+  if (!histData.history || histData.history.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📈</div><h3>No History Yet</h3><p>Data appears after first submission.</p></div>`;
+    return;
+  }
+
+  const last14 = histData.history.slice(0, 14).reverse();
+  const today  = new Date().toISOString().split("T")[0];
+  let html = `<div class="card fade-in"><div class="card-title">📈 Last ${last14.length} Days</div><div class="history-chart">`;
+
+  last14.forEach(h => {
+    const isToday = h.date === today;
+    const low     = h.score !== null && h.score < 3.5;
+    const pct     = h.score !== null ? (h.score / 5) * 100 : 0;
+    const d2      = new Date(h.date);
+    const label   = (d2.getMonth()+1) + "/" + d2.getDate();
+    html += `
+      <div class="hbar-wrap" onclick="${h.score !== null ? "openDetailModal('overall','" + h.date + "',null)" : ""}">
+        <div class="hbar-score">${h.score !== null ? h.score.toFixed(1) : ""}</div>
+        <div class="hbar ${isToday ? 'today' : ''} ${low ? 'low' : ''} ${h.score === null ? 'na' : ''}"
+          style="height:${Math.max(pct, 6)}%"></div>
+        <div class="hbar-date">${label}</div>
+      </div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div class="card fade-in"><div class="card-title">📋 All Submissions</div>`;
+  histData.history.forEach(h => {
+    const low = h.score !== null && h.score < 3.5;
+    html += `
+      <div class="report-row" onclick="${h.score !== null ? "openDetailModal('overall','" + h.date + "',null)" : ""}"
+        style="${h.score !== null ? 'cursor:pointer' : ''}">
+        <div class="report-label">${formatDate(h.date)}</div>
+        <div class="report-val">${h.score !== null ? h.score.toFixed(1) + "/5" : "—"}</div>
+        ${h.score !== null ? '<div class="badge ' + (low ? 'bad' : 'good') + '">' + (low ? '⚠️' : '✅') + '</div>' : '<div class="badge warn">No Data</div>'}
+      </div>`;
+  });
+  html += `</div>`;
+
+  el.innerHTML = html;
+}
+
+async function openDetailModal(type, date, floor) {
+  const modal   = document.getElementById("detailModal");
+  const content = document.getElementById("modalContent");
+  document.getElementById("modalTitle").textContent =
+    type === "floor" ? floor + " — Detail" : "Overall — " + formatDateShort(date);
+  content.innerHTML = `<div class="loader"><div class="spinner"></div><p>Loading...</p></div>`;
+  modal.classList.add("open");
+
+  const params = { action: "get_submission_detail", type, date };
+  if (floor) params.floor = floor;
+  const data = await apiGet(params);
+
+  if (!data.ok || !data.entries || data.entries.length === 0) {
+    content.innerHTML = `<p style="color:var(--ink-60);font-size:13px;text-align:center;padding:20px">No detail available.</p>`;
+    return;
+  }
+
+  const aspectMap = {};
+  data.entries.forEach(e => {
+    const asp = e.ASPECT || e.aspect || "Other";
+    if (!aspectMap[asp]) aspectMap[asp] = [];
+    aspectMap[asp].push(e);
+  });
+
+  let html = "";
+  Object.entries(aspectMap).forEach(([asp, entries]) => {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--ink-60);text-transform:uppercase;letter-spacing:.07em;padding:12px 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px">${asp}</div>`;
+    entries.forEach(e => {
+      const val     = e.VALUE || e.value || "";
+      const remarks = e.REMARKS || e.remarks || "";
+      const photo   = e.PHOTO_LINK || e.photo_link || "";
+      html += `
+        <div class="detail-row">
+          <div style="flex:1">
+            <div class="detail-label">${e.POINT || e.point}</div>
+            ${remarks ? '<div class="detail-remarks">📝 ' + remarks + '</div>' : ""}
+            ${photo ? '<a href="' + photo + '" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--navy);margin-top:4px;text-decoration:none">📷 View Photo</a>' : ""}
+          </div>
+          <div class="detail-val ${val}">${val === "yes" ? "✅ Yes" : val === "no" ? "❌ No" : val === "na" ? "N/A" : val}</div>
+        </div>`;
+    });
+  });
+  content.innerHTML = html;
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("detailModal"))
+    document.getElementById("detailModal").classList.remove("open");
+}
+
+function apiGet(params) {
+  return new Promise((resolve) => {
+    const cbName = "admCb_" + Date.now() + "_" + (++_cbCount);
+    const script = document.createElement("script");
+    let settled  = false;
+    window[cbName] = (data) => {
+      if (settled) return; settled = true;
+      delete window[cbName];
+      if (document.body.contains(script)) document.body.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = () => { if (settled) return; settled = true; resolve({ ok: false, error: "Network error" }); };
+    setTimeout(() => { if (settled) return; settled = true; resolve({ ok: false, error: "Timeout" }); }, 15000);
+    script.src = API + "?" + new URLSearchParams(params).toString() + "&callback=" + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+function showError(tabId) {
+  document.getElementById(tabId).innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>Failed to Load</h3><p>Check connection and try again.</p></div>`;
+}
+
+function logout() { sessionStorage.clear(); window.location.href = "login.html"; }
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const mon  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return days[d.getUTCDay()] + ", " + d.getUTCDate() + " " + mon[d.getUTCMonth()] + " " + d.getUTCFullYear();
+}
+function formatDateShort(dateStr) {
+  const d = new Date(dateStr);
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const mon  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return days[d.getUTCDay()] + " " + d.getUTCDate() + " " + mon[d.getUTCMonth()];
+}
+function showToast(msg, type="") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = type; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>
