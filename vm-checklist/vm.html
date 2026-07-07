@@ -508,22 +508,6 @@ function setYN(pNo, val) {
   updateProgress();
   updateSubmitBtn();
 
-  // Hide point card smoothly after answering — only if no remarks/photo needed
-  if (val === "yes" || val === "na") {
-    setTimeout(() => {
-      const card = document.getElementById("pc_" + pNo);
-      if (card) {
-        card.style.transition = "opacity .3s ease, max-height .4s ease";
-        card.style.opacity = "0";
-        card.style.overflow = "hidden";
-        setTimeout(() => {
-          card.style.display = "none";
-          // Check if section is now complete
-          updateSectionPill(pNo);
-        }, 350);
-      }
-    }, 400);
-  }
 }
 
 function setRemarks(pNo, val) {
@@ -695,11 +679,33 @@ async function submitChecklist() {
   const res = await apiGet(params);
   if (res.ok) {
     showToast("Checklist submitted successfully!", "success");
+    // Hide all newly answered point cards
+    entries.forEach(entry => {
+      const card = document.getElementById("pc_" + entry.point_no);
+      if (card) {
+        card.style.transition = "opacity .3s ease";
+        card.style.opacity = "0";
+        setTimeout(() => { card.style.display = "none"; }, 300);
+      }
+      // Add to answeredToday so section pills update
+      answeredToday[String(entry.point_no)] = { value: entry.value, remarks: entry.remarks, photo_link: entry.photo_link };
+    });
+    // Update all section pills
+    setTimeout(() => {
+      sections.forEach((s, i) => {
+        const allDone = s.pts.every(p => {
+          const id = p["#"] || p.point_no;
+          return answeredToday[id] || (answers[id] && answers[id].value);
+        });
+        const pill = document.getElementById("pill_" + i);
+        if (pill && allDone) { pill.classList.add("done"); pill.textContent = "✅ " + s.name; }
+      });
+    }, 350);
     setTimeout(() => {
       sessionStorage.removeItem("vm_checklist_type");
       sessionStorage.removeItem("vm_checklist_floor");
       window.location.href = "vm-dashboard.html";
-    }, 1500);
+    }, 1800);
   } else {
     showToast(res.error || "Submission failed.", "error");
     btn.disabled = false;
