@@ -142,6 +142,18 @@ html,body{min-height:100vh;background:var(--ivory);
   <div class="tab" onclick="switchTab('history')">History</div>
 </div>
 
+<!-- DATE FILTER BAR -->
+<div style="background:var(--white);padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:sticky;top:106px;z-index:89">
+  <div style="font-size:12px;font-weight:700;color:var(--ink-60);white-space:nowrap">📅 Date</div>
+  <input type="date" id="dateFilter"
+    style="flex:1;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--ivory);font-family:inherit"
+    onchange="onDateChange()"/>
+  <button onclick="shareReport()"
+    style="padding:8px 14px;border-radius:8px;background:#25D366;color:var(--white);font-size:12px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px">
+    📤 Share
+  </button>
+</div>
+
 <div class="tab-content active" id="tab-today">
   <div class="loader"><div class="spinner"></div><p>Loading dashboard...</p></div>
 </div>
@@ -166,6 +178,7 @@ html,body{min-height:100vh;background:var(--ivory);
   </div>
 </div>
 
+<canvas id="reportCanvas" style="display:none"></canvas>
 <div id="toast"></div>
 
 <div style="text-align:center;padding:24px 20px 32px;border-top:1px solid var(--border);margin-top:8px">
@@ -177,14 +190,31 @@ html,body{min-height:100vh;background:var(--ivory);
 const API    = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
 const FLOORS = ["Ground Floor","1st Floor","2nd Floor","3rd Floor","4th Floor"];
 let user = null, dashData = null, reportData = null, histData = null, _cbCount = 0;
+let selectedDate = "";
 
 window.onload = () => {
   const stored = sessionStorage.getItem("vm_user");
   if (!stored) { window.location.href = "login.html"; return; }
   user = JSON.parse(stored);
   if (user.role !== "admin") { window.location.href = "vm-dashboard.html"; return; }
+
+  // Set date filter to today
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  selectedDate = ist.toISOString().split("T")[0];
+  document.getElementById("dateFilter").value = selectedDate;
+  document.getElementById("dateFilter").max   = selectedDate;
+
   loadToday();
 };
+
+function onDateChange() {
+  selectedDate = document.getElementById("dateFilter").value;
+  dashData = null;
+  document.getElementById("tab-today").innerHTML = '<div class="loader"><div class="spinner"></div><p>Loading...</p></div>';
+  document.getElementById("tab-floors").innerHTML = '<div class="loader"><div class="spinner"></div><p>Loading...</p></div>';
+  loadToday();
+}
 
 function switchTab(tab) {
   document.querySelectorAll(".tab").forEach((t,i) => {
@@ -199,7 +229,7 @@ function switchTab(tab) {
 }
 
 async function loadToday() {
-  const data = await apiGet({ action: "get_admin_dashboard" });
+  const data = await apiGet({ action: "get_admin_dashboard", date: selectedDate });
   if (!data.ok) { showError("tab-today"); showError("tab-floors"); return; }
   dashData = data;
   renderToday();
@@ -462,6 +492,188 @@ async function openDetailModal(type, date, floor) {
 function closeModal(e) {
   if (e.target === document.getElementById("detailModal"))
     document.getElementById("detailModal").classList.remove("open");
+}
+
+// ── WHATSAPP REPORT CARD ──────────────────────────────────────
+async function shareReport() {
+  if (!dashData) { showToast("Load dashboard first", "error"); return; }
+  showToast("Generating report card...", "");
+
+  const canvas = document.getElementById("reportCanvas");
+  const ctx    = canvas.getContext("2d");
+  const W = 800, H = 900;
+  canvas.width = W; canvas.height = H;
+
+  const navy   = "#1E2D5A";
+  const gold   = "#B8860B";
+  const green  = "#1E7A1E";
+  const crimson= "#C0392B";
+  const ivory  = "#F9F7F0";
+  const white  = "#FFFFFF";
+  const ink    = "#1A1A2E";
+  const border = "#E8E4D8";
+
+  // Background
+  ctx.fillStyle = ivory;
+  ctx.fillRect(0, 0, W, H);
+
+  // Header
+  ctx.fillStyle = navy;
+  roundRect(ctx, 0, 0, W, 140, 0);
+  ctx.fill();
+
+  // Header text
+  ctx.fillStyle = white;
+  ctx.font = "bold 28px 'DM Sans', sans-serif";
+  ctx.fillText("BSC Textiles — VM Report", 40, 55);
+  ctx.font = "16px 'DM Sans', sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.fillText(formatDate(selectedDate) + "  ·  Belagavi Store", 40, 85);
+
+  // Score section
+  const score    = dashData.overall_done ? dashData.overall_score : null;
+  const isGood   = score !== null && score >= 3.5;
+  const scoreClr = score === null ? "#999" : isGood ? green : crimson;
+
+  ctx.fillStyle = white;
+  roundRect(ctx, 30, 160, W - 60, 130, 16);
+  ctx.fill();
+  ctx.strokeStyle = border;
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 30, 160, W - 60, 130, 16);
+  ctx.stroke();
+
+  ctx.fillStyle = ink;
+  ctx.font = "bold 14px 'DM Sans', sans-serif";
+  ctx.fillText("OVERALL SCORE", 60, 195);
+
+  ctx.fillStyle = scoreClr;
+  ctx.font = "bold 64px 'DM Sans', sans-serif";
+  ctx.fillText(score !== null ? score.toFixed(1) : "—", 60, 265);
+
+  ctx.fillStyle = "#999";
+  ctx.font = "22px 'DM Sans', sans-serif";
+  ctx.fillText("/ 5", 170, 265);
+
+  // Status badge
+  const badgeX = W - 220;
+  ctx.fillStyle = score === null ? "#EEE" : isGood ? "#D1FAE5" : "#FEE2E2";
+  roundRect(ctx, badgeX, 200, 160, 44, 22);
+  ctx.fill();
+  ctx.fillStyle = score === null ? "#999" : isGood ? green : crimson;
+  ctx.font = "bold 14px 'DM Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(score === null ? "Not Submitted" : isGood ? "✅ On Track" : "⚠️ Attention", badgeX + 80, 228);
+  ctx.textAlign = "left";
+
+  // Aspect scores
+  let y = 320;
+  ctx.fillStyle = ink;
+  ctx.font = "bold 14px 'DM Sans', sans-serif";
+  ctx.fillText("ASPECT SCORES", 40, y);
+  y += 20;
+
+  const aspects = dashData.aspect_scores || [];
+  aspects.forEach(a => {
+    y += 36;
+    ctx.fillStyle = white;
+    roundRect(ctx, 30, y - 24, W - 60, 32, 8);
+    ctx.fill();
+
+    ctx.fillStyle = ink;
+    ctx.font = "13px 'DM Sans', sans-serif";
+    ctx.fillText(a.aspect, 50, y - 4);
+
+    const barW  = 240;
+    const barX  = W - 340;
+    const pct   = (a.score / 5) * barW;
+    const low   = a.score < 3.5;
+    ctx.fillStyle = border;
+    roundRect(ctx, barX, y - 16, barW, 8, 4);
+    ctx.fill();
+    ctx.fillStyle = low ? crimson : gold;
+    roundRect(ctx, barX, y - 16, pct, 8, 4);
+    ctx.fill();
+
+    ctx.fillStyle = low ? crimson : navy;
+    ctx.font = "bold 14px 'DM Sans', sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(a.score.toFixed(1), W - 50, y - 4);
+    ctx.textAlign = "left";
+  });
+
+  // Floor status
+  y += 60;
+  ctx.fillStyle = ink;
+  ctx.font = "bold 14px 'DM Sans', sans-serif";
+  ctx.fillText("THIS WEEK'S FLOORS", 40, y);
+  y += 16;
+
+  const floorCols = 2;
+  const floorW    = (W - 80) / floorCols;
+  (dashData.floor_status || []).forEach((f, i) => {
+    const fx  = 30 + (i % floorCols) * (floorW + 20);
+    const fy  = y + Math.floor(i / floorCols) * 70;
+    const done = f.done;
+    const partial = f.submitted > 0 && !done;
+    ctx.fillStyle = done ? "#D1FAE5" : partial ? "#FEF3C7" : white;
+    roundRect(ctx, fx, fy + 10, floorW - 20, 56, 10);
+    ctx.fill();
+    ctx.strokeStyle = done ? green : partial ? gold : border;
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, fx, fy + 10, floorW - 20, 56, 10);
+    ctx.stroke();
+
+    ctx.fillStyle = done ? green : partial ? gold : "#999";
+    ctx.font = "bold 13px 'DM Sans', sans-serif";
+    ctx.fillText(f.floor, fx + 12, fy + 34);
+
+    ctx.fillStyle = done ? green : partial ? gold : "#999";
+    ctx.font = "12px 'DM Sans', sans-serif";
+    ctx.fillText(done ? "✅ " + f.score.toFixed(1) + "/5" : partial ? f.submitted + "/" + f.total + " pts" : "⏳ Pending", fx + 12, fy + 54);
+  });
+
+  // Footer
+  y = H - 60;
+  ctx.fillStyle = navy;
+  roundRect(ctx, 0, y, W, 60, 0);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  ctx.font = "12px 'DM Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Powered by C&B Consulting & Beyond", W/2, y + 35);
+  ctx.textAlign = "left";
+
+  // Download and share
+  const imgData = canvas.toDataURL("image/png");
+  const link    = document.createElement("a");
+  link.download = "BSC_VM_Report_" + selectedDate + ".png";
+  link.href     = imgData;
+  link.click();
+
+  setTimeout(() => {
+    const msg = encodeURIComponent(
+      "📊 *BSC VM Daily Report*\n" +
+      "📅 " + formatDate(selectedDate) + "\n" +
+      (dashData.overall_done ? "Overall Score: *" + dashData.overall_score.toFixed(1) + "/5*" : "Overall: Not submitted") + "\n" +
+      "_(Image attached above)_"
+    );
+    window.open("https://wa.me/?text=" + msg, "_blank");
+  }, 800);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 function apiGet(params) {
