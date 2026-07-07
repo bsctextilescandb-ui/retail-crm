@@ -325,7 +325,8 @@ function initUploadFrame() {
   // Listen for messages from iframe
   window.addEventListener("message", function(event) {
     const data = event.data;
-    if (!data) return;
+    if (!data || typeof data !== 'object') return;
+    // Accept from any origin — Apps Script domain differs from GitHub Pages
 
     if (data.type === "upload_ready") {
       uploadFrameReady = true;
