@@ -340,14 +340,27 @@ async function loadReports() {
   }
   html += `</div>`;
 
-  // Staff report
-  html += `<div class="card fade-in"><div class="card-title">👥 Staff Submission Count</div>`;
-  if (reportData.staff_report && reportData.staff_report.length > 0) {
-    reportData.staff_report.forEach(s => {
-      html += `<div class="report-row"><div class="report-label">${s.name}</div><div class="report-val">${s.total_days} days</div></div>`;
+  // Floor comparison — last 4 weeks
+  html += `<div class="card fade-in"><div class="card-title">🏢 Floor Comparison (Last 4 Weeks)</div>`;
+  if (reportData.floor_report && reportData.floor_report.length > 0) {
+    reportData.floor_report.forEach(f => {
+      if (!f.weeks || f.weeks.length === 0) return;
+      html += `<div style="margin-bottom:14px">`;
+      html += `<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px">${f.floor}</div>`;
+      html += `<div style="display:flex;gap:6px">`;
+      f.weeks.forEach(w => {
+        const low = w.score < 3.5;
+        html += `
+          <div style="flex:1;text-align:center">
+            <div style="font-size:11px;font-weight:700;color:${low ? 'var(--crimson)' : 'var(--green)'};">${w.score.toFixed(1)}</div>
+            <div style="height:4px;border-radius:2px;background:${low ? 'var(--crimson)' : 'var(--green)'};margin:3px 0;opacity:.6"></div>
+            <div style="font-size:9px;color:var(--ink-30)">${w.week.split('-W')[1] ? 'W' + w.week.split('-W')[1] : w.week}</div>
+          </div>`;
+      });
+      html += `</div></div>`;
     });
   } else {
-    html += `<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data yet</div>`;
+    html += `<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No floor data yet</div>`;
   }
   html += `</div>`;
 
