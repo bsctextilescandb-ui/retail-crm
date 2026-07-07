@@ -26,15 +26,31 @@ html,body{min-height:100vh;background:var(--ivory);font-family:'DM Sans',system-
 .topbar-title{font-family:'DM Serif Display',serif;color:var(--white);font-size:16px}
 .topbar-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px}
 .logout-btn{padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.12);color:var(--white);font-size:12px;font-weight:600;font-family:inherit;border:none;cursor:pointer}
-.tab-bar{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 20px;position:sticky;top:64px;z-index:90}
-.tab-item{padding:14px 16px;font-size:13px;font-weight:600;color:var(--ink-60);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s}
-.tab-item.active{color:var(--navy);border-bottom-color:var(--navy)}
-.date-share-bar{background:var(--white);padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:110px;z-index:89}
+
+/* Main tabs */
+.main-tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 20px;position:sticky;top:64px;z-index:90}
+.main-tab{padding:14px 20px;font-size:14px;font-weight:600;color:var(--ink-60);border-bottom:2px solid transparent;cursor:pointer;transition:all .2s}
+.main-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+
+/* Sub tabs (inside dashboard tab) */
+.sub-tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 20px;overflow-x:auto;scrollbar-width:none;position:sticky;top:110px;z-index:89}
+.sub-tabs::-webkit-scrollbar{display:none}
+.sub-tab{flex-shrink:0;padding:11px 14px;font-size:12px;font-weight:600;color:var(--ink-60);border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap}
+.sub-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+
+/* Date + share bar */
+.date-bar{background:var(--white);padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:152px;z-index:88}
 .date-label{font-size:12px;font-weight:700;color:var(--ink-60);white-space:nowrap}
 .date-input{flex:1;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--ivory);font-family:inherit}
 .share-btn{padding:8px 14px;border-radius:8px;background:#25D366;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;white-space:nowrap}
-.tab-content{display:none;padding:20px;max-width:560px;margin:0 auto}
-.tab-content.active{display:block}
+
+.main-content{display:none}
+.main-content.active{display:block}
+.sub-content{display:none;padding:20px;max-width:640px;margin:0 auto}
+.sub-content.active{display:block}
+
+/* Checklist tab styles */
+.body-pad{padding:20px;max-width:560px;margin:0 auto}
 .greeting{background:var(--navy);border-radius:18px;padding:24px 20px;margin-bottom:16px;position:relative;overflow:hidden}
 .greeting::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
 .greeting-name{font-family:'DM Serif Display',serif;font-size:22px;color:var(--white);margin-bottom:4px}
@@ -74,21 +90,58 @@ html,body{min-height:100vh;background:var(--ivory);font-family:'DM Sans',system-
 .floor-score{font-family:'DM Serif Display',serif;font-size:20px;color:var(--green)}
 .floor-score span{font-size:11px}
 .floor-arrow{font-size:18px;color:var(--ink-30)}
-.report-card{background:var(--white);border-radius:16px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
-.report-card-title{font-size:12px;font-weight:700;color:var(--ink-60);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+
+/* Dashboard sub-tab styles */
+.card{background:var(--white);border-radius:16px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:12px;font-weight:700;color:var(--ink-60);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px}
+.score-hero{background:var(--navy);border-radius:18px;padding:24px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.score-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
+.score-label{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.score-value{font-family:'DM Serif Display',serif;font-size:56px;color:var(--white);line-height:1}
+.score-value span{font-size:20px;opacity:.5}
+.score-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-top:10px}
+.score-badge.good{background:rgba(30,122,30,.3);color:#7EE87E}
+.score-badge.warn{background:rgba(192,57,43,.3);color:#FF8B7E}
+.score-badge.na{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6)}
+.score-meta{font-size:11px;color:rgba(255,255,255,.5);margin-top:6px}
+.compliance-circle{width:72px;height:72px;border-radius:50%;border:4px solid rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.compliance-val{font-size:18px;font-weight:700;color:var(--white)}
+.compliance-label{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase}
+.aspect-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ink-10)}
+.aspect-row:last-child{border-bottom:none}
+.aspect-name{font-size:13px;color:var(--ink);flex:1}
+.aspect-bar-wrap{width:120px;flex-shrink:0}
+.aspect-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.aspect-bar-fill{height:100%;border-radius:3px;background:var(--gold)}
+.aspect-bar-fill.low{background:var(--crimson)}
+.aspect-score{font-size:13px;font-weight:700;color:var(--navy);width:32px;text-align:right;flex-shrink:0}
+.aspect-score.low{color:var(--crimson)}
+.floor-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.floor-card2{background:var(--ivory);border-radius:12px;border:1.5px solid var(--border);padding:14px}
+.floor-card2.done{background:var(--green-l);border-color:var(--green)}
+.floor-card2.warn{background:var(--crimson-l);border-color:var(--crimson)}
+.floor-card2-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.floor-card2.done .floor-card2-name{color:var(--green)}
+.floor-card2.warn .floor-card2-name{color:var(--crimson)}
+.floor-card2-score{font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy)}
+.floor-card2-score span{font-size:12px;color:var(--ink-30)}
+.floor-card2-meta{font-size:11px;color:var(--ink-60);margin-top:4px}
+.history-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:8px}
+.hbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.hbar{width:100%;border-radius:4px 4px 0 0;background:var(--navy-l);min-height:4px}
+.hbar.today{background:var(--navy)}
+.hbar.low{background:var(--crimson-l)}
+.hbar.today.low{background:var(--crimson)}
+.hbar.na{background:var(--border)}
+.hbar-date{font-size:9px;color:var(--ink-30);white-space:nowrap}
 .report-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--ink-10);gap:10px}
 .report-row:last-child{border-bottom:none}
 .report-label{font-size:13px;color:var(--ink);flex:1}
 .report-val{font-size:13px;font-weight:700;color:var(--navy);flex-shrink:0}
-.aspect-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ink-10)}
-.aspect-row:last-child{border-bottom:none}
-.aspect-name{font-size:13px;color:var(--ink);flex:1}
-.aspect-bar-wrap{width:100px;flex-shrink:0}
-.aspect-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
-.aspect-bar-fill{height:100%;border-radius:3px;background:var(--gold)}
-.aspect-bar-fill.low{background:var(--crimson)}
-.aspect-score{font-size:13px;font-weight:700;color:var(--navy);width:28px;text-align:right;flex-shrink:0}
-.aspect-score.low{color:var(--crimson)}
+.badge{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:600}
+.badge.good{background:var(--green-l);color:var(--green)}
+.badge.warn{background:var(--orange-l);color:var(--orange)}
+.badge.bad{background:var(--crimson-l);color:var(--crimson)}
 .loader{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:12px}
 .spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--navy);animation:spin .7s linear infinite}
 .loader p{font-size:13px;color:var(--ink-60)}
@@ -107,30 +160,54 @@ html,body{min-height:100vh;background:var(--ivory);font-family:'DM Sans',system-
   <div class="topbar-left">
     <div class="topbar-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/></div>
     <div>
-      <div class="topbar-title">VM Dashboard</div>
+      <div class="topbar-title">VM Checklist</div>
       <div class="topbar-sub">BSC Textiles — Belagavi</div>
     </div>
   </div>
   <button class="logout-btn" onclick="logout()">Logout</button>
 </div>
 
-<div class="tab-bar">
-  <div class="tab-item active" id="tab-dash" onclick="switchTab('dash')">Dashboard</div>
-  <div class="tab-item" id="tab-rep" onclick="switchTab('rep')">Reports</div>
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <div class="main-tab active" id="mtab-checklist" onclick="switchMain('checklist')">Checklist</div>
+  <div class="main-tab" id="mtab-dashboard" onclick="switchMain('dashboard')">Dashboard</div>
 </div>
 
-<div class="date-share-bar">
-  <div class="date-label">📅 Date</div>
-  <input type="date" id="dateFilter" class="date-input" onchange="onDateChange()"/>
-  <button class="share-btn" onclick="shareReport()">📤 Share</button>
+<!-- CHECKLIST CONTENT -->
+<div class="main-content active" id="mcontent-checklist">
+  <div class="body-pad" id="checklistBody">
+    <div class="loader"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
 </div>
 
-<div class="tab-content active" id="content-dash">
-  <div class="loader"><div class="spinner"></div><p>Loading dashboard...</p></div>
-</div>
-
-<div class="tab-content" id="content-rep">
-  <div class="loader"><div class="spinner"></div><p>Loading reports...</p></div>
+<!-- DASHBOARD CONTENT -->
+<div class="main-content" id="mcontent-dashboard">
+  <!-- Sub tabs -->
+  <div class="sub-tabs">
+    <div class="sub-tab active" id="stab-today" onclick="switchSub('today')">Today</div>
+    <div class="sub-tab" id="stab-floors" onclick="switchSub('floors')">Floors</div>
+    <div class="sub-tab" id="stab-reports" onclick="switchSub('reports')">Reports</div>
+    <div class="sub-tab" id="stab-history" onclick="switchSub('history')">History</div>
+  </div>
+  <!-- Date + Share -->
+  <div class="date-bar">
+    <div class="date-label">📅 Date</div>
+    <input type="date" id="dateFilter" class="date-input" onchange="onDateChange()"/>
+    <button class="share-btn" onclick="shareReport()">📤 Share</button>
+  </div>
+  <!-- Sub contents -->
+  <div class="sub-content active" id="scontent-today">
+    <div class="loader"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
+  <div class="sub-content" id="scontent-floors">
+    <div class="loader"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
+  <div class="sub-content" id="scontent-reports">
+    <div class="loader"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
+  <div class="sub-content" id="scontent-history">
+    <div class="loader"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
 </div>
 
 <canvas id="reportCanvas" style="display:none"></canvas>
@@ -144,66 +221,65 @@ html,body{min-height:100vh;background:var(--ivory);font-family:'DM Sans',system-
 <script>
 const API = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
 const FLOORS = [
-  { name:"Ground Floor", icon:"🏢" },
-  { name:"1st Floor",    icon:"1️⃣" },
-  { name:"2nd Floor",    icon:"2️⃣" },
-  { name:"3rd Floor",    icon:"3️⃣" },
-  { name:"4th Floor",    icon:"4️⃣" }
+  {name:"Ground Floor",icon:"🏢"},{name:"1st Floor",icon:"1️⃣"},
+  {name:"2nd Floor",icon:"2️⃣"},{name:"3rd Floor",icon:"3️⃣"},{name:"4th Floor",icon:"4️⃣"}
 ];
 
-let user=null, dashData=null, adminDash=null, reportData=null;
-let selectedDate="", currentTab="dash", _cbCount=0;
+let user=null, vmDash=null, adminDash=null, reportData=null, histData=null;
+let selectedDate="", currentSub="today", _cb=0;
 
 window.onload = () => {
-  const stored = sessionStorage.getItem("vm_user");
-  if (!stored) { window.location.href="login.html"; return; }
-  user = JSON.parse(stored);
-
-  const now = new Date();
-  const ist = new Date(now.getTime() + 5.5*60*60*1000);
+  const s = sessionStorage.getItem("vm_user");
+  if (!s) { window.location.href="login.html"; return; }
+  user = JSON.parse(s);
+  const now=new Date(), ist=new Date(now.getTime()+5.5*60*60*1000);
   selectedDate = ist.toISOString().split("T")[0];
-
-  const df = document.getElementById("dateFilter");
-  df.value = selectedDate;
-  df.max   = selectedDate;
-
-  loadDashboard();
+  loadChecklist();
 };
 
-function switchTab(tab) {
-  currentTab = tab;
-  ["dash","rep"].forEach(t => {
-    document.getElementById("tab-"+t).classList.toggle("active", t===tab);
-    document.getElementById("content-"+t).classList.toggle("active", t===tab);
+// ── MAIN TAB SWITCH ───────────────────────────────────────────
+function switchMain(tab) {
+  ["checklist","dashboard"].forEach(t => {
+    document.getElementById("mtab-"+t).classList.toggle("active", t===tab);
+    document.getElementById("mcontent-"+t).classList.toggle("active", t===tab);
   });
-  if (tab==="rep" && !reportData) loadReports();
+  if (tab==="dashboard") {
+    const df=document.getElementById("dateFilter");
+    df.value=selectedDate; df.max=selectedDate;
+    if (!adminDash) loadAdminDash();
+  }
+}
+
+// ── SUB TAB SWITCH ────────────────────────────────────────────
+function switchSub(tab) {
+  currentSub = tab;
+  ["today","floors","reports","history"].forEach(t => {
+    document.getElementById("stab-"+t).classList.toggle("active", t===tab);
+    document.getElementById("scontent-"+t).classList.toggle("active", t===tab);
+  });
+  if (tab==="reports" && !reportData) loadReports();
+  if (tab==="history" && !histData)   loadHistory();
 }
 
 function onDateChange() {
   selectedDate = document.getElementById("dateFilter").value;
   adminDash = null;
-  document.getElementById("content-dash").innerHTML = '<div class="loader"><div class="spinner"></div><p>Loading...</p></div>';
-  loadDashboard();
+  document.getElementById("scontent-today").innerHTML   = '<div class="loader"><div class="spinner"></div><p>Loading...</p></div>';
+  document.getElementById("scontent-floors").innerHTML  = '<div class="loader"><div class="spinner"></div><p>Loading...</p></div>';
+  loadAdminDash();
 }
 
-async function loadDashboard() {
-  const [vmData, admData] = await Promise.all([
-    apiGet({ action:"get_vm_dashboard", name:user.name }),
-    apiGet({ action:"get_admin_dashboard", date:selectedDate })
-  ]);
-  if (!vmData.ok) { showToast("Failed to load dashboard","error"); return; }
-  dashData  = vmData;
-  adminDash = admData.ok ? admData : null;
-  renderDashboard();
+// ── CHECKLIST TAB ─────────────────────────────────────────────
+async function loadChecklist() {
+  const data = await apiGet({action:"get_vm_dashboard", name:user.name});
+  if (!data.ok) { showToast("Failed to load","error"); return; }
+  vmDash = data;
+  renderChecklist();
 }
 
-function renderDashboard() {
-  const d   = dashData;
-  const el  = document.getElementById("content-dash");
-  const dateLabel = formatDate(d.date);
-
-  const overallDone  = d.overall_done;
-  const overallScore = d.overall_score;
+function renderChecklist() {
+  const d=vmDash, el=document.getElementById("checklistBody");
+  const overallDone=d.overall_done, overallScore=d.overall_score;
 
   let overallHtml = `
     <div class="overall-card ${overallDone?'done':'pending'} fade-in">
@@ -211,67 +287,32 @@ function renderDashboard() {
         <div class="overall-label">📋 Overall Checklist</div>
         <div class="overall-badge ${overallDone?'done':'pending'}">${overallDone?'✅ Done':'⏳ Pending'}</div>
       </div>`;
-
   if (overallDone) {
-    overallHtml += `
-      <div class="overall-score-wrap">
-        <div class="overall-score">${overallScore.toFixed(1)}<span> / 5</span></div>
-        <div class="overall-score-sub">Today's Score</div>
-      </div>`;
+    overallHtml += `<div class="overall-score-wrap"><div class="overall-score">${overallScore.toFixed(1)}<span> / 5</span></div><div class="overall-score-sub">Today's Score</div></div>`;
   }
-
-  if (!overallDone) {
-    overallHtml += `<button class="btn-fill" onclick="goToChecklist('overall')">Fill Overall Checklist →</button>`;
-  } else {
-    overallHtml += `
-      <button class="btn-fill done-btn" disabled>✅ Submitted Today</button>
-      <button class="btn-fill secondary" onclick="goToChecklist('overall')">Edit Submission</button>`;
-  }
+  overallHtml += !overallDone
+    ? `<button class="btn-fill" onclick="goChecklist('overall')">Fill Overall Checklist →</button>`
+    : `<button class="btn-fill done-btn" disabled>✅ Submitted Today</button><button class="btn-fill secondary" onclick="goChecklist('overall')">Edit Submission</button>`;
   overallHtml += `</div>`;
 
-  let floorHtml = "";
+  let floorHtml="";
   FLOORS.forEach(f => {
-    const status   = (d.floor_status||[]).find(s => s.floor===f.name);
-    const done     = status && status.done;
-    const score    = done ? status.score : null;
-    const date     = done ? formatDateShort(status.date) : null;
-    const submitted= status ? (status.submitted||0) : 0;
-    const total    = status ? (status.total||0) : 0;
-    const partial  = submitted > 0 && !done;
-
+    const st=((d.floor_status||[]).find(s=>s.floor===f.name));
+    const done=st&&st.done, score=done?st.score:null, date=done?formatDateShort(st.date):null;
+    const submitted=st?(st.submitted||0):0, total=st?(st.total||0):0, partial=submitted>0&&!done;
     if (done) {
-      floorHtml += `
-        <div class="floor-card done fade-in">
-          <div class="floor-icon">${f.icon}</div>
-          <div class="floor-info">
-            <div class="floor-name">${f.name}</div>
-            <div class="floor-meta">✅ Done on ${date}</div>
-          </div>
-          <div class="floor-right"><div class="floor-score">${score.toFixed(1)}<span>/5</span></div></div>
-        </div>`;
+      floorHtml += `<div class="floor-card done fade-in"><div class="floor-icon">${f.icon}</div><div class="floor-info"><div class="floor-name">${f.name}</div><div class="floor-meta">✅ Done on ${date}</div></div><div class="floor-right"><div class="floor-score">${score.toFixed(1)}<span>/5</span></div></div></div>`;
     } else {
-      floorHtml += `
-        <div class="floor-card active-floor fade-in" onclick="goToChecklist('floor','${f.name}')">
-          <div class="floor-icon">${f.icon}</div>
-          <div class="floor-info">
-            <div class="floor-name">${f.name}</div>
-            <div class="floor-meta">${partial ? submitted+"/"+total+" points done · Tap to continue" : "Tap to fill this week's checklist"}</div>
-          </div>
-          <div class="floor-right">
-            ${partial ? '<div style="font-size:13px;font-weight:600;color:var(--gold)">'+submitted+"/"+total+'</div>' : '<div class="floor-arrow">›</div>'}
-          </div>
-        </div>`;
+      floorHtml += `<div class="floor-card active-floor fade-in" onclick="goChecklist('floor','${f.name}')"><div class="floor-icon">${f.icon}</div><div class="floor-info"><div class="floor-name">${f.name}</div><div class="floor-meta">${partial?submitted+"/"+total+" pts done · Tap to continue":"Tap to fill this week's checklist"}</div></div><div class="floor-right">${partial?'<div style="font-size:13px;font-weight:600;color:var(--gold)">'+submitted+"/"+total+'</div>':'<div class="floor-arrow">›</div>'}</div></div>`;
     }
   });
 
-  const doneCount = (d.floor_status||[]).filter(s=>s.done).length;
-  const pendingCount = 5 - doneCount;
-
+  const doneCount=(d.floor_status||[]).filter(s=>s.done).length;
   el.innerHTML = `
     <div class="greeting fade-in">
       <div class="greeting-name">Hello, ${user.name}! 👋</div>
-      <div class="greeting-date">${dateLabel}</div>
-      <div class="greeting-week">📅 This Week: ${doneCount}/5 floors done${pendingCount>0?' · '+pendingCount+' pending':' · All floors complete! 🎉'}</div>
+      <div class="greeting-date">${formatDate(d.date)}</div>
+      <div class="greeting-week">📅 This Week: ${doneCount}/5 floors done${5-doneCount>0?' · '+(5-doneCount)+' pending':' · All complete! 🎉'}</div>
     </div>
     <div class="section-title">Today's Overall</div>
     ${overallHtml}
@@ -279,134 +320,196 @@ function renderDashboard() {
     <div class="floor-grid">${floorHtml}</div>`;
 }
 
-async function loadReports() {
-  const el   = document.getElementById("content-rep");
-  const data = await apiGet({ action:"get_admin_reports" });
-  if (!data.ok) { el.innerHTML='<div class="loader"><p style="color:var(--crimson)">Failed to load</p></div>'; return; }
-  reportData = data;
-
-  let html = "";
-
-  // Weekly compliance
-  html += '<div class="report-card fade-in"><div class="report-card-title">📅 Weekly Compliance</div>';
-  if (reportData.weekly_compliance && reportData.weekly_compliance.length > 0) {
-    reportData.weekly_compliance.forEach(w => {
-      const pct = Math.round((w.days_filled/7)*100);
-      const clr = pct>=80?"var(--green)":pct>=50?"var(--orange)":"var(--crimson)";
-      html += '<div class="report-row"><div class="report-label">'+w.week+'</div><div class="report-val" style="color:'+clr+'">'+w.days_filled+'/7 ('+pct+'%)</div></div>';
-    });
-  } else { html += '<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data yet</div>'; }
-  html += '</div>';
-
-  // Aspect performance
-  html += '<div class="report-card fade-in"><div class="report-card-title">📊 Aspect Performance (30 Days)</div>';
-  if (reportData.aspect_report && reportData.aspect_report.length > 0) {
-    reportData.aspect_report.forEach(a => {
-      const pct = (a.score/5)*100, low = a.score<3.5;
-      html += '<div class="aspect-row"><div class="aspect-name">'+a.aspect+'</div>';
-      html += '<div class="aspect-bar-wrap"><div class="aspect-bar"><div class="aspect-bar-fill'+(low?' low':'')+'" style="width:'+pct+'%"></div></div></div>';
-      html += '<div class="aspect-score'+(low?' low':'')+'">'+a.score.toFixed(1)+'</div></div>';
-    });
-  } else { html += '<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data yet</div>'; }
-  html += '</div>';
-
-  // Floor comparison
-  html += '<div class="report-card fade-in"><div class="report-card-title">🏢 Floor Comparison (4 Weeks)</div>';
-  if (reportData.floor_report && reportData.floor_report.length > 0) {
-    reportData.floor_report.forEach(f => {
-      if (!f.weeks || f.weeks.length===0) return;
-      html += '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px">'+f.floor+'</div><div style="display:flex;gap:6px">';
-      f.weeks.forEach(w => {
-        const low = w.score<3.5;
-        html += '<div style="flex:1;text-align:center"><div style="font-size:11px;font-weight:700;color:'+(low?'var(--crimson)':'var(--green)')+'">'+w.score.toFixed(1)+'</div>';
-        html += '<div style="height:4px;border-radius:2px;background:'+(low?'var(--crimson)':'var(--green)')+';margin:3px 0;opacity:.6"></div>';
-        html += '<div style="font-size:9px;color:var(--ink-30)">W'+(w.week.split("-W")[1]||w.week)+'</div></div>';
-      });
-      html += '</div></div>';
-    });
-  } else { html += '<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No floor data yet</div>'; }
-  html += '</div>';
-
-  el.innerHTML = html;
-}
-
-function goToChecklist(type, floor) {
+function goChecklist(type, floor) {
   sessionStorage.setItem("vm_checklist_type", type);
   if (floor) sessionStorage.setItem("vm_checklist_floor", floor);
   window.location.href = "vm.html";
 }
 
-async function shareReport() {
-  let adm = adminDash;
-  if (!adm) {
-    adm = await apiGet({ action:"get_admin_dashboard", date:selectedDate });
-    if (adm.ok) adminDash = adm;
+// ── DASHBOARD TAB ─────────────────────────────────────────────
+async function loadAdminDash() {
+  const data = await apiGet({action:"get_admin_dashboard", date:selectedDate});
+  if (!data.ok) return;
+  adminDash = data;
+  renderToday();
+  renderFloors();
+}
+
+function renderToday() {
+  const d=adminDash, el=document.getElementById("scontent-today");
+  if (!d) return;
+  const score=d.overall_done?d.overall_score:null;
+  const isGood=score!==null&&score>=3.5;
+  let html = `
+    <div class="score-hero fade-in">
+      <div>
+        <div class="score-label">Overall Score</div>
+        <div class="score-value">${d.overall_done?d.overall_score.toFixed(1):"—"}<span>${d.overall_done?" / 5":""}</span></div>
+        <div class="score-badge ${d.overall_done?(isGood?'good':'warn'):'na'}">${d.overall_done?(isGood?'✅ On Track':'⚠️ Attention'):'📋 Not Submitted'}</div>
+        <div class="score-meta">${formatDate(d.date)}</div>
+      </div>
+      <div class="compliance-circle"><div class="compliance-val">${(d.floor_status||[]).filter(f=>f.done).length}/5</div><div class="compliance-label">Floors</div></div>
+    </div>`;
+  if (d.overall_done && (d.aspect_scores||[]).length>0) {
+    html += '<div class="card fade-in"><div class="card-title">📊 Aspect-wise Scores</div>';
+    d.aspect_scores.forEach(a => {
+      const pct=(a.score/5)*100, low=a.score<3.5;
+      html += `<div class="aspect-row"><div class="aspect-name">${a.aspect}</div><div class="aspect-bar-wrap"><div class="aspect-bar"><div class="aspect-bar-fill ${low?'low':''}" style="width:${pct}%"></div></div></div><div class="aspect-score ${low?'low':''}">${a.score.toFixed(1)}</div></div>`;
+    });
+    html += '</div>';
   }
-  if (!adm || !adm.ok) { showToast("No data to share","error"); return; }
+  el.innerHTML = html;
+}
+
+function renderFloors() {
+  const d=adminDash, el=document.getElementById("scontent-floors");
+  if (!d) return;
+  let html = '<div class="card fade-in"><div class="card-title">📅 This Week — '+d.week+'</div><div class="floor-grid2">';
+  (d.floor_status||[]).forEach(f => {
+    const isLow=f.score!==null&&f.score<3.5;
+    const cls=f.done?"done":(isLow?"warn":"");
+    html += `<div class="floor-card2 ${cls}"><div class="floor-card2-name">${f.floor}</div><div class="floor-card2-score">${f.score!==null?f.score.toFixed(1):"—"}<span>${f.score!==null?"/5":""}</span></div><div class="floor-card2-meta">${f.done?"✅ Complete":f.submitted>0?f.submitted+"/"+f.total+" pts":"⏳ Pending"}${f.date?" · "+formatDateShort(f.date):""}</div></div>`;
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+async function loadReports() {
+  const el=document.getElementById("scontent-reports");
+  const data=await apiGet({action:"get_admin_reports"});
+  if (!data.ok){el.innerHTML='<div class="loader"><p style="color:var(--crimson)">Failed</p></div>';return;}
+  reportData=data;
+  let html="";
+  html+='<div class="card fade-in"><div class="card-title">📅 Weekly Compliance</div>';
+  (reportData.weekly_compliance||[]).forEach(w=>{
+    const pct=Math.round((w.days_filled/7)*100),clr=pct>=80?"var(--green)":pct>=50?"var(--orange)":"var(--crimson)";
+    html+='<div class="report-row"><div class="report-label">'+w.week+'</div><div class="report-val" style="color:'+clr+'">'+w.days_filled+'/7 ('+pct+'%)</div></div>';
+  });
+  if(!(reportData.weekly_compliance||[]).length) html+='<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data</div>';
+  html+='</div>';
+  html+='<div class="card fade-in"><div class="card-title">📊 Aspect Performance (30 Days)</div>';
+  (reportData.aspect_report||[]).forEach(a=>{
+    const pct=(a.score/5)*100,low=a.score<3.5;
+    html+='<div class="aspect-row"><div class="aspect-name">'+a.aspect+'</div><div class="aspect-bar-wrap"><div class="aspect-bar"><div class="aspect-bar-fill'+(low?' low':'')+'" style="width:'+pct+'%"></div></div></div><div class="aspect-score'+(low?' low':'')+'">'+a.score.toFixed(1)+'</div></div>';
+  });
+  if(!(reportData.aspect_report||[]).length) html+='<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data</div>';
+  html+='</div>';
+  html+='<div class="card fade-in"><div class="card-title">🏢 Floor Comparison (4 Weeks)</div>';
+  (reportData.floor_report||[]).forEach(f=>{
+    if(!f.weeks||!f.weeks.length) return;
+    html+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px">'+f.floor+'</div><div style="display:flex;gap:6px">';
+    f.weeks.forEach(w=>{const low=w.score<3.5;html+='<div style="flex:1;text-align:center"><div style="font-size:11px;font-weight:700;color:'+(low?'var(--crimson)':'var(--green)')+'">'+w.score.toFixed(1)+'</div><div style="height:4px;border-radius:2px;background:'+(low?'var(--crimson)':'var(--green)')+';margin:3px 0;opacity:.6"></div><div style="font-size:9px;color:var(--ink-30)">W'+(w.week.split("-W")[1]||w.week)+'</div></div>';});
+    html+='</div></div>';
+  });
+  if(!(reportData.floor_report||[]).length) html+='<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:12px">No data</div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+async function loadHistory() {
+  const el=document.getElementById("scontent-history");
+  const data=await apiGet({action:"get_history"});
+  if(!data.ok){el.innerHTML='<div class="loader"><p style="color:var(--crimson)">Failed</p></div>';return;}
+  histData=data;
+  if(!(histData.history||[]).length){el.innerHTML='<div class="loader"><p>No history yet</p></div>';return;}
+  const last14=(histData.history||[]).slice(0,14).reverse();
+  const today=selectedDate;
+  let html='<div class="card fade-in"><div class="card-title">📈 Last '+last14.length+' Days</div><div class="history-chart">';
+  last14.forEach(h=>{
+    const isToday=h.date===today,low=h.score!==null&&h.score<3.5,pct=h.score!==null?(h.score/5)*100:0;
+    const d2=new Date(h.date),label=(d2.getMonth()+1)+"/"+d2.getDate();
+    html+='<div class="hbar-wrap"><div class="hbar '+(isToday?'today':'')+(low?' low':'')+(h.score===null?' na':'')+'" style="height:'+Math.max(pct,6)+'%"></div><div class="hbar-date">'+label+'</div></div>';
+  });
+  html+='</div></div>';
+  html+='<div class="card fade-in"><div class="card-title">📋 All Submissions</div>';
+  (histData.history||[]).forEach(h=>{
+    const low=h.score!==null&&h.score<3.5;
+    html+='<div class="report-row"><div class="report-label">'+formatDate(h.date)+'</div><div class="report-val">'+(h.score!==null?h.score.toFixed(1)+"/5":"—")+'</div><span class="badge '+(h.score===null?'warn':low?'bad':'good')+'">'+(h.score===null?"No Data":low?"⚠️":"✅")+'</span></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ── SHARE REPORT ──────────────────────────────────────────────
+async function shareReport() {
+  let adm=adminDash;
+  if(!adm){adm=await apiGet({action:"get_admin_dashboard",date:selectedDate});if(adm.ok)adminDash=adm;}
+  if(!adm||!adm.ok){showToast("No data to share","error");return;}
   showToast("Generating report...","");
 
-  const canvas = document.getElementById("reportCanvas");
-  const ctx    = canvas.getContext("2d");
-  const W=800, H=860;
-  canvas.width=W; canvas.height=H;
+  const canvas=document.getElementById("reportCanvas");
+  const ctx=canvas.getContext("2d");
+  const W=800,H=880;
+  canvas.width=W;canvas.height=H;
 
-  const navy="#1E2D5A",gold="#B8860B",green="#1E7A1E",crimson="#C0392B",ivory="#F9F7F0",white="#FFFFFF",ink="#1A1A2E",border="#E8E4D8";
+  // Colors
+  const navy="#1E2D5A",gold="#B8860B",green="#1E7A1E",crimson="#C0392B",ivory="#F9F7F0",white="#FFFFFF",ink="#1A1A2E",bdr="#E8E4D8";
 
-  ctx.fillStyle=ivory; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle=navy; rr(ctx,0,0,W,130,0); ctx.fill();
-  ctx.fillStyle=white; ctx.font="bold 26px sans-serif"; ctx.fillText("BSC Textiles — VM Report",40,52);
-  ctx.fillStyle="rgba(255,255,255,.65)"; ctx.font="15px sans-serif"; ctx.fillText(formatDate(selectedDate)+"  ·  Belagavi Store",40,80);
-  ctx.fillStyle="rgba(255,255,255,.4)"; ctx.font="12px sans-serif";
-  ctx.fillText("By: "+(adm.submitted_by||[]).join(", ")||"Not submitted",40,105);
+  // Background
+  ctx.fillStyle=ivory;ctx.fillRect(0,0,W,H);
 
+  // Header
+  ctx.fillStyle=navy;rr(ctx,0,0,W,140,0);ctx.fill();
+  ctx.fillStyle=white;ctx.font="bold 28px Cambria, serif";ctx.fillText("BSC Textiles — VM Checklist Report",40,55);
+  ctx.fillStyle="rgba(255,255,255,.65)";ctx.font="16px Cambria, serif";ctx.fillText(formatDate(selectedDate)+"  ·  Belagavi Store",40,85);
+  ctx.fillStyle="rgba(255,255,255,.4)";ctx.font="13px Cambria, serif";
+  ctx.fillText("Submitted by: "+((adm.submitted_by||[]).join(", ")||"Not submitted"),40,112);
+
+  // Score card
   const score=adm.overall_done?adm.overall_score:null;
   const isGood=score!==null&&score>=3.5;
-  ctx.fillStyle=white; rr(ctx,30,150,W-60,110,14); ctx.fill();
-  ctx.strokeStyle=border; ctx.lineWidth=1.5; rr(ctx,30,150,W-60,110,14); ctx.stroke();
-  ctx.fillStyle=ink; ctx.font="bold 13px sans-serif"; ctx.fillText("OVERALL SCORE",55,183);
+  ctx.fillStyle=white;rr(ctx,30,158,W-60,114,14);ctx.fill();
+  ctx.strokeStyle=bdr;ctx.lineWidth=1.5;rr(ctx,30,158,W-60,114,14);ctx.stroke();
+  ctx.fillStyle=ink;ctx.font="bold 13px Cambria, serif";ctx.fillText("OVERALL SCORE",55,188);
   ctx.fillStyle=score===null?"#999":isGood?green:crimson;
-  ctx.font="bold 58px sans-serif"; ctx.fillText(score!==null?score.toFixed(1):"—",55,248);
-  ctx.fillStyle="#999"; ctx.font="20px sans-serif"; ctx.fillText("/5",score!==null?160:95,248);
-  ctx.fillStyle=score===null?"#EEE":isGood?"#D1FAE5":"#FEE2E2"; rr(ctx,W-220,190,170,38,19); ctx.fill();
-  ctx.fillStyle=score===null?"#999":isGood?green:crimson; ctx.font="bold 13px sans-serif";
-  ctx.textAlign="center"; ctx.fillText(score===null?"Not Submitted":isGood?"✅ On Track":"⚠️ Attention",W-135,214); ctx.textAlign="left";
+  ctx.font="bold 60px Cambria, serif";ctx.fillText(score!==null?score.toFixed(1):"—",55,255);
+  ctx.fillStyle="#999";ctx.font="22px Cambria, serif";ctx.fillText("/5",score!==null?165:95,255);
+  ctx.fillStyle=score===null?"#EEE":isGood?"#D1FAE5":"#FEE2E2";rr(ctx,W-225,194,175,40,20);ctx.fill();
+  ctx.fillStyle=score===null?"#999":isGood?green:crimson;
+  ctx.font="bold 14px Cambria, serif";ctx.textAlign="center";
+  ctx.fillText(score===null?"Not Submitted":isGood?"✅ On Track":"⚠️ Needs Attention",W-137,219);ctx.textAlign="left";
 
-  let y=290;
-  ctx.fillStyle=ink; ctx.font="bold 13px sans-serif"; ctx.fillText("ASPECT SCORES",40,y); y+=16;
-  (adm.aspect_scores||[]).forEach(a => {
-    y+=32;
-    ctx.fillStyle=white; rr(ctx,30,y-22,W-60,30,7); ctx.fill();
-    ctx.fillStyle=ink; ctx.font="12px sans-serif"; ctx.fillText(a.aspect,50,y-4);
-    const bx=W-330,bw=220,low=a.score<3.5;
-    ctx.fillStyle=border; rr(ctx,bx,y-14,bw,7,3); ctx.fill();
-    ctx.fillStyle=low?crimson:gold; rr(ctx,bx,y-14,(a.score/5)*bw,7,3); ctx.fill();
-    ctx.fillStyle=low?crimson:navy; ctx.font="bold 13px sans-serif";
-    ctx.textAlign="right"; ctx.fillText(a.score.toFixed(1),W-45,y-4); ctx.textAlign="left";
+  // Aspect scores
+  let y=300;
+  ctx.fillStyle=ink;ctx.font="bold 14px Cambria, serif";ctx.fillText("ASPECT SCORES",40,y);y+=18;
+  (adm.aspect_scores||[]).forEach(a=>{
+    y+=34;
+    ctx.fillStyle=white;rr(ctx,30,y-24,W-60,32,8);ctx.fill();
+    ctx.fillStyle=ink;ctx.font="13px Cambria, serif";ctx.fillText(a.aspect,50,y-5);
+    const bx=W-340,bw=230,low=a.score<3.5;
+    ctx.fillStyle=bdr;rr(ctx,bx,y-15,bw,8,4);ctx.fill();
+    ctx.fillStyle=low?crimson:gold;rr(ctx,bx,y-15,(a.score/5)*bw,8,4);ctx.fill();
+    ctx.fillStyle=low?crimson:navy;ctx.font="bold 14px Cambria, serif";
+    ctx.textAlign="right";ctx.fillText(a.score.toFixed(1),W-45,y-5);ctx.textAlign="left";
   });
 
-  y+=50;
-  ctx.fillStyle=ink; ctx.font="bold 13px sans-serif"; ctx.fillText("THIS WEEK'S FLOORS",40,y); y+=16;
+  // Floor status
+  y+=55;
+  ctx.fillStyle=ink;ctx.font="bold 14px Cambria, serif";ctx.fillText("THIS WEEK'S FLOORS",40,y);y+=18;
   const fw=(W-80)/2;
   (adm.floor_status||[]).forEach((f,i)=>{
-    const fx=30+(i%2)*(fw+20),fy=y+Math.floor(i/2)*68;
+    const fx=30+(i%2)*(fw+20),fy=y+Math.floor(i/2)*70;
     const done=f.done,partial=f.submitted>0&&!done;
-    ctx.fillStyle=done?"#D1FAE5":partial?"#FEF3C7":white; rr(ctx,fx,fy+8,fw-20,52,9); ctx.fill();
-    ctx.strokeStyle=done?green:partial?gold:border; ctx.lineWidth=1.5; rr(ctx,fx,fy+8,fw-20,52,9); ctx.stroke();
+    ctx.fillStyle=done?"#D1FAE5":partial?"#FEF3C7":white;rr(ctx,fx,fy+8,fw-20,54,10);ctx.fill();
+    ctx.strokeStyle=done?green:partial?gold:bdr;ctx.lineWidth=1.5;rr(ctx,fx,fy+8,fw-20,54,10);ctx.stroke();
     ctx.fillStyle=done?green:partial?gold:"#999";
-    ctx.font="bold 12px sans-serif"; ctx.fillText(f.floor,fx+10,fy+30);
-    ctx.font="11px sans-serif"; ctx.fillText(done?"✅ "+f.score.toFixed(1)+"/5":partial?f.submitted+"/"+f.total+" pts":"⏳ Pending",fx+10,fy+48);
+    ctx.font="bold 13px Cambria, serif";ctx.fillText(f.floor,fx+12,fy+32);
+    ctx.font="12px Cambria, serif";ctx.fillText(done?"✅ "+f.score.toFixed(1)+"/5":partial?f.submitted+"/"+f.total+" pts":"⏳ Pending",fx+12,fy+52);
   });
 
-  y=H-55;
-  ctx.fillStyle=navy; rr(ctx,0,y,W,55,0); ctx.fill();
-  ctx.fillStyle="rgba(255,255,255,.55)"; ctx.font="12px sans-serif"; ctx.textAlign="center";
-  ctx.fillText("Powered by C&B Consulting & Beyond",W/2,y+32); ctx.textAlign="left";
+  // Footer
+  y=H-58;
+  ctx.fillStyle=navy;rr(ctx,0,y,W,58,0);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.55)";ctx.font="13px Cambria, serif";ctx.textAlign="center";
+  ctx.fillText("Powered by C&B Consulting & Beyond  ·  BSC Textiles Belagavi",W/2,y+34);ctx.textAlign="left";
 
+  // Download
   const link=document.createElement("a");
   link.download="BSC_VM_"+selectedDate+".png";
-  link.href=canvas.toDataURL("image/png"); link.click();
+  link.href=canvas.toDataURL("image/png");link.click();
+
   setTimeout(()=>{
-    const msg=encodeURIComponent("📊 *BSC VM Daily Report*\n📅 "+formatDate(selectedDate)+"\n"+(adm.overall_done?"Score: *"+adm.overall_score.toFixed(1)+"/5*":"Not submitted")+"\n_(Image attached)_");
+    const msg=encodeURIComponent("📊 *BSC VM Daily Report*\n📅 "+formatDate(selectedDate)+"\n"+(adm.overall_done?"Score: *"+adm.overall_score.toFixed(1)+"/5*":"Not submitted")+"\n_(Image attached above)_");
     window.open("https://wa.me/?text="+msg,"_blank");
   },800);
 }
@@ -419,38 +522,24 @@ function rr(ctx,x,y,w,h,r){
   ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
 }
 
-function apiGet(params) {
-  return new Promise((resolve) => {
-    const cbName="vmCb_"+Date.now()+"_"+(++_cbCount);
-    const script=document.createElement("script");
-    let settled=false;
-    window[cbName]=(data)=>{ if(settled)return; settled=true; delete window[cbName]; if(document.body.contains(script))document.body.removeChild(script); resolve(data); };
-    script.onerror=()=>{ if(settled)return; settled=true; resolve({ok:false,error:"Network error"}); };
-    setTimeout(()=>{ if(settled)return; settled=true; resolve({ok:false,error:"Timeout"}); },15000);
-    script.src=API+"?"+new URLSearchParams(params).toString()+"&callback="+cbName;
-    document.body.appendChild(script);
+// ── API ───────────────────────────────────────────────────────
+function apiGet(params){
+  return new Promise((resolve)=>{
+    const cb="vmCb_"+Date.now()+"_"+(++_cb);
+    const sc=document.createElement("script");
+    let done=false;
+    window[cb]=(d)=>{if(done)return;done=true;delete window[cb];if(document.body.contains(sc))document.body.removeChild(sc);resolve(d);};
+    sc.onerror=()=>{if(done)return;done=true;resolve({ok:false,error:"Network error"});};
+    setTimeout(()=>{if(done)return;done=true;resolve({ok:false,error:"Timeout"});},15000);
+    sc.src=API+"?"+new URLSearchParams(params).toString()+"&callback="+cb;
+    document.body.appendChild(sc);
   });
 }
 
-function logout() { sessionStorage.clear(); window.location.href="login.html"; }
-
-function formatDate(dateStr) {
-  const d=new Date(dateStr);
-  const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return days[d.getUTCDay()]+", "+d.getUTCDate()+" "+mon[d.getUTCMonth()]+" "+d.getUTCFullYear();
-}
-function formatDateShort(dateStr) {
-  const d=new Date(dateStr);
-  const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return days[d.getUTCDay()]+" "+d.getUTCDate()+" "+mon[d.getUTCMonth()];
-}
-function showToast(msg,type="") {
-  const t=document.getElementById("toast");
-  t.textContent=msg; t.className=type; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3000);
-}
+function logout(){sessionStorage.clear();window.location.href="login.html";}
+function formatDate(ds){const d=new Date(ds),days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return days[d.getUTCDay()]+", "+d.getUTCDate()+" "+mon[d.getUTCMonth()]+" "+d.getUTCFullYear();}
+function formatDateShort(ds){const d=new Date(ds),days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return days[d.getUTCDay()]+" "+d.getUTCDate()+" "+mon[d.getUTCMonth()];}
+function showToast(msg,type=""){const t=document.getElementById("toast");t.textContent=msg;t.className=type;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
 </script>
 </body>
 </html>
