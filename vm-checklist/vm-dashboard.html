@@ -536,9 +536,7 @@ async function shareReport() {
   link.download="BSC_VM_"+selectedDate+".png";
   link.href=canvas.toDataURL("image/png"); link.click();
   setTimeout(()=>{
-    const msg=encodeURIComponent("📊 *BSC VM Daily Report*
-📅 "+formatDate(selectedDate)+"
-"+(adm.overall_done?"Score: *"+adm.overall_score.toFixed(1)+"/5*":"Not submitted")+"\n_(Image attached)_");
+    const msg=encodeURIComponent("📊 *BSC VM Daily Report*\n📅 "+formatDate(selectedDate)+"\n"+(adm.overall_done?"Score: *"+adm.overall_score.toFixed(1)+"/5*":"Not submitted")+"\n_(Image attached)_");
     window.open("https://wa.me/?text="+msg,"_blank");
   },800);
 }
