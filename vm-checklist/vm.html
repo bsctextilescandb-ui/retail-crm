@@ -349,7 +349,7 @@ function renderChecklist() {
 
   // Section pills — all visible, tap any section freely
   let pillsHtml = sections.map((s, i) => {
-    const allDone = s.pts.every(p => answeredToday[p["#"] || p.point_no]);
+    const allDone = s.pts.every(p => answeredToday[String(p["#"] || p.point_no)]);
     return `
     <div class="section-pill ${i === 0 ? 'active' : ''} ${allDone ? 'done' : ''}"
       id="pill_${i}" onclick="goToSection(${i})">
@@ -371,7 +371,7 @@ function renderChecklist() {
     }
 
     // Count pending points in this section
-    const pendingPts = s.pts.filter(p => !answeredToday[p["#"] || p.point_no]);
+    const pendingPts = s.pts.filter(p => !answeredToday[String(p["#"] || p.point_no)]);
 
     if (pendingPts.length === 0) {
       // All points in this section already answered
@@ -524,7 +524,7 @@ function updateSectionPill(pNo) {
     if (!inSection) return;
     // Check if all points in section are answered or newly answered
     const allDone = s.pts.every(p => {
-      const id = p["#"] || p.point_no;
+      const id = String(p["#"] || p.point_no);
       return answeredToday[id] || (answers[id] && answers[id].value);
     });
     const pill = document.getElementById("pill_" + i);
