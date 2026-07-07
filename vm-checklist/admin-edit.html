@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>BSC VM — Edit Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);--ink-10:rgba(26,26,46,.06);
+  --ivory:#F9F7F0;--white:#FFFFFF;--border:#E8E4D8;
+  --shadow:0 2px 12px rgba(26,26,46,.08);
+}
+html,body{min-height:100vh;background:var(--ivory);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.topbar{background:var(--navy);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.12);color:var(--white);font-size:18px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.topbar-title{font-family:'DM Serif Display',serif;color:var(--white);font-size:16px}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px}
+.add-btn{padding:8px 14px;border-radius:8px;background:var(--gold);color:var(--white);font-size:13px;font-weight:700;font-family:inherit;border:none;cursor:pointer}
+
+/* ── FILTER BAR ───────────────────────────────────── */
+.filter-bar{background:var(--white);padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;position:sticky;top:64px;z-index:90}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-pill{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--ivory);border:1.5px solid var(--border);color:var(--ink-60);transition:all .2s}
+.filter-pill.active{background:var(--navy);border-color:var(--navy);color:var(--white)}
+
+/* ── BODY ─────────────────────────────────────────── */
+.body{padding:16px 20px;max-width:640px;margin:0 auto}
+.summary-bar{font-size:12px;color:var(--ink-60);margin-bottom:16px;display:flex;gap:12px}
+.summary-badge{padding:3px 10px;border-radius:10px;font-weight:600;background:var(--navy-l);color:var(--navy);font-size:11px}
+
+/* ── ASPECT SECTION ───────────────────────────────── */
+.aspect-block{margin-bottom:20px}
+.aspect-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.aspect-name{font-family:'DM Serif Display',serif;font-size:16px;color:var(--navy)}
+.aspect-count{font-size:11px;color:var(--ink-30);background:var(--ivory);padding:3px 8px;border-radius:8px}
+
+/* ── POINT CARD ───────────────────────────────────── */
+.point-card{background:var(--white);border-radius:12px;border:1.5px solid var(--border);padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s}
+.point-card:hover{border-color:var(--navy-l)}
+.point-num{width:24px;height:24px;border-radius:6px;background:var(--navy);color:var(--white);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.point-body{flex:1;min-width:0}
+.point-label{font-size:13px;color:var(--ink);line-height:1.4;margin-bottom:6px}
+.point-meta{display:flex;gap:6px;flex-wrap:wrap}
+.meta-badge{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.meta-badge.type-overall{background:var(--navy-l);color:var(--navy)}
+.meta-badge.type-floor{background:var(--gold-l);color:var(--gold)}
+.meta-badge.freq{background:var(--ivory);color:var(--ink-60);border:1px solid var(--border)}
+.point-actions{display:flex;gap:6px;flex-shrink:0}
+.action-btn{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--ivory);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+.action-btn.edit:hover{background:var(--navy-l);border-color:var(--navy)}
+.action-btn.del:hover{background:var(--crimson-l);border-color:var(--crimson)}
+
+/* ── MODAL ────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--white);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s ease;padding:24px 20px}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy);margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{font-size:12px;font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--ivory);font-family:inherit;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);outline:none;background:var(--white)}
+.field textarea{resize:vertical;min-height:80px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.btn-cancel{flex:1;padding:13px;border-radius:10px;background:var(--ivory);color:var(--ink);font-size:14px;font-weight:600;border:1.5px solid var(--border);cursor:pointer;font-family:inherit}
+.btn-save{flex:2;padding:13px;border-radius:10px;background:var(--navy);color:var(--white);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background .2s}
+.btn-save:hover{background:var(--navy-d)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── CONFIRM MODAL ────────────────────────────────── */
+.confirm-box{background:var(--white);border-radius:20px 20px 0 0;width:100%;transform:translateY(100%);transition:transform .3s ease;padding:28px 20px;text-align:center}
+.modal-overlay.open .confirm-box{transform:translateY(0)}
+.confirm-icon{font-size:40px;margin-bottom:12px}
+.confirm-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy);margin-bottom:8px}
+.confirm-msg{font-size:13px;color:var(--ink-60);margin-bottom:20px;line-height:1.5}
+.confirm-btns{display:flex;gap:10px}
+.btn-confirm-cancel{flex:1;padding:13px;border-radius:10px;background:var(--ivory);color:var(--ink);font-size:14px;font-weight:600;border:1.5px solid var(--border);cursor:pointer;font-family:inherit}
+.btn-confirm-del{flex:1;padding:13px;border-radius:10px;background:var(--crimson);color:var(--white);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+
+/* ── LOADER ───────────────────────────────────────── */
+.loader{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:12px}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--navy);animation:spin .7s linear infinite}
+.loader p{font-size:13px;color:var(--ink-60)}
+
+/* ── TOAST ────────────────────────────────────────── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--white);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--crimson)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="window.location.href='admin.html'">‹</button>
+    <div>
+      <div class="topbar-title">Edit Checklist</div>
+      <div class="topbar-sub">Add, edit or remove points</div>
+    </div>
+  </div>
+  <button class="add-btn" onclick="openAddModal()">+ Add Point</button>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-pill active" onclick="setFilter('all',this)">All</div>
+  <div class="filter-pill" onclick="setFilter('Overall',this)">Overall</div>
+  <div class="filter-pill" onclick="setFilter('Floor',this)">Floor</div>
+</div>
+
+<div class="body" id="body">
+  <div class="loader"><div class="spinner"></div><p>Loading checklist...</p></div>
+</div>
+
+<!-- EDIT / ADD MODAL -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="editModalTitle">Edit Point</div>
+    <div class="field">
+      <label>Point Label</label>
+      <textarea id="editLabel" rows="3" placeholder="Enter checklist point..."></textarea>
+    </div>
+    <div class="field">
+      <label>Aspect</label>
+      <input type="text" id="editAspect" placeholder="e.g. Mannequin Placement"/>
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="editType">
+        <option value="Overall">Overall (Daily store-level)</option>
+        <option value="Floor">Floor (Weekly per floor)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Frequency</label>
+      <select id="editFreq">
+        <option value="Daily">Daily</option>
+        <option value="3 Days Once">3 Days Once</option>
+        <option value="Weekly">Weekly</option>
+        <option value="Seasonal">Seasonal</option>
+        <option value="As & When">As & When</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-save" id="editSaveBtn" onclick="savePoint()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Delete Point?</div>
+    <div class="confirm-msg" id="confirmMsg">This will permanently remove the point from the checklist.</div>
+    <div class="confirm-btns">
+      <button class="btn-confirm-cancel" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div style="text-align:center;padding:24px 20px 32px;border-top:1px solid var(--border);margin-top:8px">
+  <div style="font-size:10px;color:rgba(26,26,46,.3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Powered by</div>
+  <img src="https://bsctextilescandb-ui.github.io/retail-crm/cnb-logo.png" alt="C&B" style="height:28px;opacity:.7"/>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
+
+let allPoints     = [];
+let currentFilter = "all";
+let editingPoint  = null; // null = adding new
+let deletingPNo   = null;
+let _cbCount      = 0;
+
+// ── INIT ──────────────────────────────────────────────────────
+window.onload = () => {
+  const stored = sessionStorage.getItem("vm_user");
+  if (!stored) { window.location.href = "login.html"; return; }
+  const user = JSON.parse(stored);
+  if (user.role !== "admin") { window.location.href = "vm-dashboard.html"; return; }
+  loadPoints();
+};
+
+async function loadPoints() {
+  const data = await apiGet({ action: "get_checklist_master" });
+  if (!data.ok) {
+    document.getElementById("body").innerHTML =
+      `<div class="loader"><p style="color:var(--crimson)">Failed to load checklist points.</p></div>`;
+    return;
+  }
+  allPoints = data.points || [];
+  renderPoints();
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderPoints() {
+  const body = document.getElementById("body");
+  const filtered = currentFilter === "all"
+    ? allPoints
+    : allPoints.filter(p => (p.TYPE || p.Type || p.type || "").toString().trim() === currentFilter);
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<div class="loader"><p>No points found.</p></div>`;
+    return;
+  }
+
+  // Group by aspect
+  const aspectMap = {};
+  filtered.forEach(p => {
+    const asp = p.ASPECT || p.Aspect || p.aspect || "Other";
+    if (!aspectMap[asp]) aspectMap[asp] = [];
+    aspectMap[asp].push(p);
+  });
+
+  const total   = filtered.length;
+  const overall = filtered.filter(p => (p.TYPE||p.Type||p.type||"").toString().trim() === "Overall").length;
+  const floor   = filtered.filter(p => (p.TYPE||p.Type||p.type||"").toString().trim() === "Floor").length;
+
+  let html = `
+    <div class="summary-bar fade-in">
+      <span class="summary-badge">Total: ${total}</span>
+      <span class="summary-badge">Overall: ${overall}</span>
+      <span class="summary-badge">Floor: ${floor}</span>
+    </div>`;
+
+  Object.entries(aspectMap).forEach(([asp, pts]) => {
+    html += `
+      <div class="aspect-block fade-in">
+        <div class="aspect-header">
+          <div class="aspect-name">${asp}</div>
+          <div class="aspect-count">${pts.length} points</div>
+        </div>`;
+    pts.forEach(p => {
+      const pNo  = p["#"] || p.point_no || p.POINT_NO;
+      const type = (p.TYPE || p.Type || p.type || "").toString().trim();
+      const freq = p.FREQUENCY || p.Frequency || p.frequency || "";
+      const label= p.POINT || p.Point || p.point || "";
+      html += `
+        <div class="point-card">
+          <div class="point-num">${pNo}</div>
+          <div class="point-body">
+            <div class="point-label">${label}</div>
+            <div class="point-meta">
+              <span class="meta-badge type-${type.toLowerCase()}">${type}</span>
+              <span class="meta-badge freq">🔄 ${freq}</span>
+            </div>
+          </div>
+          <div class="point-actions">
+            <button class="action-btn edit" onclick="openEditModal(${pNo})" title="Edit">✏️</button>
+            <button class="action-btn del"  onclick="openDeleteModal(${pNo},'${label.replace(/'/g,"\\'")}')">🗑️</button>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+
+  body.innerHTML = html;
+}
+
+// ── FILTER ────────────────────────────────────────────────────
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  renderPoints();
+}
+
+// ── EDIT MODAL ────────────────────────────────────────────────
+function openEditModal(pNo) {
+  const p = allPoints.find(pt => String(pt["#"] || pt.point_no || pt.POINT_NO) === String(pNo));
+  if (!p) return;
+  editingPoint = pNo;
+  document.getElementById("editModalTitle").textContent = "Edit Point #" + pNo;
+  document.getElementById("editLabel").value  = p.POINT || p.Point || p.point || "";
+  document.getElementById("editAspect").value = p.ASPECT || p.Aspect || p.aspect || "";
+  document.getElementById("editType").value   = (p.TYPE || p.Type || p.type || "Overall").toString().trim();
+  document.getElementById("editFreq").value   = p.FREQUENCY || p.Frequency || p.frequency || "Daily";
+  document.getElementById("editSaveBtn").textContent = "Save Changes";
+  document.getElementById("editModal").classList.add("open");
+}
+
+function openAddModal() {
+  editingPoint = null;
+  document.getElementById("editModalTitle").textContent = "Add New Point";
+  document.getElementById("editLabel").value  = "";
+  document.getElementById("editAspect").value = "";
+  document.getElementById("editType").value   = "Overall";
+  document.getElementById("editFreq").value   = "Daily";
+  document.getElementById("editSaveBtn").textContent = "Add Point";
+  document.getElementById("editModal").classList.add("open");
+}
+
+function closeEditModal(e) {
+  if (!e || e.target === document.getElementById("editModal"))
+    document.getElementById("editModal").classList.remove("open");
+}
+
+async function savePoint() {
+  const label  = document.getElementById("editLabel").value.trim();
+  const aspect = document.getElementById("editAspect").value.trim();
+  const type   = document.getElementById("editType").value;
+  const freq   = document.getElementById("editFreq").value;
+
+  if (!label)  { showToast("Point label is required", "error"); return; }
+  if (!aspect) { showToast("Aspect is required", "error"); return; }
+
+  const btn = document.getElementById("editSaveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  let res;
+  if (editingPoint) {
+    // Update existing — update each field
+    const fields = { POINT: label, ASPECT: aspect, TYPE: type, FREQUENCY: freq };
+    let allOk = true;
+    for (const [field, value] of Object.entries(fields)) {
+      const r = await apiGet({ action: "update_checklist_point", point_no: editingPoint, field, value });
+      if (!r.ok) { allOk = false; break; }
+    }
+    res = { ok: allOk };
+  } else {
+    res = await apiGet({ action: "add_checklist_point", type, aspect, point: label, frequency: freq });
+  }
+
+  btn.disabled = false;
+
+  if (res.ok) {
+    showToast(editingPoint ? "Point updated!" : "Point added!", "success");
+    document.getElementById("editModal").classList.remove("open");
+    await loadPoints();
+  } else {
+    btn.textContent = editingPoint ? "Save Changes" : "Add Point";
+    showToast(res.error || "Failed to save", "error");
+  }
+}
+
+// ── DELETE MODAL ──────────────────────────────────────────────
+function openDeleteModal(pNo, label) {
+  deletingPNo = pNo;
+  document.getElementById("confirmMsg").textContent =
+    'Delete "' + label.substring(0, 60) + (label.length > 60 ? '...' : '') + '"? This cannot be undone.';
+  document.getElementById("confirmModal").classList.add("open");
+}
+
+function closeConfirmModal(e) {
+  if (!e || e.target === document.getElementById("confirmModal"))
+    document.getElementById("confirmModal").classList.remove("open");
+}
+
+async function confirmDelete() {
+  if (!deletingPNo) return;
+  document.querySelector(".btn-confirm-del").textContent = "Deleting...";
+  const res = await apiGet({ action: "delete_checklist_point", point_no: deletingPNo });
+  document.getElementById("confirmModal").classList.remove("open");
+  document.querySelector(".btn-confirm-del").textContent = "Delete";
+  if (res.ok) {
+    showToast("Point deleted!", "success");
+    await loadPoints();
+  } else {
+    showToast(res.error || "Delete failed", "error");
+  }
+}
+
+// ── API ───────────────────────────────────────────────────────
+function apiGet(params) {
+  return new Promise((resolve) => {
+    const cbName = "editCb_" + Date.now() + "_" + (++_cbCount);
+    const script = document.createElement("script");
+    let settled  = false;
+    window[cbName] = (data) => {
+      if (settled) return; settled = true;
+      delete window[cbName];
+      if (document.body.contains(script)) document.body.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = () => { if (settled) return; settled = true; resolve({ ok: false, error: "Network error" }); };
+    setTimeout(() => { if (settled) return; settled = true; resolve({ ok: false, error: "Timeout" }); }, 15000);
+    script.src = API + "?" + new URLSearchParams(params).toString() + "&callback=" + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+function showToast(msg, type="") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = type; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>
