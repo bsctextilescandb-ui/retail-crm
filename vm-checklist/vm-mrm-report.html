@@ -704,47 +704,12 @@ function renderReport() {
     ...(o.no_count>=20?[{item:`Review top failed points and update SOP/training`, priority:"Medium", owner:"VM Manager"}]:[]),
   ];
 
-  el.innerHTML += `
-    <div class="page fade-in">
-      <div class="page-header">
-        <div class="page-header-title">Action Items & Observations</div>
-        <div class="page-header-num">PAGE 09</div>
-      </div>
-      <div class="page-body">
-        <div class="section-title">Management Observations</div>
-        <textarea class="obs-area" placeholder="Add management observations and notes here..."></textarea>
-        <div class="divider"></div>
-        <div class="section-title">Auto-generated Action Items</div>
-        <table class="action-table">
-          <thead><tr><th>#</th><th>Action Item</th><th>Priority</th><th>Owner</th></tr></thead>
-          <tbody>
-            ${autoActions.length>0?autoActions.map((a,i)=>`
-              <tr>
-                <td>${i+1}</td>
-                <td>${a.item}</td>
-                <td><span class="priority-badge ${a.priority.toLowerCase()}">${a.priority}</span></td>
-                <td>${a.owner}</td>
-              </tr>`).join(""):
-              '<tr><td colspan="4" style="text-align:center;color:var(--ink-60)">No critical action items — store performing well! ✅</td></tr>'}
-          </tbody>
-        </table>
-        <div class="divider"></div>
-        <div class="section-title">Additional Actions (Manual Entry)</div>
-        <table class="action-table">
-          <thead><tr><th>#</th><th>Action Item</th><th>Priority</th><th>Owner</th></tr></thead>
-          <tbody>
-            ${[1,2,3].map(i=>`<tr><td>${autoActions.length+i}</td><td><input style="width:100%;border:none;background:transparent;font-family:Cambria,serif;font-size:13px" placeholder="Enter action item..."/></td><td><select style="border:none;background:transparent;font-family:Cambria,serif;font-size:12px"><option>High</option><option>Medium</option><option>Low</option></select></td><td><input style="width:100%;border:none;background:transparent;font-family:Cambria,serif;font-size:13px" placeholder="Owner..."/></td></tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-
-  // ── PAGE 10 TARGETS ───────────────────────────────────────
+  // ── PAGE 09 TARGETS ───────────────────────────────────────
   const nextMonthScore = Math.min(5, parseFloat((o.avg_score + 0.3).toFixed(1)));
   el.innerHTML += `
     <div class="page fade-in">
       <div class="page-header">
-        <div class="page-header-title">Next Period Targets</div>
+        <div class="page-header-title">Next Period Targets & Action Items</div>
         <div class="page-header-num">PAGE 09</div>
       </div>
       <div class="page-body">
