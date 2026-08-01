@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VM MRM Report — BSC The Textile Mall</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#D97706;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#F9F7F0;--white:#FFFFFF;--border:#E8E4D8;
+}
+body{font-family:Cambria,Georgia,serif;background:var(--ivory);color:var(--ink);min-height:100vh}
+
+/* ── PASSWORD SCREEN ───────────────────────────── */
+#pwScreen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999}
+.pw-box{background:var(--white);border-radius:20px;padding:40px 32px;width:100%;max-width:360px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.pw-logo{width:80px;height:80px;border-radius:16px;overflow:hidden;margin:0 auto 20px;border:2px solid var(--border)}
+.pw-logo img{width:100%;height:100%;object-fit:cover}
+.pw-title{font-size:22px;color:var(--navy);margin-bottom:6px}
+.pw-sub{font-size:13px;color:var(--ink-60);margin-bottom:24px}
+.pw-input{width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);font-size:15px;font-family:Cambria,serif;letter-spacing:.1em;margin-bottom:12px;text-align:center}
+.pw-input:focus{border-color:var(--navy);outline:none}
+.pw-btn{width:100%;padding:13px;border-radius:10px;background:var(--navy);color:var(--white);font-size:15px;font-weight:700;font-family:Cambria,serif;border:none;cursor:pointer}
+.pw-error{font-size:13px;color:var(--crimson);margin-top:10px;min-height:20px}
+
+/* ── TOP CONTROLS ──────────────────────────────── */
+#app{display:none}
+.controls{background:var(--navy);padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.controls-brand{display:flex;align-items:center;gap:10px;flex:1}
+.controls-logo{width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0}
+.controls-logo img{width:100%;height:100%;object-fit:cover}
+.controls-title{font-size:16px;color:var(--white);font-weight:700}
+.controls-sub{font-size:11px;color:rgba(255,255,255,.55)}
+.ctrl-group{display:flex;align-items:center;gap:8px}
+.ctrl-label{font-size:12px;color:rgba(255,255,255,.6);white-space:nowrap}
+.ctrl-select{padding:7px 12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:var(--white);font-size:12px;font-family:Cambria,serif;cursor:pointer}
+.ctrl-select option{background:var(--navy-d);color:var(--white)}
+.ctrl-date{padding:7px 12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:var(--white);font-size:12px;font-family:Cambria,serif}
+.ctrl-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;font-family:Cambria,serif;border:none;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ctrl-btn.apply{background:var(--gold);color:var(--white)}
+.ctrl-btn.pdf{background:var(--crimson);color:var(--white)}
+
+/* ── PAGES ─────────────────────────────────────── */
+.report{max-width:900px;margin:0 auto;padding:24px}
+.page{background:var(--white);border-radius:16px;margin-bottom:24px;overflow:hidden;box-shadow:0 2px 16px rgba(26,26,46,.08);page-break-after:always}
+
+/* ── PAGE 1 COVER ──────────────────────────────── */
+.cover{background:var(--navy);min-height:500px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 40px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:rgba(184,134,11,.1)}
+.cover::after{content:'';position:absolute;bottom:-60px;left:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.cover-logo{width:100px;height:100px;border-radius:20px;overflow:hidden;margin:0 auto 28px;border:3px solid rgba(255,255,255,.2)}
+.cover-logo img{width:100%;height:100%;object-fit:cover}
+.cover-tag{font-size:12px;color:rgba(255,255,255,.5);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+.cover-title{font-size:38px;color:var(--white);line-height:1.2;margin-bottom:8px}
+.cover-sub{font-size:20px;color:var(--gold);margin-bottom:6px}
+.cover-period{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:32px}
+.cover-divider{width:60px;height:2px;background:var(--gold);margin:0 auto 32px}
+.cover-prepared{font-size:13px;color:rgba(255,255,255,.4)}
+.cover-prepared span{color:rgba(255,255,255,.7)}
+
+/* ── PAGE HEADER ───────────────────────────────── */
+.page-header{background:var(--navy);padding:24px 32px;display:flex;align-items:center;justify-content:space-between}
+.page-header-title{font-size:20px;color:var(--white)}
+.page-header-num{font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.1em}
+.page-body{padding:32px}
+
+/* ── EXECUTIVE SUMMARY ─────────────────────────── */
+.health-score-wrap{display:flex;align-items:center;gap:24px;margin-bottom:28px}
+.health-circle{width:110px;height:110px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:6px solid var(--navy)}
+.health-num{font-size:32px;font-weight:700;color:var(--navy);line-height:1}
+.health-label{font-size:11px;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em}
+.health-desc{flex:1}
+.health-desc h3{font-size:18px;color:var(--navy);margin-bottom:6px}
+.health-desc p{font-size:13px;color:var(--ink-60);line-height:1.6}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.kpi-card{background:var(--ivory);border-radius:12px;padding:14px 16px;border:1.5px solid var(--border)}
+.kpi-card-label{font-size:11px;color:var(--ink-60);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.kpi-card-val{font-size:22px;font-weight:700;color:var(--navy);line-height:1}
+.kpi-card-sub{font-size:11px;margin-top:4px}
+.kpi-card-sub.good{color:var(--green)}
+.kpi-card-sub.warn{color:var(--orange)}
+.kpi-card-sub.bad{color:var(--crimson)}
+.wins-concerns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.wins-box{background:var(--green-l);border-radius:12px;padding:16px;border:1.5px solid var(--green)}
+.concerns-box{background:var(--crimson-l);border-radius:12px;padding:16px;border:1.5px solid var(--crimson)}
+.box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.wins-box .box-title{color:var(--green)}
+.concerns-box .box-title{color:var(--crimson)}
+.box-item{font-size:13px;color:var(--ink);margin-bottom:6px;display:flex;align-items:flex-start;gap:6px;line-height:1.4}
+
+/* ── SCORE TREND ───────────────────────────────── */
+.trend-chart{height:160px;display:flex;align-items:flex-end;gap:3px;padding:10px 0;border-bottom:2px solid var(--border);margin-bottom:12px}
+.trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.trend-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height .4s ease}
+.trend-bar.good{background:var(--navy)}
+.trend-bar.warn{background:var(--orange)}
+.trend-bar.bad{background:var(--crimson)}
+.trend-bar.na{background:var(--border)}
+.trend-label{font-size:9px;color:var(--ink-30);white-space:nowrap}
+.trend-score{font-size:9px;color:var(--ink-60);font-weight:700}
+.weekly-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.week-card{background:var(--ivory);border-radius:10px;padding:12px;text-align:center;border:1.5px solid var(--border)}
+.week-card-label{font-size:11px;color:var(--ink-60);margin-bottom:4px}
+.week-card-score{font-size:20px;font-weight:700;color:var(--navy)}
+.compliance-wrap{display:flex;align-items:center;gap:20px;background:var(--navy-l);border-radius:12px;padding:16px}
+.compliance-big{font-size:36px;font-weight:700;color:var(--navy);flex-shrink:0}
+.compliance-info h4{font-size:14px;color:var(--navy);margin-bottom:4px}
+.compliance-info p{font-size:12px;color:var(--ink-60)}
+
+/* ── ASPECT TABLE ──────────────────────────────── */
+.aspect-table{width:100%;border-collapse:collapse}
+.aspect-table th{background:var(--navy);color:var(--white);padding:10px 14px;font-size:12px;text-align:left;font-weight:600}
+.aspect-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+.aspect-table tr:nth-child(even) td{background:var(--ivory)}
+.bar-cell{width:160px}
+.bar-bg{height:8px;border-radius:4px;background:var(--border);overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-fill.good{background:var(--green)}
+.bar-fill.warn{background:var(--orange)}
+.bar-fill.bad{background:var(--crimson)}
+.score-pill{display:inline-block;padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700}
+.score-pill.good{background:var(--green-l);color:var(--green)}
+.score-pill.warn{background:var(--orange-l);color:var(--orange)}
+.score-pill.bad{background:var(--crimson-l);color:var(--crimson)}
+.rank-badge{width:24px;height:24px;border-radius:6px;background:var(--crimson);color:var(--white);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+
+/* ── FLOOR SECTION ─────────────────────────────── */
+.floor-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.floor-card{background:var(--ivory);border-radius:12px;padding:16px;text-align:center;border:1.5px solid var(--border)}
+.floor-card.best{border-color:var(--green);background:var(--green-l)}
+.floor-card.worst{border-color:var(--crimson);background:var(--crimson-l)}
+.floor-name{font-size:11px;font-weight:700;color:var(--ink-60);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.floor-score-big{font-size:26px;font-weight:700;color:var(--navy)}
+.floor-score-big.best{color:var(--green)}
+.floor-score-big.worst{color:var(--crimson)}
+.floor-comp{font-size:11px;color:var(--ink-60);margin-top:4px}
+.floor-bar-chart{margin-bottom:24px}
+.floor-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.floor-bar-label{font-size:13px;color:var(--ink);width:100px;flex-shrink:0}
+.floor-bar-bg{flex:1;height:20px;border-radius:6px;background:var(--border);overflow:hidden}
+.floor-bar-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.floor-bar-val{font-size:13px;font-weight:700;color:var(--navy);width:40px;text-align:right;flex-shrink:0}
+
+/* ── NO ANSWERS ────────────────────────────────── */
+.fail-table{width:100%;border-collapse:collapse}
+.fail-table th{background:var(--crimson);color:var(--white);padding:10px 14px;font-size:12px;text-align:left}
+.fail-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+.fail-table tr:nth-child(even) td{background:var(--ivory)}
+.fail-count{background:var(--crimson-l);color:var(--crimson);font-weight:700;padding:2px 8px;border-radius:6px;font-size:12px}
+
+/* ── PHOTO SUMMARY ─────────────────────────────── */
+.photo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.photo-card{background:var(--ivory);border-radius:10px;padding:14px;text-align:center;border:1.5px solid var(--border)}
+.photo-num{font-size:24px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.photo-label{font-size:11px;color:var(--ink-60)}
+.drive-link-box{background:var(--navy-l);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--navy)}
+.drive-link-text{font-size:13px;color:var(--navy)}
+.drive-link-btn{padding:8px 14px;border-radius:8px;background:var(--navy);color:var(--white);font-size:12px;font-weight:700;text-decoration:none}
+
+/* ── WOW TABLE ─────────────────────────────────── */
+.wow-table{width:100%;border-collapse:collapse}
+.wow-table th{background:var(--gold);color:var(--white);padding:10px 14px;font-size:12px;text-align:left}
+.wow-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:center}
+.wow-table td:first-child{text-align:left}
+.wow-table tr:nth-child(even) td{background:var(--ivory)}
+.trend-arrow.up{color:var(--green)}
+.trend-arrow.down{color:var(--crimson)}
+.trend-arrow.flat{color:var(--orange)}
+
+/* ── ACTION ITEMS ──────────────────────────────── */
+.action-table{width:100%;border-collapse:collapse}
+.action-table th{background:var(--navy);color:var(--white);padding:10px 14px;font-size:12px;text-align:left}
+.action-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:top}
+.action-table tr:nth-child(even) td{background:var(--ivory)}
+.priority-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.priority-badge.high{background:var(--crimson-l);color:var(--crimson)}
+.priority-badge.medium{background:var(--orange-l);color:var(--orange)}
+.priority-badge.low{background:var(--green-l);color:var(--green)}
+.obs-area{width:100%;min-height:80px;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:Cambria,serif;font-size:13px;background:var(--ivory);resize:vertical}
+
+/* ── TARGETS PAGE ──────────────────────────────── */
+.targets-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.target-card{background:var(--ivory);border-radius:12px;padding:18px;border:1.5px solid var(--border)}
+.target-card-label{font-size:12px;color:var(--ink-60);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.target-current{font-size:14px;color:var(--ink-60);margin-bottom:4px}
+.target-next{font-size:22px;font-weight:700;color:var(--navy)}
+.target-arrow{color:var(--gold);margin:0 6px}
+.sign-area{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+.sign-box{border-top:2px solid var(--border);padding-top:12px}
+.sign-label{font-size:12px;color:var(--ink-60)}
+
+/* ── UTILITIES ─────────────────────────────────── */
+.section-title{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--navy)}
+.divider{height:1px;background:var(--border);margin:24px 0}
+.tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700}
+.tag.good{background:var(--green-l);color:var(--green)}
+.tag.warn{background:var(--orange-l);color:var(--orange)}
+.tag.bad{background:var(--crimson-l);color:var(--crimson)}
+.loader{display:flex;flex-direction:column;align-items:center;padding:80px;gap:16px}
+.spinner{width:40px;height:40px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--navy);animation:spin .7s linear infinite}
+.loader p{font-size:14px;color:var(--ink-60)}
+
+/* ── PRINT ─────────────────────────────────────── */
+@media print {
+  body{background:white}
+  .controls{display:none!important}
+  .page{box-shadow:none;margin-bottom:0;border-radius:0;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto}
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="pwScreen">
+  <div class="pw-box">
+    <div class="pw-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/></div>
+    <div class="pw-title">VM MRM Report</div>
+    <div class="pw-sub">BSC The Textile Mall · Belagavi<br/>Enter password to access</div>
+    <input type="password" class="pw-input" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()"/>
+    <button class="pw-btn" onclick="checkPw()">Access Report</button>
+    <div class="pw-error" id="pwError"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="controls">
+    <div class="controls-brand">
+      <div class="controls-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/></div>
+      <div>
+        <div class="controls-title">VM MRM Report</div>
+        <div class="controls-sub">BSC The Textile Mall · Belagavi</div>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Period</span>
+      <select class="ctrl-select" id="periodType" onchange="toggleDateInputs()">
+        <option value="month">Monthly</option>
+        <option value="custom">Custom Range</option>
+      </select>
+    </div>
+    <div class="ctrl-group" id="monthGroup">
+      <input type="month" class="ctrl-date" id="monthPicker"/>
+    </div>
+    <div class="ctrl-group" id="customGroup" style="display:none">
+      <input type="date" class="ctrl-date" id="dateFrom"/>
+      <span class="ctrl-label">to</span>
+      <input type="date" class="ctrl-date" id="dateTo"/>
+    </div>
+    <button class="ctrl-btn apply" onclick="generateReport()">Generate</button>
+    <button class="ctrl-btn pdf" onclick="window.print()">📄 PDF</button>
+  </div>
+
+  <div class="report" id="report">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Select a period and click Generate to load the report.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwhLkB_Lp5t8JeM_9ZCq1onID-pDmuKdBE00aGQY6FCFljTNbFaHxOxfSpSoSKRc9xQ/exec";
+const PASSWORD = "BSCCANDB";
+const FLOORS   = ["Ground Floor","1st Floor","2nd Floor","3rd Floor","4th Floor"];
+let _cb = 0, reportData = null;
+
+// ── AUTH ──────────────────────────────────────────────────────
+function checkPw() {
+  const val = document.getElementById("pwInput").value;
+  if (val === PASSWORD) {
+    document.getElementById("pwScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    initControls();
+  } else {
+    document.getElementById("pwError").textContent = "Incorrect password. Try again.";
+    document.getElementById("pwInput").value = "";
+  }
+}
+
+function initControls() {
+  const now = new Date();
+  const y   = now.getFullYear();
+  const m   = String(now.getMonth()+1).padStart(2,"0");
+  document.getElementById("monthPicker").value = y+"-"+m;
+  document.getElementById("dateFrom").value    = y+"-"+m+"-01";
+  document.getElementById("dateTo").value      = now.toISOString().split("T")[0];
+}
+
+function toggleDateInputs() {
+  const type = document.getElementById("periodType").value;
+  document.getElementById("monthGroup").style.display  = type==="month"?"flex":"none";
+  document.getElementById("customGroup").style.display = type==="custom"?"flex":"none";
+}
+
+// ── DATE RANGE ────────────────────────────────────────────────
+function getDateRange() {
+  const type = document.getElementById("periodType").value;
+  if (type === "month") {
+    const val = document.getElementById("monthPicker").value;
+    const [y,m] = val.split("-");
+    const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+    return { from: y+"-"+m+"-01", to: y+"-"+m+"-"+String(lastDay).padStart(2,"0"), label: monthLabel(val) };
+  } else {
+    const from = document.getElementById("dateFrom").value;
+    const to   = document.getElementById("dateTo").value;
+    return { from, to, label: formatDateShort(from)+" – "+formatDateShort(to) };
+  }
+}
+
+function monthLabel(val) {
+  const [y,m] = val.split("-");
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return months[parseInt(m)-1]+" "+y;
+}
+
+// ── GENERATE REPORT ───────────────────────────────────────────
+async function generateReport() {
+  const range = getDateRange();
+  const el    = document.getElementById("report");
+  el.innerHTML = '<div class="loader"><div class="spinner"></div><p>Loading VM data...</p></div>';
+
+  const [overall, floors, history] = await Promise.all([
+    apiGet({ action:"get_mrm_overall", from:range.from, to:range.to }),
+    apiGet({ action:"get_mrm_floors",  from:range.from, to:range.to }),
+    apiGet({ action:"get_history" })
+  ]);
+
+  reportData = { overall, floors, history, range };
+  renderReport();
+}
+
+function renderReport() {
+  const { overall, floors, history, range } = reportData;
+  const el = document.getElementById("report");
+  el.innerHTML = "";
+
+  // ── PAGE 1 COVER ──────────────────────────────────────────
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="cover">
+        <div class="cover-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/></div>
+        <div class="cover-tag">Monthly Review Report</div>
+        <div class="cover-title">VM Checklist Report</div>
+        <div class="cover-sub">BSC The Textile Mall</div>
+        <div class="cover-period">${range.label}</div>
+        <div class="cover-divider"></div>
+        <div class="cover-prepared">Prepared by: <span>C&B Consulting & Beyond</span></div>
+      </div>
+    </div>`;
+
+  // ── PAGE 2 EXECUTIVE SUMMARY ──────────────────────────────
+  const o        = overall.ok ? overall : { days_filled:0, days_total:0, avg_score:0, aspect_scores:[], no_count:0, na_count:0, floors_done:0, floors_total:0 };
+  const health   = calcHealth(o);
+  const compPct  = o.days_total > 0 ? Math.round((o.days_filled/o.days_total)*100) : 0;
+  const scoreClr = o.avg_score >= 4 ? "good" : o.avg_score >= 3.5 ? "warn" : "bad";
+  const bottomAspects = [...(o.aspect_scores||[])].sort((a,b)=>a.score-b.score).slice(0,3);
+  const topAspects    = [...(o.aspect_scores||[])].sort((a,b)=>b.score-a.score).slice(0,3);
+
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Executive Summary</div>
+        <div class="page-header-num">PAGE 02</div>
+      </div>
+      <div class="page-body">
+        <div class="health-score-wrap">
+          <div class="health-circle">
+            <div class="health-num" style="color:${health>=80?'var(--green)':health>=60?'var(--orange)':'var(--crimson)'}">${health}</div>
+            <div class="health-label">Health Score</div>
+          </div>
+          <div class="health-desc">
+            <h3>VM Store Health: ${health>=80?"Strong 🟢":health>=60?"Moderate 🟡":"Needs Attention 🔴"}</h3>
+            <p>Based on ${range.label} — Overall average score, compliance rate, floor completion, and failure patterns combined into a single health index.</p>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-card-label">Avg VM Score</div>
+            <div class="kpi-card-val">${o.avg_score.toFixed(1)}/5</div>
+            <div class="kpi-card-sub ${scoreClr}">${o.avg_score>=3.5?"✅ On Target":"⚠️ Below Target"}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">Days Filled</div>
+            <div class="kpi-card-val">${o.days_filled}/${o.days_total}</div>
+            <div class="kpi-card-sub ${compPct>=80?"good":compPct>=60?"warn":"bad"}">${compPct}% Compliance</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">Floors Completed</div>
+            <div class="kpi-card-val">${o.floors_done}/${o.floors_total}</div>
+            <div class="kpi-card-sub ${o.floors_done===o.floors_total?"good":"warn"}">${o.floors_total>0?Math.round((o.floors_done/o.floors_total)*100):0}% Rate</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">No Answers</div>
+            <div class="kpi-card-val">${o.no_count}</div>
+            <div class="kpi-card-sub ${o.no_count<20?"good":o.no_count<50?"warn":"bad"}">${o.no_count<20?"Low":"High"} Failures</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">N/A Answers</div>
+            <div class="kpi-card-val">${o.na_count}</div>
+            <div class="kpi-card-sub">Excluded from score</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">Best Aspect</div>
+            <div class="kpi-card-val" style="font-size:14px">${topAspects[0]?topAspects[0].aspect:"—"}</div>
+            <div class="kpi-card-sub good">${topAspects[0]?topAspects[0].score.toFixed(1)+"/5":""}</div>
+          </div>
+        </div>
+        <div class="wins-concerns">
+          <div class="wins-box">
+            <div class="box-title">✅ Key Wins</div>
+            ${topAspects.map(a=>`<div class="box-item">✅ ${a.aspect} — ${a.score.toFixed(1)}/5</div>`).join("")}
+            ${compPct>=80?'<div class="box-item">✅ Checklist compliance above 80%</div>':""}
+          </div>
+          <div class="concerns-box">
+            <div class="box-title">⚠️ Areas Needing Attention</div>
+            ${bottomAspects.filter(a=>a.score<3.5).map(a=>`<div class="box-item">⚠️ ${a.aspect} — ${a.score.toFixed(1)}/5</div>`).join("")}
+            ${compPct<80?'<div class="box-item">⚠️ Checklist compliance below 80%</div>':""}
+            ${o.no_count>=20?`<div class="box-item">⚠️ ${o.no_count} failure answers recorded</div>`:""}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // ── PAGE 3 SCORE TREND ────────────────────────────────────
+  const hist    = (history.ok ? history.history : []).filter(h => h.date >= reportData.range.from && h.date <= reportData.range.to);
+  const weeks   = getWeeklyAverages(hist);
+  const missedDays = o.days_total - o.days_filled;
+
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Overall Score Trend</div>
+        <div class="page-header-num">PAGE 03</div>
+      </div>
+      <div class="page-body">
+        <div class="section-title">Daily Score Chart</div>
+        <div class="trend-chart">
+          ${hist.length > 0 ? hist.map(h=>{
+            const pct = h.score!==null?(h.score/5)*100:0;
+            const cls = h.score===null?"na":h.score>=4?"good":h.score>=3.5?"warn":"bad";
+            const d   = new Date(h.date);
+            return '<div class="trend-bar-wrap"><div class="trend-score">'+(h.score!==null?h.score.toFixed(1):"")+'</div><div class="trend-bar '+cls+'" style="height:'+Math.max(pct,4)+'%"></div><div class="trend-label">'+(d.getMonth()+1)+"/"+d.getDate()+'</div></div>';
+          }).join("") : '<div style="color:var(--ink-60);font-size:13px;padding:20px">No data for this period</div>'}
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Weekly Averages</div>
+        <div class="weekly-grid">
+          ${weeks.map((w,i)=>`<div class="week-card"><div class="week-card-label">Week ${i+1}</div><div class="week-card-score" style="color:${w.score>=4?'var(--green)':w.score>=3.5?'var(--orange)':'var(--crimson)'}">${w.score>0?w.score.toFixed(1):"—"}</div><div style="font-size:11px;color:var(--ink-60);margin-top:2px">${w.days} days</div></div>`).join("")}
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Compliance Summary</div>
+        <div class="compliance-wrap">
+          <div class="compliance-big">${compPct}%</div>
+          <div class="compliance-info">
+            <h4>Checklist Filled ${o.days_filled} out of ${o.days_total} days</h4>
+            <p>${missedDays > 0 ? missedDays+" day(s) missed this period — scores on missed days treated as 0 and affect overall rating." : "Perfect compliance — checklist filled every day! ✅"}</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // ── PAGE 4 ASPECT PERFORMANCE ─────────────────────────────
+  const aspects = (o.aspect_scores||[]).sort((a,b)=>a.score-b.score);
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Aspect-wise Performance</div>
+        <div class="page-header-num">PAGE 04</div>
+      </div>
+      <div class="page-body">
+        <table class="aspect-table">
+          <thead><tr><th>#</th><th>Aspect</th><th>Score</th><th class="bar-cell">Performance</th><th>Status</th></tr></thead>
+          <tbody>
+            ${aspects.map((a,i)=>{
+              const cls=a.score>=4?"good":a.score>=3.5?"warn":"bad";
+              const pct=(a.score/5)*100;
+              return `<tr><td>${i+1}</td><td>${a.aspect}</td><td><strong>${a.score.toFixed(1)}/5</strong></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div></td><td><span class="score-pill ${cls}">${a.score>=4?"✅ Good":a.score>=3.5?"🟡 Fair":"⚠️ Low"}</span></td></tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="section-title">Bottom 3 — Action Required</div>
+        ${aspects.slice(0,3).map((a,i)=>`
+          <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--crimson-l);border-radius:10px;margin-bottom:10px;border:1.5px solid var(--crimson)">
+            <div class="rank-badge">${i+1}</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--crimson)">${a.aspect}</div><div style="font-size:12px;color:var(--ink-60)">Score: ${a.score.toFixed(1)}/5 — Needs immediate focus</div></div>
+          </div>`).join("")}
+      </div>
+    </div>`;
+
+  // ── PAGE 5 FLOOR PERFORMANCE ──────────────────────────────
+  const fl = floors.ok ? floors.floor_data : [];
+  const sortedFloors = [...fl].sort((a,b)=>b.avg_score-a.avg_score);
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Floor-wise Performance</div>
+        <div class="page-header-num">PAGE 05</div>
+      </div>
+      <div class="page-body">
+        <div class="section-title">Floor Score Summary</div>
+        <div class="floor-grid">
+          ${fl.map((f,i)=>{
+            const isBest=sortedFloors[0]&&sortedFloors[0].floor===f.floor;
+            const isWorst=sortedFloors[sortedFloors.length-1]&&sortedFloors[sortedFloors.length-1].floor===f.floor&&fl.length>1;
+            const cls=isBest?"best":isWorst?"worst":"";
+            return `<div class="floor-card ${cls}"><div class="floor-name">${f.floor.replace(" Floor","")}</div><div class="floor-score-big ${cls}">${f.avg_score>0?f.avg_score.toFixed(1):"—"}</div><div style="font-size:10px;color:var(--ink-30)">/5</div><div class="floor-comp">${f.weeks_done}/${f.weeks_total} weeks</div></div>`;
+          }).join("")}
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Floor Comparison</div>
+        <div class="floor-bar-chart">
+          ${fl.map(f=>{
+            const pct=f.avg_score>0?(f.avg_score/5)*100:0;
+            const clr=f.avg_score>=4?"var(--green)":f.avg_score>=3.5?"var(--orange)":"var(--crimson)";
+            return `<div class="floor-bar-row"><div class="floor-bar-label">${f.floor}</div><div class="floor-bar-bg"><div class="floor-bar-fill" style="width:${pct}%;background:${clr}"></div></div><div class="floor-bar-val">${f.avg_score>0?f.avg_score.toFixed(1):"—"}</div></div>`;
+          }).join("")}
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Floor Completion Rate</div>
+        <table class="aspect-table">
+          <thead><tr><th>Floor</th><th>Weeks Completed</th><th>Completion Rate</th><th>Status</th></tr></thead>
+          <tbody>
+            ${fl.map(f=>{
+              const rate=f.weeks_total>0?Math.round((f.weeks_done/f.weeks_total)*100):0;
+              const cls=rate>=100?"good":rate>=75?"warn":"bad";
+              return `<tr><td>${f.floor}</td><td>${f.weeks_done}/${f.weeks_total} weeks</td><td>${rate}%</td><td><span class="score-pill ${cls}">${rate>=100?"✅ Complete":rate>=75?"🟡 Partial":"⚠️ Low"}</span></td></tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // ── PAGE 6 NO ANSWERS ANALYSIS ────────────────────────────
+  const fails = o.top_fails || [];
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">No Answers Analysis</div>
+        <div class="page-header-num">PAGE 06</div>
+      </div>
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
+          <div class="kpi-card">
+            <div class="kpi-card-label">Total No Answers</div>
+            <div class="kpi-card-val" style="color:var(--crimson)">${o.no_count}</div>
+            <div class="kpi-card-sub bad">Failures Recorded</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">Worst Floor</div>
+            <div class="kpi-card-val" style="font-size:16px">${o.worst_floor||"—"}</div>
+            <div class="kpi-card-sub bad">Most Failures</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-label">Recurring Issues</div>
+            <div class="kpi-card-val">${fails.filter(f=>f.count>=3).length}</div>
+            <div class="kpi-card-sub warn">Failed 3+ times</div>
+          </div>
+        </div>
+        <div class="section-title">Top Failed Points</div>
+        ${fails.length>0?`
+        <table class="fail-table">
+          <thead><tr><th>#</th><th>Checklist Point</th><th>Aspect</th><th>Failed</th></tr></thead>
+          <tbody>
+            ${fails.slice(0,10).map((f,i)=>`<tr><td>${i+1}</td><td>${f.point}</td><td>${f.aspect}</td><td><span class="fail-count">${f.count}x</span></td></tr>`).join("")}
+          </tbody>
+        </table>`:'<div style="font-size:13px;color:var(--ink-60);text-align:center;padding:20px">No failure data for this period</div>'}
+        ${fails.filter(f=>f.count>=3).length>0?`
+        <div class="divider"></div>
+        <div class="section-title">Recurring Issues (3+ Failures) — SOP Review Needed</div>
+        ${fails.filter(f=>f.count>=3).map(f=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--orange-l);border-radius:8px;margin-bottom:8px;border:1px solid var(--orange)">
+            <div style="flex:1;font-size:13px;color:var(--ink)">${f.point}</div>
+            <span class="tag warn">${f.count}x Failed</span>
+          </div>`).join("")}`:""}
+      </div>
+    </div>`;
+
+  // ── PAGE 7 PHOTO SUMMARY ──────────────────────────────────
+  const photosByFloor = fl.map(f=>({floor:f.floor, count:f.photo_count||0}));
+  const totalPhotos   = photosByFloor.reduce((s,f)=>s+f.count, 0);
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Photo Evidence Summary</div>
+        <div class="page-header-num">PAGE 07</div>
+      </div>
+      <div class="page-body">
+        <div class="section-title">Photos Uploaded This Period</div>
+        <div class="photo-grid">
+          ${photosByFloor.map(f=>`
+            <div class="photo-card">
+              <div class="photo-num">${f.count}</div>
+              <div class="photo-label">${f.floor}</div>
+            </div>`).join("")}
+        </div>
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:36px;font-weight:700;color:var(--navy)">${totalPhotos}</div>
+          <div style="font-size:13px;color:var(--ink-60)">Total Photos Uploaded</div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Access Full Photo Evidence</div>
+        <div class="drive-link-box">
+          <div class="drive-link-text">📁 All VM photos are stored in Google Drive</div>
+          <a class="drive-link-btn" href="https://drive.google.com/drive/folders/1Na7-mrU1jrx8Q9AvR51cfMpiVK72cOlv" target="_blank">Open Drive →</a>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:var(--ink-60);line-height:1.6">
+          Photos are uploaded automatically when a checklist point is marked as ❌ No. Each photo is timestamped and linked to its specific checklist point, floor, and date for easy reference during management review.
+        </div>
+      </div>
+    </div>`;
+
+  // ── PAGE 8 WEEK ON WEEK ───────────────────────────────────
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Week-on-Week Comparison</div>
+        <div class="page-header-num">PAGE 08</div>
+      </div>
+      <div class="page-body">
+        <div class="section-title">Weekly Performance Summary</div>
+        <table class="wow-table">
+          <thead><tr><th>Metric</th>${weeks.map((_,i)=>`<th>Week ${i+1}</th>`).join("")}<th>Trend</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Overall Score</td>
+              ${weeks.map(w=>`<td>${w.score>0?w.score.toFixed(1):"—"}</td>`).join("")}
+              <td>${getTrend(weeks.map(w=>w.score))}</td>
+            </tr>
+            <tr>
+              <td>Days Filled</td>
+              ${weeks.map(w=>`<td>${w.days}/7</td>`).join("")}
+              <td>${getTrend(weeks.map(w=>w.days))}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="section-title">Floor Weekly Scores</div>
+        <table class="wow-table">
+          <thead><tr><th>Floor</th>${weeks.map((_,i)=>`<th>Week ${i+1}</th>`).join("")}</tr></thead>
+          <tbody>
+            ${fl.map(f=>`
+              <tr>
+                <td>${f.floor}</td>
+                ${(f.weekly_scores||[]).map(s=>`<td style="color:${s===null?'var(--ink-30)':s>=4?'var(--green)':s>=3.5?'var(--orange)':'var(--crimson)'}">${s!==null?s.toFixed(1):"—"}</td>`).join("")}
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // ── PAGE 9 ACTION ITEMS ───────────────────────────────────
+  const autoActions = [
+    ...bottomAspects.filter(a=>a.score<3.5).map(a=>({
+      item:`Improve ${a.aspect} — current score ${a.score.toFixed(1)}/5`,
+      priority:"High", owner:"VM Team"
+    })),
+    ...(compPct<80?[{item:`Improve daily checklist compliance — currently ${compPct}%`, priority:"High", owner:"VM Manager"}]:[]),
+    ...(o.no_count>=20?[{item:`Review top failed points and update SOP/training`, priority:"Medium", owner:"VM Manager"}]:[]),
+  ];
+
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Action Items & Observations</div>
+        <div class="page-header-num">PAGE 09</div>
+      </div>
+      <div class="page-body">
+        <div class="section-title">Management Observations</div>
+        <textarea class="obs-area" placeholder="Add management observations and notes here..."></textarea>
+        <div class="divider"></div>
+        <div class="section-title">Auto-generated Action Items</div>
+        <table class="action-table">
+          <thead><tr><th>#</th><th>Action Item</th><th>Priority</th><th>Owner</th></tr></thead>
+          <tbody>
+            ${autoActions.length>0?autoActions.map((a,i)=>`
+              <tr>
+                <td>${i+1}</td>
+                <td>${a.item}</td>
+                <td><span class="priority-badge ${a.priority.toLowerCase()}">${a.priority}</span></td>
+                <td>${a.owner}</td>
+              </tr>`).join(""):
+              '<tr><td colspan="4" style="text-align:center;color:var(--ink-60)">No critical action items — store performing well! ✅</td></tr>'}
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="section-title">Additional Actions (Manual Entry)</div>
+        <table class="action-table">
+          <thead><tr><th>#</th><th>Action Item</th><th>Priority</th><th>Owner</th></tr></thead>
+          <tbody>
+            ${[1,2,3].map(i=>`<tr><td>${autoActions.length+i}</td><td><input style="width:100%;border:none;background:transparent;font-family:Cambria,serif;font-size:13px" placeholder="Enter action item..."/></td><td><select style="border:none;background:transparent;font-family:Cambria,serif;font-size:12px"><option>High</option><option>Medium</option><option>Low</option></select></td><td><input style="width:100%;border:none;background:transparent;font-family:Cambria,serif;font-size:13px" placeholder="Owner..."/></td></tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // ── PAGE 10 TARGETS ───────────────────────────────────────
+  const nextMonthScore = Math.min(5, parseFloat((o.avg_score + 0.3).toFixed(1)));
+  el.innerHTML += `
+    <div class="page fade-in">
+      <div class="page-header">
+        <div class="page-header-title">Next Period Targets</div>
+        <div class="page-header-num">PAGE 10</div>
+      </div>
+      <div class="page-body">
+        <div class="section-title">Performance Targets</div>
+        <div class="targets-grid">
+          <div class="target-card">
+            <div class="target-card-label">Overall VM Score</div>
+            <div class="target-current">Current: ${o.avg_score.toFixed(1)}/5</div>
+            <div class="target-next">${nextMonthScore.toFixed(1)}/5 <span class="target-arrow">→</span> Target</div>
+          </div>
+          <div class="target-card">
+            <div class="target-card-label">Daily Compliance</div>
+            <div class="target-current">Current: ${compPct}%</div>
+            <div class="target-next">100% <span class="target-arrow">→</span> Target</div>
+          </div>
+          <div class="target-card">
+            <div class="target-card-label">Weekly Floor Completion</div>
+            <div class="target-current">Current: ${o.floors_done}/${o.floors_total}</div>
+            <div class="target-next">5/5 every week <span class="target-arrow">→</span> Target</div>
+          </div>
+          <div class="target-card">
+            <div class="target-card-label">No Answers</div>
+            <div class="target-current">Current: ${o.no_count}</div>
+            <div class="target-next">&lt;${Math.max(0,o.no_count-10)} <span class="target-arrow">→</span> Target</div>
+          </div>
+          ${bottomAspects.slice(0,2).map(a=>`
+            <div class="target-card">
+              <div class="target-card-label">${a.aspect}</div>
+              <div class="target-current">Current: ${a.score.toFixed(1)}/5</div>
+              <div class="target-next">${Math.min(5,parseFloat((a.score+0.5).toFixed(1))).toFixed(1)}/5 <span class="target-arrow">→</span> Target</div>
+            </div>`).join("")}
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Sign-off</div>
+        <div class="sign-area">
+          <div class="sign-box">
+            <div style="margin-bottom:32px"></div>
+            <div class="sign-label">Store Manager / VM Manager</div>
+          </div>
+          <div class="sign-box">
+            <div style="margin-bottom:32px"></div>
+            <div class="sign-label">Owner / Management</div>
+          </div>
+        </div>
+        <div style="margin-top:32px;text-align:center;font-size:12px;color:var(--ink-30)">
+          Prepared by C&B Consulting & Beyond · BSC The Textile Mall, Belagavi · ${range.label}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── HELPER — HEALTH SCORE ─────────────────────────────────────
+function calcHealth(o) {
+  if (!o.days_total) return 0;
+  const scoreComp   = (o.avg_score / 5) * 40;
+  const compComp    = (o.days_filled / o.days_total) * 30;
+  const floorComp   = o.floors_total > 0 ? (o.floors_done / o.floors_total) * 20 : 20;
+  const failComp    = Math.max(0, 10 - (o.no_count / 10));
+  return Math.round(scoreComp + compComp + floorComp + failComp);
+}
+
+// ── HELPER — WEEKLY AVERAGES ──────────────────────────────────
+function getWeeklyAverages(hist) {
+  const weeks = [{days:0,total:0,count:0},{days:0,total:0,count:0},{days:0,total:0,count:0},{days:0,total:0,count:0}];
+  hist.forEach(h => {
+    const d   = new Date(h.date);
+    const day = d.getUTCDate();
+    const wi  = Math.min(3, Math.floor((day-1)/7));
+    weeks[wi].days++;
+    if (h.score !== null) { weeks[wi].total += h.score; weeks[wi].count++; }
+  });
+  return weeks.map(w => ({ days:w.days, score:w.count>0?Math.round((w.total/w.count)*10)/10:0 }));
+}
+
+// ── HELPER — TREND ARROW ──────────────────────────────────────
+function getTrend(vals) {
+  const valid = vals.filter(v=>v>0);
+  if (valid.length<2) return '<span class="trend-arrow flat">→</span>';
+  const diff = valid[valid.length-1] - valid[0];
+  if (diff > 0.1) return '<span class="trend-arrow up">↑ Improving</span>';
+  if (diff < -0.1) return '<span class="trend-arrow down">↓ Declining</span>';
+  return '<span class="trend-arrow flat">→ Stable</span>';
+}
+
+// ── API ───────────────────────────────────────────────────────
+function apiGet(params) {
+  return new Promise(resolve => {
+    const cb = "mrmCb_"+Date.now()+"_"+(++_cb);
+    const sc = document.createElement("script");
+    let done = false;
+    window[cb] = d => { if(done)return; done=true; delete window[cb]; if(document.body.contains(sc))document.body.removeChild(sc); resolve(d); };
+    sc.onerror = () => { if(done)return; done=true; resolve({ok:false,error:"Network error"}); };
+    setTimeout(()=>{ if(done)return; done=true; resolve({ok:false,error:"Timeout"}); }, 20000);
+    sc.src = API+"?"+new URLSearchParams(params).toString()+"&callback="+cb;
+    document.body.appendChild(sc);
+  });
+}
+
+function formatDateShort(ds) {
+  const d=new Date(ds),mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return d.getUTCDate()+" "+mon[d.getUTCMonth()]+" "+d.getUTCFullYear();
+}
+</script>
+</body>
+</html>
