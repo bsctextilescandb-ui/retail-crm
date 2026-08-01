@@ -378,11 +378,34 @@ var PERIOD = { from:null, to:null, label:"" };
 
 function api(body){
   var token = "";
-  try{token=sessionStorage.getItem("crm_token")||"";}catch(e){}
+  try{
+    token = sessionStorage.getItem("crm_token") ||
+            localStorage.getItem("bsc_tv_token") || "";
+  }catch(e){}
   body.token = token;
   return fetch(API_URL,{method:"POST",
     headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(body)}).then(function(r){return r.json();});
+    body:JSON.stringify(body)}).then(function(r){return r.json();})
+  .catch(function(){return {ok:false,error:"Connection error"};});
+}
+
+function apiWithFallback(body){
+  return api(body).then(function(res){
+    if(res.ok) return res;
+    // Token expired — try tv_auth to get fresh token
+    return fetch(API_URL,{method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({action:"tv_auth"})})
+    .then(function(r){return r.json();})
+    .then(function(r2){
+      if(r2.ok){
+        try{localStorage.setItem("bsc_tv_token",r2.token);}catch(e){}
+        body.token = r2.token;
+        return api(body);
+      }
+      return res;
+    });
+  });
 }
 
 function generateReport(skipFilter){
@@ -406,10 +429,10 @@ function generateReport(skipFilter){
   }
 
   Promise.all([
-    api({action:"get_footfall"}),
-    api({action:"get_feedback"}),
-    api({action:"get_diverts"}),
-    api({action:"get_feedback_questions"}),
+    apiWithFallback({action:"get_footfall"}),
+    apiWithFallback({action:"get_feedback"}),
+    apiWithFallback({action:"get_diverts"}),
+    apiWithFallback({action:"get_feedback_questions"}),
   ]).then(function(res){
     DATA.footfall  = res[0].entries    || [];
     DATA.daily     = res[0].daily_all  || [];
@@ -896,7 +919,7 @@ function voiceQuotes(voices, type){
   var cls  = type==="positive" ? "voice-quote" : "concern-quote";
   var icon = type==="positive" ? "💬" : "⚠️";
   var html = "";
-  voices.slice(0,6).forEach(function(v,i){
+  voices.slice(0,4).forEach(function(v,i){
     var txt = String(v.your_voice||"").trim();
     html += '<div class="'+cls+'">' +
       '<div class="vq-num">'+icon+' Voice '+(i+1)+'</div>' +
@@ -908,8 +931,8 @@ function voiceQuotes(voices, type){
       '</div>' +
     '</div>';
   });
-  if(voices.length>6){
-    html += '<div class="vq-more">+ '+(voices.length-6)+' more feedback voices in this period</div>';
+  if(voices.length>4){
+    html += '<div class="vq-more">+ '+(voices.length-4)+' more feedback voices in this period</div>';
   }
   return html;
 }
