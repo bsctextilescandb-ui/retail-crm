@@ -170,6 +170,56 @@ input,select{font-family:inherit;outline:0}
 /* ── Loading ── */
 .loading{text-align:center;padding:40px;color:var(--ink-60);font-size:14px}
 
+/* ── Impact tab ── */
+.impact-toggle{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.impact-toggle-btn{padding:7px 16px;border-radius:999px;font-size:12px;
+  font-weight:500;border:1.5px solid var(--border);
+  background:var(--white);color:var(--ink-60);cursor:pointer;transition:all .15s}
+.impact-toggle-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.health-score-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow-md);
+  padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:24px}
+.health-circle{width:90px;height:90px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex-shrink:0;border:5px solid var(--border)}
+.health-circle.excellent{border-color:var(--green);background:var(--green-l)}
+.health-circle.good{border-color:var(--gold);background:var(--gold-l)}
+.health-circle.average{border-color:var(--orange);background:var(--orange-l)}
+.health-circle.critical{border-color:var(--crimson);background:var(--crimson-l)}
+.health-score-num{font-size:28px;font-weight:700;line-height:1}
+.health-score-den{font-size:11px;color:var(--ink-60)}
+.health-info{flex:1}
+.health-title{font-size:18px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.health-subtitle{font-size:13px;color:var(--ink-60);margin-bottom:10px}
+.health-bar-track{height:8px;background:var(--surface);border-radius:4px;overflow:hidden}
+.health-bar-fill{height:100%;border-radius:4px}
+.impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:700px){.impact-grid{grid-template-columns:1fr 1fr}}
+.impact-card{background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  padding:16px;position:relative;overflow:hidden}
+.impact-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%}
+.impact-card.green::before{background:var(--green)}
+.impact-card.gold::before{background:var(--gold)}
+.impact-card.crimson::before{background:var(--crimson)}
+.impact-card.gray::before{background:#9CA3AF}
+.ic-label{font-size:10px;font-weight:700;color:var(--ink-30);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:space-between}
+.ic-target{font-size:10px;color:var(--ink-30)}
+.ic-value{font-size:28px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px}
+.ic-compare{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.ic-prev{font-size:11px;color:var(--ink-60)}
+.ic-change{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px}
+.ic-change.up{background:var(--green-l);color:var(--green)}
+.ic-change.down{background:var(--crimson-l);color:var(--crimson)}
+.ic-change.neutral{background:var(--surface);color:var(--ink-60)}
+.ic-status{font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px}
+.ic-insight{font-size:11px;color:var(--ink-60);margin-top:6px;
+  padding-top:6px;border-top:1px solid var(--surface);line-height:1.4}
+.impact-comparison-label{font-size:12px;color:var(--ink-60);
+  text-align:center;margin-bottom:16px;font-style:italic}
+
 .fade-in{animation:fadeIn .3s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -193,6 +243,7 @@ input,select{font-family:inherit;outline:0}
   <div class="tab"        id="tab_footfall"  onclick="showTab('footfall')">👣 Footfall</div>
   <div class="tab"        id="tab_feedback"  onclick="showTab('feedback')">💬 Feedback</div>
   <div class="tab"        id="tab_divert"    onclick="showTab('divert')">↩️ Diverts</div>
+  <div class="tab"        id="tab_impact"    onclick="showTab('impact')">⚡ Impact</div>
 </div>
 
 <div class="filter-bar">
@@ -377,6 +428,7 @@ function showTab(tab){
   else if(tab==="footfall") renderFootfall();
   else if(tab==="feedback") renderFeedback();
   else if(tab==="divert")   renderDivert();
+  else if(tab==="impact")   renderImpact();
 }
 
 /* ── Filter data ── */
@@ -1339,6 +1391,269 @@ function calcNPSLocal(feedbacks) {
   });
   var t=p+pa+d;
   return {score:t>0?Math.round(((p-d)/t)*100):null,promoters:p,passives:pa,detractors:d,count:t};
+}
+
+/* ============================================================
+   IMPACT TAB
+   ============================================================ */
+
+var impactMode = "dod"; // dod | sdlw | wtd | mtd
+
+function renderImpact() {
+  var html = '<div style="padding:20px">';
+
+  // Toggle buttons
+  html += '<div class="impact-toggle">' +
+    impactToggleBtn("dod",  "📅 Day on Day") +
+    impactToggleBtn("sdlw", "📆 Same Day Last Week") +
+    impactToggleBtn("wtd",  "🗓 Week to Date") +
+    impactToggleBtn("mtd",  "📅 Month to Date") +
+  '</div>';
+
+  // Get comparison data
+  var comp = getComparisonData(impactMode);
+
+  // Comparison label
+  html += '<div class="impact-comparison-label">'+esc(comp.label)+'</div>';
+
+  // Calculate metrics
+  var metrics = calcImpactMetrics(comp);
+
+  // Health score
+  var score     = calcHealthScore(metrics);
+  var scoreInfo = getScoreInfo(score);
+  html += '<div class="health-score-card">' +
+    '<div class="health-circle '+scoreInfo.cls+'">' +
+      '<div class="health-score-num" style="color:'+scoreInfo.color+'">'+score+'</div>' +
+      '<div class="health-score-den">/100</div>' +
+    '</div>' +
+    '<div class="health-info">' +
+      '<div class="health-title">'+scoreInfo.emoji+' Store Health — '+scoreInfo.label+'</div>' +
+      '<div class="health-subtitle">'+esc(scoreInfo.insight)+'</div>' +
+      '<div class="health-bar-track">' +
+        '<div class="health-bar-fill" style="width:'+score+'%;background:'+scoreInfo.color+'"></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  // Metric cards
+  html += '<div class="impact-grid">';
+  metrics.forEach(function(m){ html += renderImpactCard(m); });
+  html += '</div>';
+
+  html += '</div>';
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+function impactToggleBtn(mode, label) {
+  return '<button class="impact-toggle-btn'+(impactMode===mode?" active":"")+
+    '" onclick="setImpactMode(\''+mode+'\')">'+label+'</button>';
+}
+
+function setImpactMode(mode) {
+  impactMode = mode;
+  renderImpact();
+}
+
+/* ── Get date ranges for comparison ── */
+function getComparisonData(mode) {
+  var now = new Date();
+  // IST adjust
+  var ist = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 330*60000);
+
+  var todayStr = fmtKey(ist);
+
+  if(mode === "dod") {
+    var yd = new Date(ist); yd.setDate(ist.getDate()-1);
+    return {
+      label: "Today ("+fmtDisp(ist)+") vs Yesterday ("+fmtDisp(yd)+")",
+      curDates: [todayStr],
+      prevDates: [fmtKey(yd)]
+    };
+  }
+
+  if(mode === "sdlw") {
+    var lw = new Date(ist); lw.setDate(ist.getDate()-7);
+    return {
+      label: "Today ("+fmtDisp(ist)+") vs Same Day Last Week ("+fmtDisp(lw)+")",
+      curDates: [todayStr],
+      prevDates: [fmtKey(lw)]
+    };
+  }
+
+  if(mode === "wtd") {
+    // Mon to today this week vs Mon to same day last week
+    var dow = ist.getDay()||7; // Mon=1...Sun=7
+    var curDates=[], prevDates=[];
+    for(var i=1;i<=dow;i++){
+      var cd=new Date(ist); cd.setDate(ist.getDate()-(dow-i));
+      var pd=new Date(cd); pd.setDate(cd.getDate()-7);
+      curDates.push(fmtKey(cd));
+      prevDates.push(fmtKey(pd));
+    }
+    return {
+      label: "This week Mon–"+fmtDisp(ist)+" vs Last week same days",
+      curDates: curDates, prevDates: prevDates
+    };
+  }
+
+  if(mode === "mtd") {
+    // 1 to today this month vs 1 to same date last month
+    var day = ist.getDate();
+    var curDates=[], prevDates=[];
+    for(var j=1;j<=day;j++){
+      var cm=new Date(ist.getFullYear(),ist.getMonth(),j);
+      var pm=new Date(ist.getFullYear(),ist.getMonth()-1,j);
+      curDates.push(fmtKey(cm));
+      prevDates.push(fmtKey(pm));
+    }
+    var mNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return {
+      label: mNames[ist.getMonth()]+" 1–"+day+" vs "+mNames[ist.getMonth()-1<0?11:ist.getMonth()-1]+" 1–"+day,
+      curDates: curDates, prevDates: prevDates
+    };
+  }
+  return { label:"", curDates:[], prevDates:[] };
+}
+
+function fmtKey(d) {
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+function fmtDisp(d) {
+  return d.toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+}
+
+/* ── Calculate all 6 metrics ── */
+function calcImpactMetrics(comp) {
+  var cur  = comp.curDates;
+  var prev = comp.prevDates;
+
+  var ffCur   = DATA.footfall.filter(function(r){ return cur.indexOf(r.date)!==-1; });
+  var ffPrev  = DATA.footfall.filter(function(r){ return prev.indexOf(r.date)!==-1; });
+  var fbCur   = DATA.feedback.filter(function(r){ return cur.indexOf(r.date)!==-1; });
+  var fbPrev  = DATA.feedback.filter(function(r){ return prev.indexOf(r.date)!==-1; });
+  var divCur  = DATA.diverts.filter(function(r){ return cur.indexOf(r.date)!==-1; });
+  var divPrev = DATA.diverts.filter(function(r){ return prev.indexOf(r.date)!==-1; });
+  var dlyCur  = DATA.daily.filter(function(r){ return cur.indexOf(r.date)!==-1; });
+  var dlyPrev = DATA.daily.filter(function(r){ return prev.indexOf(r.date)!==-1; });
+
+  // Footfall
+  var ffC = ffCur.reduce(function(s,r){return s+(Number(r.count)||0);},0);
+  var ffP = ffPrev.reduce(function(s,r){return s+(Number(r.count)||0);},0);
+
+  // Bills + Conversion
+  var bC = dlyCur.reduce(function(s,r){return s+(Number(r.bills_count)||0);},0);
+  var bP = dlyPrev.reduce(function(s,r){return s+(Number(r.bills_count)||0);},0);
+  var cvC = ffC>0 ? Math.round((bC/ffC)*100) : 0;
+  var cvP = ffP>0 ? Math.round((bP/ffP)*100) : 0;
+
+  // CSI
+  var csiC = calcCSILocal(fbCur).score;
+  var csiP = calcCSILocal(fbPrev).score;
+
+  // NPS
+  var npsC = calcNPSLocal(fbCur).score;
+  var npsP = calcNPSLocal(fbPrev).score;
+
+  // Feedback volume
+  var fbCnt = fbCur.length;
+  var fbPCnt= fbPrev.length;
+
+  // Divert rate = diverts / footfall * 100
+  var drC = ffC>0 ? parseFloat(((divCur.length/ffC)*100).toFixed(2)) : 0;
+  var drP = ffP>0 ? parseFloat(((divPrev.length/ffP)*100).toFixed(2)) : 0;
+
+  return [
+    buildMetric("Footfall",         ffC,    ffP,    null,  null, "visitors",   "—",     20, false, "More footfall means more opportunities"),
+    buildMetric("Conversion %",     cvC,    cvP,    90,    null, "%",          "≥ 90%", 20, false, "Bills generated per 100 visitors"),
+    buildMetric("CSI Score",        csiC,   csiP,   80,    null, "%",          "≥ 80%", 20, false, "Customer satisfaction index"),
+    buildMetric("NPS Score",        npsC,   npsP,   95,    null, "",           "≥ 95",  15, false, "Net promoter score"),
+    buildMetric("Feedback Volume",  fbCnt,  fbPCnt, null,  null, "",           "↑ Growing",10, false, "Number of feedbacks collected"),
+    buildMetric("Divert Rate",      drC,    drP,    null,  5,    "%",          "< 5%",  15, true,  "Diverts as % of footfall — lower is better")
+  ];
+}
+
+function buildMetric(name, curVal, prevVal, minTarget, maxTarget, unit, targetLabel, weight, lowerIsBetter, insight) {
+  // Status vs target
+  var metStatus = "gray";
+  var score = 0;
+  if(curVal === null) { metStatus="gray"; score=50; }
+  else if(minTarget !== null) {
+    if(curVal >= minTarget)       { metStatus="green";  score=100; }
+    else if(curVal >= minTarget*0.9){ metStatus="gold"; score=70; }
+    else                          { metStatus="crimson";score=30; }
+  } else if(maxTarget !== null) {
+    if(curVal <= maxTarget)       { metStatus="green";  score=100; }
+    else if(curVal <= maxTarget*1.2){metStatus="gold";  score=70; }
+    else                          { metStatus="crimson";score=30; }
+  } else {
+    // Trend based
+    if(prevVal===null||prevVal===0){ metStatus="gray"; score=60; }
+    else if(lowerIsBetter ? curVal<=prevVal : curVal>=prevVal){ metStatus="green"; score=90; }
+    else { metStatus="gold"; score=60; }
+  }
+
+  // Change
+  var change = null, changePct = null, changeDir = "neutral";
+  if(prevVal !== null && prevVal !== 0 && curVal !== null) {
+    change = curVal - prevVal;
+    changePct = Math.abs(Math.round((change/prevVal)*100));
+    changeDir = lowerIsBetter
+      ? (change<=0 ? "up" : "down")
+      : (change>=0 ? "up" : "down");
+  }
+
+  return { name:name, curVal:curVal, prevVal:prevVal, unit:unit,
+    targetLabel:targetLabel, metStatus:metStatus, score:score,
+    weight:weight, change:change, changePct:changePct, changeDir:changeDir,
+    insight:insight, lowerIsBetter:lowerIsBetter };
+}
+
+function renderImpactCard(m) {
+  var curDisp  = m.curVal  !== null ? m.curVal+(m.unit||"")  : "—";
+  var prevDisp = m.prevVal !== null ? m.prevVal+(m.unit||"") : "—";
+
+  var changeHtml = "";
+  if(m.change !== null) {
+    var arrow = m.changeDir==="up" ? "↑" : m.changeDir==="down" ? "↓" : "→";
+    var sign  = m.change>=0 ? "+" : "";
+    changeHtml = '<span class="ic-change '+m.changeDir+'">'+arrow+' '+sign+m.change+(m.unit||"")+' ('+m.changePct+'%)</span>';
+  }
+
+  var statusEmoji = m.metStatus==="green" ? "🟢" : m.metStatus==="gold" ? "🟡" : m.metStatus==="crimson" ? "🔴" : "⚪";
+  var statusLabel = m.metStatus==="green" ? "On Track" : m.metStatus==="gold" ? "Needs Attention" : m.metStatus==="crimson" ? "Below Target" : "No Target";
+
+  return '<div class="impact-card '+m.metStatus+'">' +
+    '<div class="ic-label">'+esc(m.name)+'<span class="ic-target">Target: '+esc(m.targetLabel)+'</span></div>' +
+    '<div class="ic-value">'+esc(String(curDisp))+'</div>' +
+    '<div class="ic-compare">' +
+      '<span class="ic-prev">vs '+esc(String(prevDisp))+'</span>' +
+      changeHtml +
+    '</div>' +
+    '<div class="ic-status">'+statusEmoji+' '+esc(statusLabel)+'</div>' +
+    '<div class="ic-insight">'+esc(m.insight)+'</div>' +
+  '</div>';
+}
+
+/* ── Health Score ── */
+function calcHealthScore(metrics) {
+  var total=0, maxTotal=0;
+  metrics.forEach(function(m){
+    total    += (m.score/100) * m.weight;
+    maxTotal += m.weight;
+  });
+  return Math.round((total/maxTotal)*100);
+}
+
+function getScoreInfo(score) {
+  if(score>=80) return {cls:"excellent",color:"var(--green)", emoji:"🏆",label:"Excellent",
+    insight:"Store is performing excellently across all key metrics. Keep it up!"};
+  if(score>=60) return {cls:"good",     color:"var(--gold)",  emoji:"👍",label:"Good",
+    insight:"Store is doing well. A few metrics need attention to reach excellence."};
+  if(score>=40) return {cls:"average",  color:"var(--orange)",emoji:"⚠️", label:"Needs Attention",
+    insight:"Several metrics are below target. Focus on conversion and customer satisfaction."};
+  return        {cls:"critical",  color:"var(--crimson)",emoji:"🚨",label:"Critical",
+    insight:"Multiple metrics are significantly below target. Immediate action required."};
 }
 
 boot();
