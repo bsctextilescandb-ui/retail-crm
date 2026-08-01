@@ -247,9 +247,34 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .report-controls{display:none!important}
   #pwScreen,#dateScreen{display:none!important}
-  .page{box-shadow:none;border:1px solid #D5D1C8;margin-bottom:16px}
-  .cover-page{page-break-after:always;background:#1E2D5A!important}
-  .page-body{}
+
+  /* Each section starts on a new PDF page */
+  .page{
+    box-shadow:none!important;
+    border:1px solid #D5D1C8!important;
+    margin:0!important;
+    page-break-before:always!important;
+    break-before:always!important;
+    page-break-inside:auto!important;
+    break-inside:auto!important;
+  }
+
+  /* Cover page — always starts fresh, next page also fresh */
+  .cover-page{
+    page-break-before:always!important;
+    break-before:always!important;
+    page-break-after:always!important;
+    break-after:always!important;
+    background:#1E2D5A!important;
+    margin:0!important;
+  }
+
+  /* First page — no top break needed */
+  .cover-page:first-child{
+    page-break-before:avoid!important;
+    break-before:avoid!important;
+  }
+
   body{background:#ffffff!important;padding:0!important}
   #report{padding:0!important}
   .stat-grid{grid-template-columns:repeat(4,1fr)!important}
@@ -257,6 +282,12 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
   .impact-grid{grid-template-columns:repeat(3,1fr)!important}
   .page-header-title{color:rgba(255,255,255,.8)!important}
   .page-header-name{color:#ffffff!important}
+
+  /* Content inside page can flow naturally across PDF pages */
+  .page-body{page-break-inside:auto!important;break-inside:auto!important}
+  .voice-quote,.concern-quote{page-break-inside:avoid!important;break-inside:avoid!important}
+  .stat-card{page-break-inside:avoid!important;break-inside:avoid!important}
+  .health-row{page-break-inside:avoid!important;break-inside:avoid!important}
 }
 </style>
 </head>
