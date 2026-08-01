@@ -268,6 +268,10 @@ input,select{font-family:inherit;outline:0}
       border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none"></span>
     📥 Export Excel
   </button>
+  <button class="btn-apply" onclick="openMRM()"
+    style="background:var(--gold);margin-left:4px;display:flex;align-items:center;gap:6px">
+    📋 MRM Report
+  </button>
 </div>
 
 <div class="main" id="mainContent">
@@ -1654,6 +1658,10 @@ function getScoreInfo(score) {
     insight:"Several metrics are below target. Focus on conversion and customer satisfaction."};
   return        {cls:"critical",  color:"var(--crimson)",emoji:"🚨",label:"Critical",
     insight:"Multiple metrics are significantly below target. Immediate action required."};
+}
+
+function openMRM(){
+  window.open("mrm-report.html","_blank");
 }
 
 boot();
