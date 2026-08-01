@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MRM Report — BSC The Textile Mall</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Cambria,Georgia,serif}
+:root{
+  --navy:#1E2D5A;--navy-d:#151F3E;--navy-l:#EEF1FB;
+  --gold:#B8860B;--gold-l:#FEF3C7;
+  --crimson:#C0392B;--crimson-l:#FEE2E2;
+  --green:#1E7A1E;--green-l:#D1FAE5;
+  --orange:#B45309;--orange-l:#FEF3C7;
+  --ink:#1A1A2E;--ink-60:rgba(26,26,46,.6);--ink-30:rgba(26,26,46,.3);
+  --ivory:#F9F7F0;--white:#fff;--surface:#F3F1E8;--border:#E8E4D8;
+}
+html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
+
+/* ── Password Screen ── */
+#pwScreen{
+  position:fixed;inset:0;background:var(--navy);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;z-index:1000;gap:16px}
+.pw-logo{width:72px;height:72px;background:var(--white);border-radius:16px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.pw-logo img{width:100%;height:100%;object-fit:contain}
+.pw-title{font-size:22px;font-weight:700;color:var(--white)}
+.pw-sub{font-size:12px;color:rgba(255,255,255,.45);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:8px}
+.pw-label{font-size:12px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em}
+.pw-input{padding:12px 18px;border-radius:10px;border:1.5px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.1);color:var(--white);font-size:16px;
+  font-family:Cambria,Georgia,serif;width:260px;text-align:center;letter-spacing:.1em}
+.pw-input:focus{outline:none;border-color:var(--gold)}
+.pw-input::placeholder{color:rgba(255,255,255,.3);letter-spacing:0}
+.pw-btn{padding:12px 32px;border-radius:10px;background:var(--gold);
+  color:var(--white);font-size:14px;font-weight:700;border:0;cursor:pointer;
+  font-family:Cambria,Georgia,serif;width:260px}
+.pw-btn:hover{background:var(--gold-d,#8B6508)}
+.pw-error{font-size:13px;color:#f87171;height:18px;font-style:italic}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.shake{animation:shake .4s ease}
+
+/* ── Date Picker Screen ── */
+#dateScreen{
+  position:fixed;inset:0;background:var(--navy);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;z-index:999;gap:16px;display:none}
+.ds-card{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);
+  border-radius:16px;padding:32px;width:360px;display:flex;flex-direction:column;gap:14px}
+.ds-title{font-size:20px;font-weight:700;color:var(--white);text-align:center}
+.ds-sub{font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-top:-8px}
+.ds-field{display:flex;flex-direction:column;gap:6px}
+.ds-label{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.09em}
+.ds-input{padding:10px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.1);color:var(--white);font-size:14px;
+  font-family:Cambria,Georgia,serif}
+.ds-input:focus{outline:none;border-color:var(--gold)}
+.ds-row{display:flex;gap:10px}
+.ds-preset{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:500;
+  border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.7);cursor:pointer;text-align:center}
+.ds-preset:hover{background:rgba(255,255,255,.15);color:var(--white)}
+.ds-generate{padding:13px;border-radius:10px;background:var(--gold);
+  color:var(--white);font-size:14px;font-weight:700;border:0;cursor:pointer;
+  font-family:Cambria,Georgia,serif;width:100%}
+.ds-skip{font-size:12px;color:rgba(255,255,255,.4);text-align:center;
+  cursor:pointer;text-decoration:underline}
+.ds-skip:hover{color:rgba(255,255,255,.7)}
+
+/* ── Report ── */
+#report{display:none;max-width:900px;margin:0 auto;padding:24px}
+
+/* ── Top controls ── */
+.report-controls{background:var(--white);border-radius:12px;border:1px solid var(--border);
+  padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(26,26,46,.06)}
+.rc-label{font-size:13px;color:var(--ink-60)}
+.rc-input{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:13px;font-family:Cambria,Georgia,serif;color:var(--ink)}
+.rc-input:focus{outline:none;border-color:var(--navy)}
+.rc-btn{padding:8px 18px;border-radius:8px;border:0;cursor:pointer;
+  font-size:13px;font-weight:600;font-family:Cambria,Georgia,serif}
+.rc-btn.primary{background:var(--navy);color:var(--white)}
+.rc-btn.secondary{background:var(--gold);color:var(--white)}
+.rc-btn.print{background:var(--green);color:var(--white)}
+.rc-preset{padding:6px 12px;border-radius:6px;border:1.5px solid var(--border);
+  font-size:12px;cursor:pointer;background:var(--white);color:var(--ink-60)}
+.rc-preset:hover{background:var(--surface)}
+
+/* ── Pages ── */
+.page{background:var(--white);border-radius:12px;border:1px solid var(--border);
+  margin-bottom:24px;overflow:hidden;box-shadow:0 2px 12px rgba(26,26,46,.06)}
+.page-header{background:var(--navy);padding:16px 24px;
+  border-bottom:3px solid var(--gold)}
+.page-header-title{font-size:13px;font-weight:700;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.page-header-name{font-size:20px;font-weight:700;color:var(--white)}
+.page-body{padding:24px}
+
+/* ── Cover page ── */
+.cover-page{background:var(--navy);border-radius:12px;
+  padding:60px 40px;text-align:center;margin-bottom:24px;
+  border:3px solid var(--gold);box-shadow:0 4px 24px rgba(26,26,46,.15)}
+.cover-logos{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:32px}
+.cover-logo{width:64px;height:64px;border-radius:12px;background:var(--white);
+  overflow:hidden}
+.cover-logo img{width:100%;height:100%;object-fit:contain}
+.cover-divider{width:1px;height:48px;background:rgba(255,255,255,.2)}
+.cover-title{font-size:32px;font-weight:700;color:var(--white);margin-bottom:8px}
+.cover-sub{font-size:16px;color:rgba(255,255,255,.6);margin-bottom:6px}
+.cover-period{font-size:14px;color:var(--gold);font-weight:600;margin-bottom:32px}
+.cover-meta{font-size:12px;color:rgba(255,255,255,.4)}
+
+/* ── Stat grid ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border-radius:10px;padding:14px 16px;
+  border-left:3px solid var(--navy)}
+.stat-card.green{border-left-color:var(--green)}
+.stat-card.gold{border-left-color:var(--gold)}
+.stat-card.crimson{border-left-color:var(--crimson)}
+.stat-card.orange{border-left-color:var(--orange)}
+.sc-label{font-size:10px;font-weight:700;color:var(--ink-30);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sc-value{font-size:26px;font-weight:700;color:var(--ink);line-height:1}
+.sc-change{font-size:11px;margin-top:4px;font-weight:500}
+.sc-change.up{color:var(--green)}
+.sc-change.down{color:var(--crimson)}
+.sc-change.neutral{color:var(--ink-60)}
+
+/* ── Health score ── */
+.health-row{display:flex;align-items:center;gap:20px;
+  background:var(--surface);border-radius:10px;padding:16px 20px;margin-bottom:20px}
+.health-circle{width:80px;height:80px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:4px solid;flex-shrink:0}
+.health-num{font-size:24px;font-weight:700;line-height:1}
+.health-den{font-size:10px;color:var(--ink-60)}
+.health-text{flex:1}
+.health-verdict{font-size:16px;font-weight:700;margin-bottom:4px}
+.health-desc{font-size:12px;color:var(--ink-60);line-height:1.4}
+
+/* ── Section headers ── */
+.section-title{font-size:13px;font-weight:700;color:var(--navy);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;
+  padding-bottom:8px;border-bottom:2px solid var(--surface)}
+
+/* ── Wins / Actions ── */
+.win-item{display:flex;align-items:flex-start;gap:10px;
+  padding:10px 14px;border-radius:8px;margin-bottom:8px}
+.win-item.green{background:var(--green-l)}
+.win-item.red{background:var(--crimson-l)}
+.win-item.gold{background:var(--gold-l)}
+.win-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.win-text{font-size:13px;color:var(--ink);line-height:1.4}
+.win-sub{font-size:11px;color:var(--ink-60);margin-top:2px}
+
+/* ── Bar chart ── */
+.bar-chart{display:flex;flex-direction:column;gap:8px}
+.bc-row{display:flex;align-items:center;gap:10px}
+.bc-label{font-size:12px;color:var(--ink-60);width:90px;text-align:right;flex-shrink:0}
+.bc-track{flex:1;height:20px;background:var(--surface);border-radius:4px;overflow:hidden}
+.bc-fill{height:100%;border-radius:4px;background:var(--navy)}
+.bc-val{font-size:12px;font-weight:600;color:var(--ink);width:50px;flex-shrink:0}
+
+/* ── Q analysis ── */
+.q-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;
+  padding:10px 14px;background:var(--surface);border-radius:8px}
+.q-name{font-size:13px;color:var(--ink);flex:1;font-weight:500}
+.q-pct{font-size:13px;font-weight:700;width:45px;text-align:right}
+.q-bar-wrap{width:120px;flex-shrink:0}
+.q-bar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.q-bar-fill{height:100%;border-radius:4px}
+.q-status{font-size:11px;width:60px;flex-shrink:0;text-align:right}
+
+/* ── Voice quotes ── */
+.voice-quote{background:var(--gold-l);border-left:3px solid var(--gold);
+  padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:10px}
+.vq-text{font-size:13px;color:var(--ink);line-height:1.5;font-style:italic}
+.vq-meta{font-size:11px;color:var(--ink-60);margin-top:6px}
+.concern-quote{background:var(--crimson-l);border-left:3px solid var(--crimson);
+  padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:10px}
+
+/* ── Theme pills ── */
+.theme-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.theme-pill{padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600}
+.theme-pill.concern{background:var(--crimson-l);color:var(--crimson)}
+.theme-pill.positive{background:var(--green-l);color:var(--green)}
+
+/* ── Funnel ── */
+.funnel-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;
+  padding:10px 16px;background:var(--surface);border-radius:8px}
+.fn-label{font-size:13px;color:var(--ink);flex:1}
+.fn-val{font-size:18px;font-weight:700;color:var(--ink)}
+.fn-pct{font-size:11px;color:var(--ink-60);width:50px;text-align:right}
+.fn-arrow{font-size:18px;color:var(--ink-30)}
+
+/* ── Table ── */
+.mrm-table{width:100%;border-collapse:collapse}
+.mrm-table th{background:var(--navy);color:var(--white);
+  padding:10px 14px;font-size:12px;font-weight:600;text-align:left}
+.mrm-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--surface)}
+.mrm-table tr:nth-child(even) td{background:var(--surface)}
+
+/* ── Target table ── */
+.target-row{display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-radius:8px;margin-bottom:8px;background:var(--surface)}
+.tr-metric{font-size:13px;font-weight:500;color:var(--ink);flex:1}
+.tr-current{font-size:13px;color:var(--ink-60);width:80px;text-align:center}
+.tr-target{font-size:13px;font-weight:700;color:var(--navy);width:80px;text-align:center}
+.tr-gap{font-size:12px;width:80px;text-align:center;padding:3px 8px;border-radius:999px}
+
+/* ── Loading ── */
+.report-loading{text-align:center;padding:60px 24px;color:var(--ink-60)}
+.rl-spinner{width:40px;height:40px;border:3px solid var(--border);
+  border-top-color:var(--navy);border-radius:50%;
+  animation:spin .7s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Print ── */
+@media print{
+  .report-controls{display:none!important}
+  #pwScreen,#dateScreen{display:none!important}
+  .page{break-inside:avoid;page-break-inside:avoid;
+    box-shadow:none;border:1px solid #E8E4D8;margin-bottom:16px}
+  .cover-page{break-inside:avoid;page-break-after:always}
+  .page-body{break-inside:avoid}
+  body{background:var(--white)!important;padding:0!important}
+  #report{padding:0!important}
+  .stat-grid{grid-template-columns:repeat(4,1fr)!important}
+  .stat-grid-3{grid-template-columns:repeat(3,1fr)!important}
+  .impact-grid{grid-template-columns:repeat(3,1fr)!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Password Screen -->
+<div id="pwScreen">
+  <div class="pw-logo">
+    <img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg" alt="BSC"/>
+  </div>
+  <div class="pw-title">BSC The Textile Mall</div>
+  <div class="pw-sub">Monthly Review Meeting Report</div>
+  <div class="pw-label">Enter Password</div>
+  <div id="pwInputWrap">
+    <input class="pw-input" type="password" id="pwInput"
+      placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPW()"/>
+  </div>
+  <button class="pw-btn" onclick="checkPW()">Access Report</button>
+  <div class="pw-error" id="pwError"></div>
+</div>
+
+<!-- Date Picker Screen -->
+<div id="dateScreen">
+  <div class="ds-card">
+    <div class="ds-title">Generate MRM Report</div>
+    <div class="ds-sub">Select the period for the report</div>
+
+    <!-- Preset buttons -->
+    <div class="ds-row">
+      <div class="ds-preset" onclick="setPreset('lastMonth')">Last Month</div>
+      <div class="ds-preset" onclick="setPreset('thisMonth')">This Month</div>
+      <div class="ds-preset" onclick="setPreset('lastQuarter')">Last Quarter</div>
+    </div>
+
+    <div class="ds-field">
+      <div class="ds-label">From Date</div>
+      <input class="ds-input" type="date" id="dsFrom"/>
+    </div>
+    <div class="ds-field">
+      <div class="ds-label">To Date</div>
+      <input class="ds-input" type="date" id="dsTo"/>
+    </div>
+
+    <button class="ds-generate" onclick="generateReport()">📋 Generate Report</button>
+    <div class="ds-skip" onclick="generateReport(true)">Skip date filter — show all data</div>
+  </div>
+</div>
+
+<!-- Report -->
+<div id="report"></div>
+
+<script>
+/* ── Config ── */
+var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+var PASSWORD  = "BSCCANDB";
+var PW_KEY    = "bsc_mrm_unlocked";
+
+/* ── Password ── */
+function checkPW(){
+  var val = (document.getElementById("pwInput").value||"").trim();
+  if(val === PASSWORD){
+    try{localStorage.setItem(PW_KEY,"1");}catch(e){}
+    document.getElementById("pwScreen").style.display = "none";
+    showDateScreen();
+  } else {
+    var wrap = document.getElementById("pwInputWrap");
+    if(wrap){wrap.classList.add("shake");setTimeout(function(){wrap.classList.remove("shake");},400);}
+    document.getElementById("pwError").textContent = "Incorrect password. Try again.";
+    document.getElementById("pwInput").value = "";
+  }
+}
+
+function showDateScreen(){
+  var ds = document.getElementById("dateScreen");
+  ds.style.display = "flex";
+  // Default to last month
+  setPreset("lastMonth");
+}
+
+/* ── Presets ── */
+function setPreset(preset){
+  var now = new Date();
+  var from, to;
+  if(preset === "lastMonth"){
+    from = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    to   = new Date(now.getFullYear(), now.getMonth(), 0);
+  } else if(preset === "thisMonth"){
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+    to   = new Date(now);
+  } else if(preset === "lastQuarter"){
+    var q = Math.floor(now.getMonth()/3);
+    from  = new Date(now.getFullYear(), (q-1)*3, 1);
+    to    = new Date(now.getFullYear(), q*3, 0);
+  }
+  document.getElementById("dsFrom").value = toInputDate(from);
+  document.getElementById("dsTo").value   = toInputDate(to);
+}
+
+function toInputDate(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+/* ── Boot ── */
+(function(){
+  var ok = false;
+  try{ok = localStorage.getItem(PW_KEY)==="1";}catch(e){}
+  if(ok){
+    document.getElementById("pwScreen").style.display="none";
+    showDateScreen();
+  }
+  document.getElementById("pwInput").addEventListener("keydown",function(e){
+    if(e.key==="Enter") checkPW();
+  });
+})();
+
+/* ── Data ── */
+var DATA = { footfall:[], feedback:[], diverts:[], daily:[], callLog:[], questions:[] };
+var PERIOD = { from:null, to:null, label:"" };
+
+function api(body){
+  var token = "";
+  try{token=sessionStorage.getItem("crm_token")||"";}catch(e){}
+  body.token = token;
+  return fetch(API_URL,{method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+function generateReport(skipFilter){
+  document.getElementById("dateScreen").style.display = "none";
+  document.getElementById("report").style.display = "block";
+  document.getElementById("report").innerHTML =
+    '<div class="report-loading"><div class="rl-spinner"></div><div>Loading report data…</div></div>';
+
+  var fromVal = document.getElementById("dsFrom").value;
+  var toVal   = document.getElementById("dsTo").value;
+
+  if(!skipFilter && fromVal && toVal){
+    var fp = fromVal.split("-");
+    var tp = toVal.split("-");
+    PERIOD.from  = new Date(parseInt(fp[0]),parseInt(fp[1])-1,parseInt(fp[2]),0,0,0,0);
+    PERIOD.to    = new Date(parseInt(tp[0]),parseInt(tp[1])-1,parseInt(tp[2]),23,59,59,0);
+    PERIOD.label = fmtDisp(PERIOD.from)+" – "+fmtDisp(PERIOD.to);
+  } else {
+    PERIOD.from = null; PERIOD.to = null;
+    PERIOD.label = "All Time";
+  }
+
+  Promise.all([
+    api({action:"get_footfall"}),
+    api({action:"get_feedback"}),
+    api({action:"get_diverts"}),
+    api({action:"get_feedback_questions"}),
+  ]).then(function(res){
+    DATA.footfall  = res[0].entries    || [];
+    DATA.daily     = res[0].daily_all  || [];
+    DATA.feedback  = res[1].feedback   || [];
+    DATA.diverts   = res[2].diverts    || [];
+    DATA.questions = res[3].questions  || [];
+    renderReport();
+  }).catch(function(e){
+    document.getElementById("report").innerHTML =
+      '<div class="report-loading"><div style="font-size:32px">⚠️</div><div style="color:var(--crimson)">'+e.message+'</div></div>';
+  });
+}
+
+/* ── Date helpers ── */
+function parseDate(str){
+  if(!str) return null;
+  var s=String(str).trim();
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){
+    var p=s.slice(0,10).split("/");
+    return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s.slice(0,10));
+  return null;
+}
+function inRange(dateStr){
+  if(!PERIOD.from || !PERIOD.to) return true;
+  var d = parseDate(dateStr);
+  if(!d) return false;
+  return d >= PERIOD.from && d <= PERIOD.to;
+}
+function fmtDisp(d){ return d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); }
+function fmtKey(d){ return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function p2(n){ return String(n).padStart(2,"0"); }
+
+/* ── Filtered data ── */
+function ff()  { return DATA.footfall.filter(function(r){return inRange(r.date);}); }
+function fb()  { return DATA.feedback.filter(function(r){return inRange(r.date);}); }
+function div() { return DATA.diverts.filter(function(r){return inRange(r.date);}); }
+function dly() { return DATA.daily.filter(function(r){return inRange(r.date);}); }
+
+/* ── Metric helpers ── */
+function totalFF(){ return ff().reduce(function(s,r){return s+(Number(r.count)||0);},0); }
+function totalBills(){ return dly().reduce(function(s,r){return s+(Number(r.bills_count)||0);},0); }
+function convPct(){ var f=totalFF(); return f>0?Math.round((totalBills()/f)*100):0; }
+
+var NEG_MAP = {
+  q2_overall_experience:["Average","Needs Improvement"],
+  q3_staff_behaviour:["Average","Not Satisfactory"],
+  q4_product_variety:["Limited Options","Did Not Find It"],
+  q5_pricing_value:["Slightly High","Too Expensive"],
+  q6_visit_again:["No"]
+};
+var Q_LABELS = {
+  q2_overall_experience:"Overall Experience",
+  q3_staff_behaviour:"Staff Behaviour",
+  q4_product_variety:"Product Variety",
+  q5_pricing_value:"Pricing & Value",
+  q6_visit_again:"Visit Again?"
+};
+
+function isNeg(f){
+  return Object.keys(NEG_MAP).some(function(k){
+    return NEG_MAP[k].indexOf(String(f[k]||"").trim())!==-1;
+  });
+}
+
+function calcCSI(feedbacks){
+  var sm={
+    "Excellent":4,"Good":3,"Average":2,"Needs Improvement":1,
+    "Very Clear & Helpful":4,"Helpful":3,"Average":2,"Not Satisfactory":1,
+    "Very Satisfied":4,"Satisfied":3,"Limited Options":2,"Did Not Find It":1,
+    "Great Value":4,"Reasonable":3,"Slightly High":2,"Too Expensive":1
+  };
+  var keys=["q2_overall_experience","q3_staff_behaviour","q4_product_variety","q5_pricing_value"];
+  var tot=0,mx=0,cnt=0;
+  feedbacks.forEach(function(f){
+    var rs=0,rm=0,has=false;
+    keys.forEach(function(k){
+      var v=String(f[k]||"").trim();
+      if(v&&sm[v]!==undefined){rs+=sm[v];rm+=4;has=true;}
+    });
+    if(has){tot+=rs;mx+=rm;cnt++;}
+  });
+  return {score:mx>0?Math.round((tot/mx)*100):null,count:cnt};
+}
+
+function calcNPS(feedbacks){
+  var p=0,pa=0,d=0;
+  feedbacks.forEach(function(f){
+    var v=String(f.q6_visit_again||f.q6||"").trim();
+    if(v==="Definitely Yes"||v==="Yes") p++;
+    else if(v==="Maybe") pa++;
+    else if(v==="No") d++;
+  });
+  var t=p+pa+d;
+  return {score:t>0?Math.round(((p-d)/t)*100):null,promoters:p,passives:pa,detractors:d,total:t};
+}
+
+function divertRate(){
+  var f=totalFF();
+  return f>0?parseFloat(((div().length/f)*100).toFixed(2)):0;
+}
+
+/* ── Theme detection ── */
+var THEMES = [
+  {key:"pricing",   words:["price","pricing","expensive","costly","high","cheap","cost","value"],
+   label:"Pricing Concerns", type:"concern"},
+  {key:"staff",     words:["staff","behaviour","behavior","rude","helpful","attitude","service","employee"],
+   label:"Staff Behaviour", type:"concern"},
+  {key:"variety",   words:["variety","stock","collection","range","option","available","find"],
+   label:"Product Variety", type:"concern"},
+  {key:"experience",words:["experience","feel","comfortable","enjoy","happy","satisfied","love","nice"],
+   label:"Great Experience", type:"positive"},
+  {key:"billing",   words:["billing","queue","wait","long","slow","checkout","bill"],
+   label:"Billing / Queue", type:"concern"},
+  {key:"clean",     words:["clean","organized","display","neat","tidy","arrangement"],
+   label:"Store Ambiance", type:"positive"},
+];
+
+function detectThemes(feedbacks){
+  var counts = {};
+  THEMES.forEach(function(t){ counts[t.key]=0; });
+  feedbacks.forEach(function(f){
+    var txt = String(f.your_voice||"").toLowerCase();
+    if(!txt) return;
+    THEMES.forEach(function(t){
+      if(t.words.some(function(w){ return txt.indexOf(w)!==-1; })){
+        counts[t.key]++;
+      }
+    });
+  });
+  return THEMES
+    .filter(function(t){ return counts[t.key]>0; })
+    .map(function(t){ return {label:t.label,count:counts[t.key],type:t.type}; })
+    .sort(function(a,b){ return b.count-a.count; });
+}
+
+/* ── Health score ── */
+function calcHealth(csi, nps, cv, dr){
+  var scores = [];
+  // Footfall trend — always 60 base (no prev period in MRM)
+  scores.push({s:60, w:20});
+  // Conversion
+  var cvS = cv>=90?100:cv>=70?70:cv>=50?40:20;
+  scores.push({s:cvS, w:20});
+  // CSI
+  var csiS = csi===null?50:csi>=80?100:csi>=65?70:csi>=50?40:20;
+  scores.push({s:csiS, w:20});
+  // NPS
+  var npsS = nps===null?50:nps>=95?100:nps>=50?70:nps>=0?40:20;
+  scores.push({s:npsS, w:15});
+  // Feedback volume — base 70
+  scores.push({s:70, w:10});
+  // Divert rate
+  var drS = dr<=2?100:dr<=5?80:dr<=10?50:20;
+  scores.push({s:drS, w:15});
+  var tot=0,mx=0;
+  scores.forEach(function(x){tot+=x.s*x.w;mx+=x.w*100;});
+  return Math.round((tot/mx)*100);
+}
+
+/* ── Render ── */
+function renderReport(){
+  var fbData = fb(), ffData = ff(), divData = div();
+  var totalFall = totalFF();
+  var totalB    = totalBills();
+  var cv        = convPct();
+  var csi       = calcCSI(fbData);
+  var nps       = calcNPS(fbData);
+  var dr        = divertRate();
+  var health    = calcHealth(csi.score, nps.score, cv, dr);
+
+  var negFB   = fbData.filter(function(f){return isNeg(f);});
+  var posFB   = fbData.filter(function(f){return !isNeg(f);});
+  var fbWithVoice = fbData.filter(function(f){return String(f.your_voice||"").trim();});
+  var posVoices   = posFB.filter(function(f){return String(f.your_voice||"").trim();});
+  var negVoices   = negFB.filter(function(f){return String(f.your_voice||"").trim();});
+  var themes      = detectThemes(fbWithVoice);
+
+  var divOpen     = divData.filter(function(d){return d.status==="open";}).length;
+  var divActioned = divData.filter(function(d){return ["sourcing","available","closed"].indexOf(d.status)!==-1;}).length;
+  var divClosed   = divData.filter(function(d){return d.status==="closed";}).length;
+
+  var scoreInfo = health>=80
+    ? {cls:"green",emoji:"🏆",label:"Excellent",desc:"Store is performing excellently across all key metrics."}
+    : health>=60
+    ? {cls:"gold", emoji:"👍",label:"Good",desc:"Store is doing well. A few metrics need improvement."}
+    : health>=40
+    ? {cls:"orange",emoji:"⚠️",label:"Needs Attention",desc:"Several metrics below target. Focused action needed."}
+    : {cls:"crimson",emoji:"🚨",label:"Critical",desc:"Multiple metrics significantly below target."};
+
+  var html = "";
+
+  // Controls bar
+  html += '<div class="report-controls">' +
+    '<span class="rc-label">Period:</span>' +
+    '<input class="rc-input" type="date" id="rcFrom" value="'+esc(document.getElementById("dsFrom").value)+'"/>' +
+    '<span class="rc-label">to</span>' +
+    '<input class="rc-input" type="date" id="rcTo" value="'+esc(document.getElementById("dsTo").value)+'"/>' +
+    '<div class="rc-preset" onclick="rcPreset(\'lastMonth\')">Last Month</div>' +
+    '<div class="rc-preset" onclick="rcPreset(\'thisMonth\')">This Month</div>' +
+    '<button class="rc-btn primary" onclick="rcGenerate()">↺ Refresh</button>' +
+    '<button class="rc-btn secondary" onclick="downloadHTML()">📥 Download HTML</button>' +
+    '<button class="rc-btn print" onclick="savePDF()">🖨 Save as PDF</button>' +
+  '</div>';
+
+  // PAGE 1 — Cover
+  html += '<div class="cover-page">' +
+    '<div class="cover-logos">' +
+      '<div class="cover-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/cnb-logo.png" style="filter:brightness(0) invert(1)"/></div>' +
+      '<div class="cover-divider"></div>' +
+      '<div class="cover-logo"><img src="https://bsctextilescandb-ui.github.io/retail-crm/logo.jpg"/></div>' +
+    '</div>' +
+    '<div class="cover-title">Monthly Review Meeting</div>' +
+    '<div class="cover-sub">BSC The Textile Mall — Belagavi</div>' +
+    '<div class="cover-period">Period: '+esc(PERIOD.label)+'</div>' +
+    '<div class="cover-meta">Prepared by Consulting & Beyond (C&B) · Generated on '+fmtDisp(new Date())+'</div>' +
+  '</div>';
+
+  // PAGE 2 — Executive Summary
+  html += page("Executive Summary", "02",
+    healthRow(health, scoreInfo) +
+    '<div class="section-title">Key Numbers at a Glance</div>' +
+    '<div class="stat-grid">' +
+      statCard("Total Footfall",   totalFall,                    "", "") +
+      statCard("Total Bills",      totalB,                       "", "") +
+      statCard("Conversion %",     cv+"%",         cv>=90?"green":"crimson", cv>=90?"✅ On Target":"🔴 Below 90% Target") +
+      statCard("CSI Score",        csi.score!==null?csi.score+"%":"—", csi.score>=80?"green":"crimson", csi.score>=80?"✅ On Target":"🔴 Below 80% Target") +
+    '</div>' +
+    '<div class="stat-grid">' +
+      statCard("NPS Score",        nps.score!==null?nps.score:"—", nps.score>=95?"green":"gold", "Target: ≥ 95") +
+      statCard("Total Feedbacks",  fbData.length,                "", "") +
+      statCard("Diverts Raised",   divData.length,               "", "") +
+      statCard("Divert Rate",      dr+"%",         dr<=5?"green":"crimson", dr<=5?"✅ < 5% Target":"🔴 Above Target") +
+    '</div>' +
+    winsSection(cv, csi.score, nps.score, negFB.length, fbData.length, dr)
+  );
+
+  // PAGE 3 — Footfall & Conversion
+  html += page("Footfall & Conversion", "03",
+    '<div class="section-title">Daily Footfall by Section</div>' +
+    ffBarChart(ffData) +
+    '<div style="margin-top:20px" class="section-title">Conversion Funnel</div>' +
+    funnelSection(totalFall, totalB, cv)
+  );
+
+  // PAGE 4 — Customer Satisfaction
+  html += page("Customer Satisfaction", "04",
+    '<div class="stat-grid-3">' +
+      statCard("CSI Score",    csi.score!==null?csi.score+"%":"—", csi.score>=80?"green":"crimson", csi.count+" responses") +
+      statCard("NPS Score",    nps.score!==null?nps.score:"—",     nps.score>=95?"green":"gold",    "Promoters: "+nps.promoters) +
+      statCard("Promoter %",   nps.total>0?Math.round((nps.promoters/nps.total)*100)+"%":"—", "green", nps.promoters+" customers") +
+    '</div>' +
+    '<div class="section-title">Question-wise Satisfaction</div>' +
+    qAnalysis(fbData) +
+    '<div style="margin-top:20px" class="section-title">NPS Breakdown</div>' +
+    npsBreakdown(nps)
+  );
+
+  // PAGE 5 — Voice of Customer
+  html += page("Voice of Customer", "05",
+    '<div class="section-title">Recurring Themes</div>' +
+    themeSection(themes) +
+    '<div class="section-title">Top Positive Voices</div>' +
+    voiceQuotes(posVoices, "positive") +
+    '<div style="margin-top:16px" class="section-title">Customer Concerns</div>' +
+    voiceQuotes(negVoices, "concern")
+  );
+
+  // PAGE 6 — Feedback Journey
+  html += page("Feedback Journey", "06",
+    '<div class="section-title">Negative to Positive Journey</div>' +
+    feedbackJourney(fbData, negFB, posFB)
+  );
+
+  // PAGE 7 — Divert Analysis
+  html += page("Divert Analysis", "07",
+    '<div class="stat-grid">' +
+      statCard("Total Diverts",  divData.length, "",                "") +
+      statCard("Divert Rate",    dr+"%",          dr<=5?"green":"crimson", "Target < 5%") +
+      statCard("Resolved",       divClosed,       "green",           Math.round((divClosed/(divData.length||1))*100)+"% resolution") +
+      statCard("Open",           divOpen,         divOpen>0?"crimson":"green", "Pending action") +
+    '</div>' +
+    '<div class="section-title">Top Sections by Diverts</div>' +
+    divertBySection(divData) +
+    '<div style="margin-top:20px" class="section-title">Status Breakdown</div>' +
+    divertStatus(divData)
+  );
+
+  // PAGE 8 — Team Performance
+  html += page("Team Performance", "08",
+    '<div class="section-title">Operational Metrics</div>' +
+    teamTable(ffData, fbData, divData)
+  );
+
+  // PAGE 9 — Highlights & Actions
+  html += page("Highlights & Action Items", "09",
+    '<div class="section-title">This Period\'s Wins</div>' +
+    periodWins(cv, csi.score, nps.score, dr) +
+    '<div style="margin-top:20px" class="section-title">Action Items for Next Period</div>' +
+    actionItems(cv, csi.score, nps.score, dr, negFB, themes)
+  );
+
+  // PAGE 10 — Next Period Targets
+  html += page("Next Period Targets", "10",
+    '<div class="section-title">Carry Forward Targets</div>' +
+    targetTable(cv, csi.score, nps.score, dr, fbData.length, totalFall)
+  );
+
+  document.getElementById("report").innerHTML = html;
+}
+
+/* ── Section renderers ── */
+function page(title, num, body){
+  return '<div class="page">' +
+    '<div class="page-header">' +
+      '<div class="page-header-title">Page '+num+'</div>' +
+      '<div class="page-header-name">'+esc(title)+'</div>' +
+    '</div>' +
+    '<div class="page-body">'+body+'</div>' +
+  '</div>';
+}
+
+function statCard(label, val, cls, sub){
+  return '<div class="stat-card '+(cls||"")+'">' +
+    '<div class="sc-label">'+esc(label)+'</div>' +
+    '<div class="sc-value">'+esc(String(val))+'</div>' +
+    (sub?'<div class="sc-change '+(cls||"neutral")+'">'+esc(sub)+'</div>':'') +
+  '</div>';
+}
+
+function healthRow(score, info){
+  var colors={green:"var(--green)",gold:"var(--gold)",orange:"var(--orange)",crimson:"var(--crimson)"};
+  var col = colors[info.cls]||"var(--navy)";
+  return '<div class="health-row">' +
+    '<div class="health-circle" style="border-color:'+col+';background:'+col+'22">' +
+      '<div class="health-num" style="color:'+col+'">'+score+'</div>' +
+      '<div class="health-den">/100</div>' +
+    '</div>' +
+    '<div class="health-text">' +
+      '<div class="health-verdict">'+info.emoji+' Store Health: '+esc(info.label)+'</div>' +
+      '<div class="health-desc">'+esc(info.desc)+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function winsSection(cv, csi, nps, negCount, totalFB, dr){
+  var wins=[], actions=[];
+  if(cv>=90)  wins.push({text:"Conversion at "+cv+"% — on target",sub:"Bills generated per visitor is healthy"});
+  else        actions.push({text:"Conversion at "+cv+"% — below 90% target",sub:"Focus on converting footfall to bills"});
+  if(csi>=80) wins.push({text:"CSI Score "+csi+"% — customer satisfaction on track",sub:"Customers are happy with the overall experience"});
+  else        actions.push({text:"CSI Score "+csi+"% — below 80% target",sub:"Address feedback on experience and staff behaviour"});
+  if(nps>=95) wins.push({text:"NPS "+nps+" — strong promoter base",sub:"Customers actively recommending the store"});
+  else        actions.push({text:"NPS "+nps+" — below 95 target",sub:"Convert passives and detractors to promoters"});
+  if(dr<=5)   wins.push({text:"Divert Rate "+dr+"% — well within 5% limit",sub:"Stock management is effective"});
+  else        actions.push({text:"Divert Rate "+dr+"% — above 5% target",sub:"Improve stock availability in high-demand sections"});
+
+  var html = '<div class="section-title" style="margin-top:20px">Key Wins</div>';
+  if(wins.length===0) html += '<div style="color:var(--ink-60);font-size:13px;padding:12px">No metrics on target this period.</div>';
+  wins.forEach(function(w){
+    html += '<div class="win-item green"><div class="win-icon">✅</div><div><div class="win-text">'+esc(w.text)+'</div><div class="win-sub">'+esc(w.sub)+'</div></div></div>';
+  });
+  html += '<div class="section-title" style="margin-top:16px">Areas Needing Attention</div>';
+  if(actions.length===0) html += '<div style="color:var(--ink-60);font-size:13px;padding:12px">All metrics on target! 🎉</div>';
+  actions.forEach(function(a){
+    html += '<div class="win-item red"><div class="win-icon">⚠️</div><div><div class="win-text">'+esc(a.text)+'</div><div class="win-sub">'+esc(a.sub)+'</div></div></div>';
+  });
+  return html;
+}
+
+function ffBarChart(ffData){
+  var dayMap={};
+  ffData.forEach(function(r){
+    dayMap[r.date]=(dayMap[r.date]||0)+(Number(r.count)||0);
+  });
+  var days=Object.keys(dayMap).sort(function(a,b){return (parseDate(a)||0)-(parseDate(b)||0);});
+  if(days.length===0) return '<div style="color:var(--ink-60);font-size:13px">No footfall data for this period.</div>';
+  var max=Math.max.apply(null,days.map(function(d){return dayMap[d];}));
+  var html='<div class="bar-chart">';
+  days.slice(0,15).forEach(function(d){
+    var v=dayMap[d];
+    var pct=max>0?Math.round((v/max)*100):0;
+    var dt=parseDate(d);
+    var lbl=dt?dt.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):d;
+    html+='<div class="bc-row">' +
+      '<div class="bc-label">'+esc(lbl)+'</div>' +
+      '<div class="bc-track"><div class="bc-fill" style="width:'+pct+'%"></div></div>' +
+      '<div class="bc-val">'+v+'</div>' +
+    '</div>';
+  });
+  if(days.length>15) html+='<div style="font-size:12px;color:var(--ink-60);margin-top:6px">+ '+(days.length-15)+' more days in period</div>';
+  html+='</div>';
+  return html;
+}
+
+function funnelSection(totalFall, totalB, cv){
+  var html='';
+  html+='<div class="funnel-row">' +
+    '<div class="fn-label">👥 Total Footfall</div>' +
+    '<div class="fn-val">'+totalFall+'</div>' +
+    '<div class="fn-pct">visitors</div>' +
+  '</div>';
+  html+='<div style="text-align:center;font-size:18px;color:var(--ink-30);margin:4px 0">↓</div>';
+  html+='<div class="funnel-row">' +
+    '<div class="fn-label">🧾 Bills Generated</div>' +
+    '<div class="fn-val">'+totalB+'</div>' +
+    '<div class="fn-pct">'+(totalFall>0?Math.round((totalB/totalFall)*100)+"% conv":"—")+'</div>' +
+  '</div>';
+  html+='<div style="margin-top:12px;padding:12px 16px;border-radius:8px;background:'+(cv>=90?"var(--green-l)":"var(--crimson-l)")+'">' +
+    '<div style="font-size:13px;font-weight:600;color:'+(cv>=90?"var(--green)":"var(--crimson)")+'">' +
+    'Conversion: '+cv+'% — Target: 90% — '+(cv>=90?"✅ On Target":"⚠️ Gap: "+(90-cv)+"%")+'</div>' +
+  '</div>';
+  return html;
+}
+
+function qAnalysis(fbData){
+  var keys=Object.keys(NEG_MAP);
+  var html='';
+  keys.forEach(function(k,i){
+    var total=fbData.filter(function(f){return String(f[k]||"").trim();}).length;
+    var neg=fbData.filter(function(f){return NEG_MAP[k].indexOf(String(f[k]||"").trim())!==-1;}).length;
+    var pos=total-neg;
+    var posPct=total>0?Math.round((pos/total)*100):0;
+    var col=posPct>=75?"var(--green)":posPct>=50?"var(--gold)":"var(--crimson)";
+    html+='<div class="q-row">' +
+      '<div class="q-name">'+esc(Q_LABELS[k])+'</div>' +
+      '<div class="q-bar-wrap">' +
+        '<div class="q-bar-track">' +
+          '<div class="q-bar-fill" style="width:'+posPct+'%;background:'+col+'"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="q-pct" style="color:'+col+'">'+posPct+'%</div>' +
+      '<div class="q-status">'+(posPct>=75?"🟢":posPct>=50?"🟡":"🔴")+'</div>' +
+    '</div>';
+  });
+  return html;
+}
+
+function npsBreakdown(nps){
+  var t=nps.total||1;
+  return '<div class="stat-grid-3">' +
+    statCard("Promoters",   nps.promoters, "green",   Math.round((nps.promoters/t)*100)+"% of responses") +
+    statCard("Passives",    nps.passives,  "gold",    Math.round((nps.passives/t)*100)+"% of responses") +
+    statCard("Detractors",  nps.detractors,"crimson", Math.round((nps.detractors/t)*100)+"% of responses") +
+  '</div>';
+}
+
+function themeSection(themes){
+  if(themes.length===0) return '<div style="color:var(--ink-60);font-size:13px;margin-bottom:16px">No open voice feedback in this period.</div>';
+  var html='<div class="theme-grid">';
+  themes.forEach(function(t){
+    html+='<div class="theme-pill '+(t.type==="concern"?"concern":"positive")+'">' +
+      (t.type==="concern"?"⚠️ ":"✅ ")+esc(t.label)+" — "+t.count+" mentions"+
+    '</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function voiceQuotes(voices, type){
+  if(voices.length===0) return '<div style="color:var(--ink-60);font-size:13px;margin-bottom:12px">No '+(type==="positive"?"positive":"concern")+" voices in this period.</div>";
+  var cls = type==="positive"?"voice-quote":"concern-quote";
+  var html="";
+  voices.slice(0,4).forEach(function(v){
+    html+='<div class="'+cls+'">' +
+      '<div class="vq-text">"'+esc(v.your_voice)+'"</div>' +
+      '<div class="vq-meta">'+esc(v.area||"")+(v.date?" · "+esc(v.date):"")+
+      (v.cust_name?" · "+esc(v.cust_name):"")+
+      '</div>' +
+    '</div>';
+  });
+  if(voices.length>4) html+='<div style="font-size:12px;color:var(--ink-60)">+ '+(voices.length-4)+' more feedback voices</div>';
+  return html;
+}
+
+function feedbackJourney(all, neg, pos){
+  var negMobile  = neg.filter(function(f){return String(f.cust_mobile||"").length>=10;});
+  var html="";
+  html+='<div class="funnel-row"><div class="fn-label">📋 Total Feedbacks</div><div class="fn-val">'+all.length+'</div><div class="fn-pct">100%</div></div>';
+  html+='<div style="text-align:center;font-size:18px;color:var(--ink-30);margin:4px 0">↓</div>';
+  html+='<div class="funnel-row" style="background:var(--crimson-l)"><div class="fn-label">🔴 Negative Feedbacks</div><div class="fn-val" style="color:var(--crimson)">'+neg.length+'</div><div class="fn-pct">'+Math.round((neg.length/(all.length||1))*100)+'%</div></div>';
+  html+='<div class="funnel-row" style="margin-left:20px"><div class="fn-label">📞 With Mobile (Callable)</div><div class="fn-val">'+negMobile.length+'</div><div class="fn-pct">'+Math.round((negMobile.length/(neg.length||1))*100)+'%</div></div>';
+  html+='<div style="text-align:center;font-size:18px;color:var(--ink-30);margin:4px 0">↓</div>';
+  html+='<div class="funnel-row" style="background:var(--green-l)"><div class="fn-label">🟢 Positive Feedbacks</div><div class="fn-val" style="color:var(--green)">'+pos.length+'</div><div class="fn-pct">'+Math.round((pos.length/(all.length||1))*100)+'%</div></div>';
+  return html;
+}
+
+function divertBySection(divData){
+  var secMap={};
+  divData.forEach(function(d){
+    var s=d.section_name||"Unknown";
+    secMap[s]=(secMap[s]||0)+1;
+  });
+  var secs=Object.keys(secMap).sort(function(a,b){return secMap[b]-secMap[a];});
+  if(secs.length===0) return '<div style="color:var(--ink-60);font-size:13px">No diverts in this period.</div>';
+  var max=secMap[secs[0]]||1;
+  var html='<div class="bar-chart">';
+  secs.slice(0,8).forEach(function(s){
+    var v=secMap[s];
+    var pct=Math.round((v/max)*100);
+    html+='<div class="bc-row">' +
+      '<div class="bc-label">'+esc(s)+'</div>' +
+      '<div class="bc-track"><div class="bc-fill" style="width:'+pct+'%;background:var(--crimson)"></div></div>' +
+      '<div class="bc-val">'+v+'</div>' +
+    '</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function divertStatus(divData){
+  var statMap={open:0,sourcing:0,available:0,closed:0};
+  divData.forEach(function(d){ if(statMap[d.status]!==undefined) statMap[d.status]++; });
+  return '<div class="stat-grid">' +
+    statCard("Open",      statMap.open,      "crimson", "Needs action") +
+    statCard("Sourcing",  statMap.sourcing,  "gold",    "Being arranged") +
+    statCard("Available", statMap.available, "green",   "Ready for customer") +
+    statCard("Closed",    statMap.closed,    "green",   "Resolved") +
+  '</div>';
+}
+
+function teamTable(ffData, fbData, divData){
+  var totalSlots=ffData.length>0 ? "—" : "—";
+  var fbRate = totalFF()>0 ? Math.round((fbData.length/totalFF())*100) : 0;
+  return '<table class="mrm-table" style="width:100%">' +
+    '<tr><th>Metric</th><th>Value</th><th>Status</th></tr>' +
+    '<tr><td>Feedback Collection Rate</td><td>1 per '+(totalFF()>0?Math.round(totalFF()/(fbData.length||1)):0)+' visitors</td><td>'+(fbRate>=2?"🟢 Active":"🟡 Moderate")+'</td></tr>' +
+    '<tr><td>Total Feedbacks Collected</td><td>'+fbData.length+'</td><td>🔵</td></tr>' +
+    '<tr><td>Total Diverts Managed</td><td>'+divData.length+'</td><td>🔵</td></tr>' +
+    '<tr><td>Divert Resolution Rate</td><td>'+Math.round((divData.filter(function(d){return d.status==="closed";}).length/(divData.length||1))*100)+'%</td><td>'+(divData.filter(function(d){return d.status==="closed";}).length/(divData.length||1)>=0.7?"🟢 Good":"🟡 Improve")+'</td></tr>' +
+    '<tr><td>Negative Feedback Response</td><td>Call queue active</td><td>🔵</td></tr>' +
+  '</table>';
+}
+
+function periodWins(cv, csi, nps, dr){
+  var html="";
+  if(cv>=90)  html+='<div class="win-item green"><div class="win-icon">🏆</div><div class="win-text">Conversion at '+cv+'% — meeting the 90% target</div></div>';
+  if(csi>=80) html+='<div class="win-item green"><div class="win-icon">😊</div><div class="win-text">CSI Score '+csi+'% — customers are satisfied</div></div>';
+  if(nps>=95) html+='<div class="win-item green"><div class="win-icon">📣</div><div class="win-text">NPS Score '+nps+' — strong promoter base</div></div>';
+  if(dr<=5)   html+='<div class="win-item green"><div class="win-icon">📦</div><div class="win-text">Divert Rate '+dr+'% — stock management effective</div></div>';
+  if(!html)   html+='<div style="color:var(--ink-60);font-size:13px;padding:12px">No metrics on target this period. Focus on improvement.</div>';
+  return html;
+}
+
+function actionItems(cv, csi, nps, dr, negFB, themes){
+  var html="";
+  var n=1;
+  if(cv<90)  html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">Improve conversion from '+cv+'% to 90% — review billing process and staff engagement</div></div>';
+  if(csi<80) html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">Improve CSI from '+csi+'% to 80% — address staff behaviour and product availability feedback</div></div>';
+  if(nps<95) html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">Improve NPS from '+nps+' to 95 — convert detractors through follow-up calls and resolution</div></div>';
+  if(dr>5)   html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">Reduce divert rate from '+dr+'% to below 5% — improve stock planning</div></div>';
+  if(negFB.length>0) html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">'+negFB.length+' negative feedbacks this period — ensure all callable customers are contacted</div></div>';
+  themes.filter(function(t){return t.type==="concern";}).slice(0,2).forEach(function(t){
+    html+='<div class="win-item red"><div class="win-icon">'+n+++'. </div><div class="win-text">Address "'+t.label+'" — mentioned '+t.count+' times in customer feedback</div></div>';
+  });
+  if(!html) html+='<div style="color:var(--ink-60);font-size:13px;padding:12px">All metrics on target! 🎉 Maintain current performance.</div>';
+  return html;
+}
+
+function targetTable(cv, csi, nps, dr, fbCount, ffCount){
+  var rows=[
+    {metric:"Footfall",      current:ffCount,   target:Math.round(ffCount*1.05)+"+ (↑5%)",  gap:""},
+    {metric:"Conversion %",  current:cv+"%",    target:"90%",                                gap:cv>=90?"On Target":"+"+(90-cv)+"%"},
+    {metric:"CSI Score",     current:csi?csi+"%":"—", target:"80%",                         gap:csi>=80?"On Target":csi?"+"+(80-csi)+"%":"Set target"},
+    {metric:"NPS Score",     current:nps||"—",  target:"95",                                 gap:nps>=95?"On Target":nps?"+"+(95-nps):"Set target"},
+    {metric:"Feedbacks",     current:fbCount,   target:Math.round(fbCount*1.1)+"+ (↑10%)", gap:""},
+    {metric:"Divert Rate",   current:dr+"%",    target:"< 5%",                               gap:dr<=5?"On Target":"↓"+(dr-5).toFixed(1)+"%"},
+  ];
+  var html='<div style="display:flex;flex-direction:column;gap:8px">';
+  rows.forEach(function(r){
+    var gapCol = r.gap==="On Target"?"var(--green)":r.gap?"var(--crimson)":"var(--ink-60)";
+    html+='<div class="target-row">' +
+      '<div class="tr-metric">'+esc(r.metric)+'</div>' +
+      '<div class="tr-current">'+esc(String(r.current))+'</div>' +
+      '<div class="tr-target">'+esc(r.target)+'</div>' +
+      '<div class="tr-gap" style="color:'+gapCol+';background:'+gapCol+'18">'+esc(r.gap||"—")+'</div>' +
+    '</div>';
+  });
+  html+='</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:8px;padding:8px 16px;'+
+    'background:var(--navy);border-radius:8px;font-size:11px;color:rgba(255,255,255,.6);font-weight:600">'+
+    '<div>METRIC</div><div style="text-align:center">CURRENT</div><div style="text-align:center">NEXT TARGET</div></div>';
+  return html;
+}
+
+/* ── Download HTML ── */
+function downloadHTML(){
+  // Get full current page HTML including all styles and rendered report
+  var reportDiv = document.getElementById("report").innerHTML;
+  var styles    = document.querySelector("style").outerHTML;
+
+  var period = PERIOD.label.replace(/[^a-zA-Z0-9\-]/g,"_");
+  var filename = "BSC_MRM_Report_"+period+".html";
+
+  var fullHTML = '<!DOCTYPE html><html lang="en"><head>' +
+    '<meta charset="UTF-8"/>' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1"/>' +
+    '<title>MRM Report — BSC The Textile Mall — '+esc(PERIOD.label)+'</title>' +
+    styles +
+    '</head><body style="background:var(--ivory);padding:24px">' +
+    '<div style="max-width:900px;margin:0 auto">' +
+    '<div style="background:var(--white);border-radius:12px;border:1px solid var(--border);' +
+      'padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:10px">' +
+      '<span style="font-size:13px;color:var(--ink-60)">BSC The Textile Mall — MRM Report — '+esc(PERIOD.label)+'</span>' +
+      '<span style="margin-left:auto;font-size:12px;color:var(--ink-30)">Generated: '+fmtDisp(new Date())+'</span>' +
+    '</div>' +
+    reportDiv +
+    '</div></body></html>';
+
+  var blob = new Blob([fullHTML], {type:"text/html;charset=utf-8"});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement("a");
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+/* ── Save as PDF ── */
+function savePDF(){
+  // Set print-friendly title and trigger browser print
+  var orig = document.title;
+  var period = PERIOD.label;
+  document.title = "BSC_MRM_Report_"+period.replace(/[^a-zA-Z0-9\-]/g,"_");
+  window.print();
+  document.title = orig;
+}
+
+/* ── Re-generate from controls ── */
+function rcPreset(preset){
+  document.getElementById("dsFrom").value = document.getElementById("dsFrom")?document.getElementById("dsFrom").value:"";
+  setPreset(preset);
+  document.getElementById("rcFrom").value = document.getElementById("dsFrom").value;
+  document.getElementById("rcTo").value   = document.getElementById("dsTo").value;
+}
+
+function rcGenerate(){
+  var f=document.getElementById("rcFrom").value;
+  var t=document.getElementById("rcTo").value;
+  document.getElementById("dsFrom").value=f;
+  document.getElementById("dsTo").value=t;
+  generateReport(false);
+}
+</script>
+</body>
+</html>
