@@ -504,7 +504,7 @@ function renderReport() {
     </div>`;
 
   // ── PAGE 4 ASPECT PERFORMANCE ─────────────────────────────
-  const aspects = (o.aspect_scores||[]).sort((a,b)=>a.score-b.score);
+  const aspects = (o.aspect_scores||[]).sort((a,b)=>b.score-a.score); // highest first
   el.innerHTML += `
     <div class="page fade-in">
       <div class="page-header">
@@ -545,8 +545,8 @@ function renderReport() {
         <div class="section-title">Floor Score Summary</div>
         <div class="floor-grid">
           ${fl.map((f,i)=>{
-            const isBest=sortedFloors[0]&&sortedFloors[0].floor===f.floor;
-            const isWorst=sortedFloors[sortedFloors.length-1]&&sortedFloors[sortedFloors.length-1].floor===f.floor&&fl.length>1;
+            const isBest=sortedFloors[0]&&sortedFloors[0].floor===f.floor&&f.avg_score>=4;
+            const isWorst=sortedFloors[sortedFloors.length-1]&&sortedFloors[sortedFloors.length-1].floor===f.floor&&fl.length>1&&f.avg_score<3.5;
             const cls=isBest?"best":isWorst?"worst":"";
             return `<div class="floor-card ${cls}"><div class="floor-name">${f.floor.replace(" Floor","")}</div><div class="floor-score-big ${cls}">${f.avg_score>0?f.avg_score.toFixed(1):"—"}</div><div style="font-size:10px;color:var(--ink-30)">/5</div><div class="floor-comp">${f.weeks_done}/${f.weeks_total} weeks</div></div>`;
           }).join("")}
@@ -556,8 +556,8 @@ function renderReport() {
         <div class="floor-bar-chart">
           ${fl.map(f=>{
             const pct=f.avg_score>0?(f.avg_score/5)*100:0;
-            const clr=f.avg_score>=4?"var(--green)":f.avg_score>=3.5?"var(--orange)":"var(--crimson)";
-            return `<div class="floor-bar-row"><div class="floor-bar-label">${f.floor}</div><div class="floor-bar-bg"><div class="floor-bar-fill" style="width:${pct}%;background:${clr}"></div></div><div class="floor-bar-val">${f.avg_score>0?f.avg_score.toFixed(1):"—"}</div></div>`;
+            const clr=f.avg_score>=4?"var(--green)":f.avg_score>=3.5?"var(--orange)":f.avg_score>0?"var(--crimson)":"var(--border)";
+            return `<div class="floor-bar-row"><div class="floor-bar-label">${f.floor}</div><div class="floor-bar-bg"><div class="floor-bar-fill" style="width:${pct}%;background:${clr}"></div></div><div class="floor-bar-val" style="color:${clr}">${f.avg_score>0?f.avg_score.toFixed(1):"—"}</div></div>`;
           }).join("")}
         </div>
         <div class="divider"></div>
@@ -567,8 +567,9 @@ function renderReport() {
           <tbody>
             ${fl.map(f=>{
               const rate=f.weeks_total>0?Math.round((f.weeks_done/f.weeks_total)*100):0;
-              const cls=rate>=100?"good":rate>=75?"warn":"bad";
-              return `<tr><td>${f.floor}</td><td>${f.weeks_done}/${f.weeks_total} weeks</td><td>${rate}%</td><td><span class="score-pill ${cls}">${rate>=100?"✅ Complete":rate>=75?"🟡 Partial":"⚠️ Low"}</span></td></tr>`;
+              const cls=rate>=100?"good":rate>=80?"good":rate>=60?"warn":"bad";
+              const label=rate>=100?"✅ Complete":rate>=80?"✅ Good":rate>=60?"🟡 Partial":"⚠️ Low";
+              return `<tr><td>${f.floor}</td><td>${f.weeks_done}/${f.weeks_total} weeks</td><td>${rate}%</td><td><span class="score-pill ${cls}">${label}</span></td></tr>`;
             }).join("")}
           </tbody>
         </table>
@@ -686,7 +687,7 @@ function renderReport() {
             ${fl.map(f=>`
               <tr>
                 <td>${f.floor}</td>
-                ${(f.weekly_scores||[]).map(s=>`<td style="color:${s===null?'var(--ink-30)':s>=4?'var(--green)':s>=3.5?'var(--orange)':'var(--crimson)'}">${s!==null?s.toFixed(1):"—"}</td>`).join("")}
+                ${(f.weekly_scores||[]).map(s=>`<td style="color:${s===null?'var(--ink-30)':s>=4?'var(--green)':s>=3.5?'var(--orange)':s!==null?'var(--crimson)':'var(--ink-30)'}">${s!==null?s.toFixed(1):"—"}</td>`).join("")}
               </tr>`).join("")}
           </tbody>
         </table>
