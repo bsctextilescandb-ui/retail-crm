@@ -575,9 +575,28 @@ function renderReport(){
   var negFB   = fbData.filter(function(f){return isNeg(f);});
   var posFB   = fbData.filter(function(f){return !isNeg(f);});
   var fbWithVoice = fbData.filter(function(f){return String(f.your_voice||"").trim();});
-  var posVoices   = posFB.filter(function(f){return String(f.your_voice||"").trim();});
-  var negVoices   = negFB.filter(function(f){return String(f.your_voice||"").trim();});
-  var themes      = detectThemes(fbWithVoice);
+
+  // Positive voices: ALL questions positive + voice > 7 words, sorted by word count desc
+  var posVoices = posFB
+    .filter(function(f){
+      var v = String(f.your_voice||"").trim();
+      return v && v.split(/\s+/).length > 7;
+    })
+    .sort(function(a,b){
+      return b.your_voice.split(/\s+/).length - a.your_voice.split(/\s+/).length;
+    });
+
+  // Concern voices: ANY negative flag + voice > 5 words, sorted by word count desc
+  var negVoices = negFB
+    .filter(function(f){
+      var v = String(f.your_voice||"").trim();
+      return v && v.split(/\s+/).length > 5;
+    })
+    .sort(function(a,b){
+      return b.your_voice.split(/\s+/).length - a.your_voice.split(/\s+/).length;
+    });
+
+  var themes = detectThemes(fbWithVoice);
 
   var divOpen     = divData.filter(function(d){return d.status==="open";}).length;
   var divActioned = divData.filter(function(d){return ["sourcing","available","closed"].indexOf(d.status)!==-1;}).length;
