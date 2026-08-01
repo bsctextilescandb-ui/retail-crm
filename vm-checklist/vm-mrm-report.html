@@ -45,6 +45,7 @@ body{font-family:Cambria,Georgia,serif;background:var(--ivory);color:var(--ink);
 .ctrl-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;font-family:Cambria,serif;border:none;cursor:pointer;display:flex;align-items:center;gap:6px}
 .ctrl-btn.apply{background:var(--gold);color:var(--white)}
 .ctrl-btn.pdf{background:var(--crimson);color:var(--white)}
+.ctrl-btn.view{background:var(--green);color:var(--white)}
 
 /* ── PAGES ─────────────────────────────────────── */
 .report{max-width:900px;margin:0 auto;padding:24px}
@@ -208,10 +209,41 @@ body{font-family:Cambria,Georgia,serif;background:var(--ivory);color:var(--ink);
 
 /* ── PRINT ─────────────────────────────────────── */
 @media print {
-  body{background:white}
+  body{background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .controls{display:none!important}
   .page{box-shadow:none;margin-bottom:0;border-radius:0;page-break-after:always;break-after:page}
   .page:last-child{page-break-after:auto}
+  /* Darken light backgrounds for print */
+  .kpi-card{background:#E8E4D8!important;border:1.5px solid #1E2D5A!important}
+  .wins-box{background:#C8F0C8!important;border:1.5px solid #1E7A1E!important}
+  .concerns-box{background:#F8C8C8!important;border:1.5px solid #C0392B!important}
+  .week-card{background:#E8E4D8!important}
+  .floor-card{background:#E8E4D8!important}
+  .floor-card.best{background:#C8F0C8!important}
+  .floor-card.worst{background:#F8C8C8!important}
+  .compliance-wrap{background:#D0D8F0!important}
+  .target-card{background:#E8E4D8!important}
+  .photo-card{background:#E8E4D8!important}
+  .drive-link-box{background:#D0D8F0!important}
+  .score-pill.good{background:#C8F0C8!important;color:#0A5A0A!important}
+  .score-pill.warn{background:#FFE0A0!important;color:#8B4500!important}
+  .score-pill.bad{background:#F8C8C8!important;color:#8B0000!important}
+  .bar-fill.good{background:#1E7A1E!important}
+  .bar-fill.warn{background:#D97706!important}
+  .bar-fill.bad{background:#C0392B!important}
+  .trend-bar.good{background:#1E2D5A!important}
+  .trend-bar.warn{background:#D97706!important}
+  .trend-bar.bad{background:#C0392B!important}
+  .floor-bar-fill{opacity:1!important}
+  .aspect-table tr:nth-child(even) td{background:#F0EDE5!important}
+  .fail-table tr:nth-child(even) td{background:#F0EDE5!important}
+  .wow-table tr:nth-child(even) td{background:#F0EDE5!important}
+  .action-table tr:nth-child(even) td{background:#F0EDE5!important}
+  .priority-badge.high{background:#F8C8C8!important;color:#8B0000!important}
+  .priority-badge.medium{background:#FFE0A0!important;color:#8B4500!important}
+  .priority-badge.low{background:#C8F0C8!important;color:#0A5A0A!important}
+  .health-circle{border:6px solid #1E2D5A!important}
+  .navy-l,.EEF1FB{background:#D0D8F0!important}
 }
 
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -258,8 +290,8 @@ body{font-family:Cambria,Georgia,serif;background:var(--ivory);color:var(--ink);
       <span class="ctrl-label">to</span>
       <input type="date" class="ctrl-date" id="dateTo"/>
     </div>
-    <button class="ctrl-btn apply" onclick="generateReport()">Generate</button>
-    <button class="ctrl-btn pdf" onclick="window.print()">📄 PDF</button>
+    <button class="ctrl-btn apply" onclick="generateReport()">▶ Generate</button>
+    <button class="ctrl-btn pdf" onclick="window.print()">📄 Download PDF</button>
   </div>
 
   <div class="report" id="report">
