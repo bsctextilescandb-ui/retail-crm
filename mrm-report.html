@@ -569,37 +569,70 @@ function divertRate(){
 }
 
 /* ── Theme detection ── */
-var THEMES = [
-  {key:"pricing",   words:["price","pricing","expensive","costly","high","cheap","cost","value"],
-   label:"Pricing Concerns", type:"concern"},
-  {key:"staff",     words:["staff","behaviour","behavior","rude","helpful","attitude","service","employee"],
-   label:"Staff Behaviour", type:"concern"},
-  {key:"variety",   words:["variety","stock","collection","range","option","available","find"],
-   label:"Product Variety", type:"concern"},
-  {key:"experience",words:["experience","feel","comfortable","enjoy","happy","satisfied","love","nice"],
-   label:"Great Experience", type:"positive"},
-  {key:"billing",   words:["billing","queue","wait","long","slow","checkout","bill"],
-   label:"Billing / Queue", type:"concern"},
-  {key:"clean",     words:["clean","organized","display","neat","tidy","arrangement"],
-   label:"Store Ambiance", type:"positive"},
-];
-
+/* ── Theme detection — based on Q answers not keywords ── */
 function detectThemes(feedbacks){
-  var counts = {};
-  THEMES.forEach(function(t){ counts[t.key]=0; });
-  feedbacks.forEach(function(f){
-    var txt = String(f.your_voice||"").toLowerCase();
-    if(!txt) return;
-    THEMES.forEach(function(t){
-      if(t.words.some(function(w){ return txt.indexOf(w)!==-1; })){
-        counts[t.key]++;
-      }
-    });
-  });
-  return THEMES
-    .filter(function(t){ return counts[t.key]>0; })
-    .map(function(t){ return {label:t.label,count:counts[t.key],type:t.type}; })
-    .sort(function(a,b){ return b.count-a.count; });
+  var themes = [];
+
+  // CONCERN themes — based on negative Q answers
+  var staffNeg = feedbacks.filter(function(f){
+    return NEG_MAP.q3_staff_behaviour.indexOf(String(f.q3_staff_behaviour||"").trim()) !== -1;
+  }).length;
+
+  var pricingNeg = feedbacks.filter(function(f){
+    return NEG_MAP.q5_pricing_value.indexOf(String(f.q5_pricing_value||"").trim()) !== -1;
+  }).length;
+
+  var varietyNeg = feedbacks.filter(function(f){
+    return NEG_MAP.q4_product_variety.indexOf(String(f.q4_product_variety||"").trim()) !== -1;
+  }).length;
+
+  var experienceNeg = feedbacks.filter(function(f){
+    return NEG_MAP.q2_overall_experience.indexOf(String(f.q2_overall_experience||"").trim()) !== -1;
+  }).length;
+
+  var visitNeg = feedbacks.filter(function(f){
+    return NEG_MAP.q6_visit_again.indexOf(String(f.q6_visit_again||"").trim()) !== -1;
+  }).length;
+
+  // POSITIVE themes — based on positive Q answers
+  var staffPos = feedbacks.filter(function(f){
+    var v = String(f.q3_staff_behaviour||"").trim();
+    return v === "Very Clear & Helpful" || v === "Helpful";
+  }).length;
+
+  var experiencePos = feedbacks.filter(function(f){
+    var v = String(f.q2_overall_experience||"").trim();
+    return v === "Excellent" || v === "Good";
+  }).length;
+
+  var visitPos = feedbacks.filter(function(f){
+    var v = String(f.q6_visit_again||"").trim();
+    return v === "Definitely Yes" || v === "Yes";
+  }).length;
+
+  var varietyPos = feedbacks.filter(function(f){
+    var v = String(f.q4_product_variety||"").trim();
+    return v === "Very Satisfied" || v === "Satisfied";
+  }).length;
+
+  // Build concern themes
+  if(staffNeg>0)       themes.push({label:"Staff Behaviour Issues",   count:staffNeg,       type:"concern"});
+  if(pricingNeg>0)     themes.push({label:"Pricing Concerns",          count:pricingNeg,     type:"concern"});
+  if(varietyNeg>0)     themes.push({label:"Product Variety Issues",    count:varietyNeg,     type:"concern"});
+  if(experienceNeg>0)  themes.push({label:"Poor Overall Experience",   count:experienceNeg,  type:"concern"});
+  if(visitNeg>0)       themes.push({label:"Will Not Visit Again",      count:visitNeg,       type:"concern"});
+
+  // Build positive themes
+  if(staffPos>0)       themes.push({label:"Excellent Staff Behaviour", count:staffPos,       type:"positive"});
+  if(experiencePos>0)  themes.push({label:"Great Overall Experience",  count:experiencePos,  type:"positive"});
+  if(visitPos>0)       themes.push({label:"Will Visit Again",          count:visitPos,       type:"positive"});
+  if(varietyPos>0)     themes.push({label:"Happy with Product Range",  count:varietyPos,     type:"positive"});
+
+  // Sort — concerns first by count, then positives by count
+  var concerns  = themes.filter(function(t){return t.type==="concern";}).sort(function(a,b){return b.count-a.count;});
+  var positives = themes.filter(function(t){return t.type==="positive";}).sort(function(a,b){return b.count-a.count;});
+
+  return concerns.concat(positives).filter(function(t){return t.count>0;});
 }
 
 /* ── Health score ── */
@@ -938,7 +971,8 @@ function themeSection(themes){
   var html='<div class="theme-grid">';
   themes.forEach(function(t){
     html+='<div class="theme-pill '+(t.type==="concern"?"concern":"positive")+'">' +
-      (t.type==="concern"?"⚠️ ":"✅ ")+esc(t.label)+" — "+t.count+" mentions"+
+      (t.type==="concern"?"⚠️ ":"✅ ")+esc(t.label)+
+      '<span class="theme-pill-count">'+t.count+' responses</span>'+
     '</div>';
   });
   html+='</div>';
@@ -1046,7 +1080,7 @@ function actionItems(cv, csi, nps, dr, negFB, themes){
   if(dr>5)   html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">Reduce divert rate from '+dr+'% to below 5% — improve stock planning</div></div>';
   if(negFB.length>0) html+='<div class="win-item gold"><div class="win-icon">'+n+++'. </div><div class="win-text">'+negFB.length+' negative feedbacks this period — ensure all callable customers are contacted</div></div>';
   themes.filter(function(t){return t.type==="concern";}).slice(0,2).forEach(function(t){
-    html+='<div class="win-item red"><div class="win-icon">'+n+++'. </div><div class="win-text">Address "'+t.label+'" — mentioned '+t.count+' times in customer feedback</div></div>';
+    html+='<div class="win-item red"><div class="win-icon">'+n+++'. </div><div class="win-text">'+esc(t.label)+' — '+t.count+' negative responses this period. Needs immediate attention.</div></div>';
   });
   if(!html) html+='<div style="color:var(--ink-60);font-size:13px;padding:12px">All metrics on target! 🎉 Maintain current performance.</div>';
   return html;
