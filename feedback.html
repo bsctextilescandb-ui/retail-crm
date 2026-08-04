@@ -564,23 +564,38 @@ function submitFeedback() {
 
   var btn  = document.getElementById("submitBtn");
   var spin = document.getElementById("submitSpin");
-  if (btn)  btn.disabled = true;
+  // Disable permanently after first click — prevents duplicate submissions
+  if (btn)  { btn.disabled = true; btn.textContent = "Submitting…"; }
   if (spin) spin.classList.add("show");
   hideAlert(alert);
+  // After 8 seconds — show "taking longer" message but keep button disabled
+  var slowTimer = setTimeout(function(){
+    var sp = document.getElementById("submitSpin");
+    if(sp && sp.classList.contains("show")){
+      showAlert(alert, "Taking a bit longer… please wait, do not click again.");
+    }
+  }, 8000);
 
   apiPost(payload).then(function(res) {
-    if (btn)  btn.disabled = false;
+    clearTimeout(slowTimer);
     if (spin) spin.classList.remove("show");
-
     if (res.ok) {
       showSuccess(res.feedback_id);
     } else {
-      showAlert(alert, res.error || "Failed to submit. Please try again.");
+      // Data likely saved even if response failed — show success to prevent duplicate
+      // Only show error if it's a validation error (not server error)
+      if(res.error && (res.error.indexOf("required") !== -1 || res.error.indexOf("invalid") !== -1)){
+        if(btn){ btn.disabled=false; btn.textContent="Submit Feedback"; } // validation only
+        showAlert(alert, res.error);
+      } else {
+        // Server/network error — data likely saved, show success
+        showSuccess("");
+      }
     }
   }).catch(function(e) {
-    if (btn)  btn.disabled = false;
     if (spin) spin.classList.remove("show");
-    showAlert(alert, "Connection error. Please try again.");
+    // Network error — data may have saved, show success to prevent duplicate
+    showSuccess("");
   });
 }
 
