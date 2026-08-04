@@ -404,14 +404,20 @@ function apiPost(body) {
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body:    JSON.stringify(body),
   }).then(function(r) {
+    // Handle 404 — deployment issue
+    if(r.status === 404) {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+      return { ok: false, error: "Deployment error" };
+    }
     return r.text().then(function(txt) {
       try {
         return JSON.parse(txt);
       } catch(e) {
-        // Apps Script returned HTML (quota/auth error) — auto sign out
+        // Apps Script returned HTML — session/quota issue
         if(txt.indexOf("<") !== -1) {
-          showGlobalError("Session expired. Please sign in again.");
-          setTimeout(function(){ signOut(); }, 2000);
+          sessionStorage.clear();
+          window.location.href = "index.html";
         }
         return { ok: false, error: "Server error. Please sign in again." };
       }
@@ -1229,8 +1235,8 @@ function boot() {
   setInterval(function(){
     apiPost({action:"get_settings"}).then(function(res){
       if(!res.ok && res.error && res.error.indexOf("sign in") !== -1){
-        showGlobalError("Session expired. Please sign in again.");
-        setTimeout(function(){ signOut(); }, 2000);
+        sessionStorage.clear();
+        window.location.href = "index.html";
       }
     }).catch(function(){});
   }, 30 * 60 * 1000);
