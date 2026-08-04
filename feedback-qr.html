@@ -189,13 +189,13 @@ function apiPost(body) {
 /* ── Boot ── */
 function boot() {
   // Load questions first, then settings
-  apiGet("feedback_form")
+  apiPost({action:"feedback_form"})
     .then(function(qRes) {
       if (!qRes.ok) { showError("Could not load questions. Please refresh."); return; }
       QUESTIONS = qRes.questions || [];
 
       // Load company name separately — don't block if it fails
-      apiGet("setup_check")
+      apiPost({action:"setup_check"})
         .then(function(sRes) {
           if (sRes.ok && sRes.company_name) {
             document.getElementById("companyName").textContent = sRes.company_name;
