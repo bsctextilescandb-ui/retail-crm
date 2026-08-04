@@ -403,7 +403,35 @@ function apiPost(body) {
     method:  "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body:    JSON.stringify(body),
-  }).then(function(r) { return r.json(); });
+  }).then(function(r) {
+    return r.text().then(function(txt) {
+      try {
+        return JSON.parse(txt);
+      } catch(e) {
+        // Apps Script returned HTML (quota/auth error) — auto sign out
+        if(txt.indexOf("<") !== -1) {
+          showGlobalError("Session expired. Please sign in again.");
+          setTimeout(function(){ signOut(); }, 2000);
+        }
+        return { ok: false, error: "Server error. Please sign in again." };
+      }
+    });
+  }).catch(function(e) {
+    return { ok: false, error: "Connection error. Check your internet." };
+  });
+}
+
+function showGlobalError(msg) {
+  var existing = document.getElementById("globalErrBanner");
+  if(existing) existing.remove();
+  var el = document.createElement("div");
+  el.id = "globalErrBanner";
+  el.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;" +
+    "background:#C0392B;color:#fff;padding:12px 20px;text-align:center;" +
+    "font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;" +
+    "box-shadow:0 2px 12px rgba(0,0,0,.3)";
+  el.textContent = "⚠️ " + msg;
+  document.body.appendChild(el);
 }
 
 /* ============================================================
@@ -1191,8 +1219,21 @@ function boot() {
       if (el) el.textContent = name;
       // Cache settings for footfall module
       if (ffState) ffState.settings = res.settings;
+    } else if(res.error && res.error.indexOf("sign in") !== -1) {
+      showGlobalError("Session expired. Redirecting to login…");
+      setTimeout(function(){ signOut(); }, 2000);
     }
   }).catch(function(){});
+
+  // Check session every 30 minutes — auto redirect if expired
+  setInterval(function(){
+    apiPost({action:"get_settings"}).then(function(res){
+      if(!res.ok && res.error && res.error.indexOf("sign in") !== -1){
+        showGlobalError("Session expired. Please sign in again.");
+        setTimeout(function(){ signOut(); }, 2000);
+      }
+    }).catch(function(){});
+  }, 30 * 60 * 1000);
 }
 
 /* ============================================================
