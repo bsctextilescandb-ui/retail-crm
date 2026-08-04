@@ -320,8 +320,10 @@ function boot() {
   apiGet("setup_check").then(function(res) {
     if (res.ok && res.setup_complete) {
       render("login");
+    } else if(res.ok && !res.setup_complete) {
+      render("onboard"); // genuine first-time setup
     } else {
-      render("onboard");
+      render("login"); // any error — assume setup done, show login
     }
   }).catch(function() {
     render("login"); // fallback
