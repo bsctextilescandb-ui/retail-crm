@@ -399,31 +399,44 @@ function clearSession() {
    ============================================================ */
 function apiPost(body) {
   body.token = SESSION ? SESSION.token : "";
-  return fetch(API_URL, {
-    method:  "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body:    JSON.stringify(body),
-  }).then(function(r) {
-    // Handle 404 — deployment issue
-    if(r.status === 404) {
-      sessionStorage.clear();
-      window.location.href = "index.html";
-      return { ok: false, error: "Deployment error" };
-    }
-    return r.text().then(function(txt) {
-      try {
-        return JSON.parse(txt);
-      } catch(e) {
-        // Apps Script returned HTML — session/quota issue
-        if(txt.indexOf("<") !== -1) {
-          sessionStorage.clear();
-          window.location.href = "index.html";
+  return new Promise(function(resolve) {
+    function attempt(retriesLeft, delay) {
+      fetch(API_URL, {
+        method:  "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body:    JSON.stringify(body),
+      }).then(function(r) {
+        if(r.status === 404 || r.status === 302) {
+          // Cold start redirect — retry
+          if(retriesLeft > 0) {
+            setTimeout(function(){ attempt(retriesLeft-1, delay*2); }, delay);
+          } else {
+            resolve({ok:false, error:"server_error"});
+          }
+          return;
         }
-        return { ok: false, error: "Server error. Please sign in again." };
-      }
-    });
-  }).catch(function(e) {
-    return { ok: false, error: "Connection error. Check your internet." };
+        return r.text().then(function(txt) {
+          try {
+            var json = JSON.parse(txt);
+            resolve(json);
+          } catch(e) {
+            // HTML response — cold start
+            if(retriesLeft > 0) {
+              setTimeout(function(){ attempt(retriesLeft-1, delay*2); }, delay);
+            } else {
+              resolve({ok:false, error:"server_error"});
+            }
+          }
+        });
+      }).catch(function() {
+        if(retriesLeft > 0) {
+          setTimeout(function(){ attempt(retriesLeft-1, delay*2); }, delay);
+        } else {
+          resolve({ok:false, error:"no_internet"});
+        }
+      });
+    }
+    attempt(3, 2000); // 3 retries, start with 2s delay
   });
 }
 

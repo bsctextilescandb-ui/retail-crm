@@ -393,34 +393,50 @@ function getToken(){
   try{t=sessionStorage.getItem("crm_token")||localStorage.getItem("bsc_tv_token")||"";}catch(e){}
   return t;
 }
+function fetchWithRetry(body, retriesLeft, delay) {
+  return new Promise(function(resolve) {
+    fetch(API_URL, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)})
+    .then(function(r) {
+      if(r.status===404 || r.status===302) {
+        if(retriesLeft>0) setTimeout(function(){ fetchWithRetry(body,retriesLeft-1,delay*2).then(resolve); }, delay);
+        else resolve({ok:false,error:"server_error"});
+        return;
+      }
+      return r.text().then(function(txt){
+        try{ resolve(JSON.parse(txt)); }
+        catch(e){
+          if(retriesLeft>0) setTimeout(function(){ fetchWithRetry(body,retriesLeft-1,delay*2).then(resolve); }, delay);
+          else resolve({ok:false,error:"server_error"});
+        }
+      });
+    }).catch(function(){
+      if(retriesLeft>0) setTimeout(function(){ fetchWithRetry(body,retriesLeft-1,delay*2).then(resolve); }, delay);
+      else resolve({ok:false,error:"no_internet"});
+    });
+  });
+}
+
 function loadData(){
   var body={action:"get_dashboard",date:dateKeyIST(),token:getToken()};
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
-  .then(function(r){return r.json();})
-  .then(function(res){
+  fetchWithRetry(body,3,2000).then(function(res){
     if(res.ok){
       renderDashboard(res);
     } else {
       // Try TV auth token
-      fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify({action:"tv_auth"})})
-      .then(function(r){return r.json();})
-      .then(function(r2){
+      fetchWithRetry({action:"tv_auth"},2,1000).then(function(r2){
         if(r2.ok){
           try{localStorage.setItem("bsc_tv_token",r2.token);}catch(e){}
           body.token=r2.token;
-          fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
-          .then(function(r){return r.json();})
-          .then(function(res2){
+          fetchWithRetry(body,2,1000).then(function(res2){
             if(res2.ok) renderDashboard(res2);
             else showErr(res2.error||"No data");
-          }).catch(function(e){showErr(e.message);});
+          });
         } else {
           showErr("Open the CRM app once on this device to connect.");
         }
-      }).catch(function(e){showErr(e.message);});
+      });
     }
-  }).catch(function(e){showErr("Connection error: "+e.message);});
+  });
 }
 
 function showErr(msg){
