@@ -295,7 +295,7 @@ function api(body){
   body.token=SESSION.token;
   return fetch(API_URL,{method:"POST",
     headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(body)}).then(function(r){return r.json();});
+    body:JSON.stringify(body)}).then(function(r){return r.text().then(function(txt){try{return JSON.parse(txt);}catch(e){return {ok:false,error:'Server error. Please sign in again.'};}})});
 }
 
 /* ── State ── */
