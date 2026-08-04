@@ -249,7 +249,7 @@ function apiPost(body) {
     method:"POST",
     headers:{"Content-Type":"text/plain;charset=utf-8"},
     body:JSON.stringify(body),
-  }).then(function(r){ return r.json(); });
+  }).then(function(r){return r.text().then(function(txt){try{return JSON.parse(txt);}catch(e){return {ok:false,error:'Server error. Please sign in again.'};}})});
 }
 
 /* ============================================================
@@ -333,7 +333,7 @@ function renderForm() {
           '" onclick="setSource(\'walk_in\')">🚶 Walk-in Entry</div>' +
       '</div>' +
       '<div class="field"><label>Area / Zone <span class="req">*</span></label>' +
-        '<input id="areaInput" type="text" placeholder="e.g. Tilakwadi, Hubli…" ' +
+        '<input id="areaInput" type="text" placeholder="e.g. Ground Floor, Sarees Section…" ' +
         'value="' + esc(formState.area) + '" oninput="formState.area=this.value"/>' +
       '</div>' +
     '</div>' +
