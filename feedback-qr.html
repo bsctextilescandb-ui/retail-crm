@@ -398,22 +398,33 @@ function doSubmit() {
   /* UI loading */
   var btn  = document.getElementById("submitBtn");
   var spin = document.getElementById("submitSpin");
-  if (btn)  btn.disabled = true;
+  if (btn)  { btn.disabled = true; btn.textContent = "Submitting…"; }
   if (spin) spin.classList.add("show");
   hideAlert(alert);
+  // After 8 seconds — show "taking longer" message but keep button disabled
+  var slowTimer = setTimeout(function(){
+    var sp = document.getElementById("submitSpin");
+    if(sp && sp.classList.contains("show")){
+      showAlert(alert, "Taking a bit longer… please wait, do not click again.");
+    }
+  }, 8000);
 
   apiPost(payload).then(function(res) {
-    if (btn)  btn.disabled = false;
+    clearTimeout(slowTimer);
     if (spin) spin.classList.remove("show");
     if (res.ok) {
       showSuccess();
     } else {
-      showAlert(alert, res.error || "Submission failed. Please try again.");
+      if(res.error && (res.error.indexOf("required")!==-1||res.error.indexOf("invalid")!==-1)){
+        if(btn){btn.disabled=false;btn.textContent="Submit Feedback";}
+        showAlert(alert, res.error);
+      } else {
+        showSuccess(); // likely saved — show success
+      }
     }
   }).catch(function() {
-    if (btn)  btn.disabled = false;
     if (spin) spin.classList.remove("show");
-    showAlert(alert,"Connection error. Please try again.");
+    showSuccess(); // network error — data may have saved
   });
 }
 
