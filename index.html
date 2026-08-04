@@ -277,7 +277,7 @@ var state = {
    API
    ============================================================ */
 function apiGet(action) {
-  return fetch(API_URL + "?action=" + action).then(function(r){ return r.json(); });
+  return fetch(API_URL + "?action=" + action).then(function(r){return r.text().then(function(txt){try{return JSON.parse(txt);}catch(e){return {ok:false,error:'Server error'};}})});
 }
 
 function apiPost(body) {
@@ -285,7 +285,7 @@ function apiPost(body) {
     method:  "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body:    JSON.stringify(body),
-  }).then(function(r){ return r.json(); });
+  }).then(function(r){return r.text().then(function(txt){try{return JSON.parse(txt);}catch(e){return {ok:false,error:'Server error'};}})});
 }
 
 /* ============================================================
