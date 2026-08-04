@@ -325,7 +325,8 @@ function boot() {
   }
 
   // Check if first-time setup needed
-  apiGet("setup_check").then(function(res) {
+  // Use POST for setup_check — GET gets redirected by Google auth
+  apiPost({ action:"setup_check" }).then(function(res) {
     if (res.ok && res.setup_complete) {
       render("login");
     } else if(res.ok && !res.setup_complete) {
