@@ -285,7 +285,15 @@ function apiPost(body) {
     method:  "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body:    JSON.stringify(body),
-  }).then(function(r){return r.text().then(function(txt){try{return JSON.parse(txt);}catch(e){return {ok:false,error:'Server error'};}})});
+  }).then(function(r){
+    if(r.status === 404) return {ok:false,error:"retry"};
+    return r.text().then(function(txt){
+      try{return JSON.parse(txt);}
+      catch(e){return {ok:false,error:"retry"};}
+    });
+  }).catch(function(){
+    return {ok:false,error:"no_internet"};
+  });
 }
 
 /* ============================================================
@@ -401,19 +409,37 @@ function doLogin() {
       saveSession(res);
       document.getElementById("loginBtn").textContent = "✓ Signed in";
       setTimeout(function(){ window.location.href = "app.html"; }, 500);
-    } else {
-      // Server error vs wrong credentials
-      var msg = res.error || "Invalid credentials. Please try again.";
-      if(msg === "Server error" || msg.indexOf("server") !== -1 || msg.indexOf("Server") !== -1){
-        msg = "Unable to connect. Please wait a moment and try again.";
-      }
-      showAlert(alert, msg);
+      return;
+    }
+    // Wrong credentials — show immediately
+    var isCredError = res.error && (
+      res.error.indexOf("Invalid") !== -1 ||
+      res.error.indexOf("not found") !== -1 ||
+      res.error.indexOf("inactive") !== -1 ||
+      res.error.indexOf("required") !== -1
+    );
+    if(isCredError) {
+      showAlert(alert, res.error);
       document.getElementById("lpwd").value = "";
       document.getElementById("lpwd").focus();
+      return;
     }
-  }).catch(function(err) {
+    // Server error — login may have worked but response lost
+    // Try to validate session directly
+    apiPost({ action:"validate_session_by_user", username:email }).then(function(vRes) {
+      if(vRes.ok) {
+        // Session exists — use it
+        saveSession(vRes);
+        window.location.href = "app.html";
+      } else {
+        showAlert(alert, "Tap Sign In once more to continue.");
+      }
+    }).catch(function(){
+      showAlert(alert, "Tap Sign In once more to continue.");
+    });
+  }).catch(function() {
     setLoading("loginBtn","loginSpin", false);
-    showAlert(alert, "No internet connection. Please check and try again.");
+    showAlert(alert, "No internet. Please check your connection.");
   });
 }
 
