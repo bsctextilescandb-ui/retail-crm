@@ -402,13 +402,18 @@ function doLogin() {
       document.getElementById("loginBtn").textContent = "✓ Signed in";
       setTimeout(function(){ window.location.href = "app.html"; }, 500);
     } else {
-      showAlert(alert, res.error || "Invalid credentials. Please try again.");
+      // Server error vs wrong credentials
+      var msg = res.error || "Invalid credentials. Please try again.";
+      if(msg === "Server error" || msg.indexOf("server") !== -1 || msg.indexOf("Server") !== -1){
+        msg = "Unable to connect. Please wait a moment and try again.";
+      }
+      showAlert(alert, msg);
       document.getElementById("lpwd").value = "";
       document.getElementById("lpwd").focus();
     }
   }).catch(function(err) {
     setLoading("loginBtn","loginSpin", false);
-    showAlert(alert, "Connection error. Please check your internet and try again.");
+    showAlert(alert, "No internet connection. Please check and try again.");
   });
 }
 
