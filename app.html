@@ -374,7 +374,7 @@ input,select,textarea{font-family:inherit;outline:0}
 /* ============================================================
    CONFIG
    ============================================================ */
-var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+var API_URL = "https://bsc-crm.bsctextiles-candb.workers.dev/";
 
 /* ============================================================
    SESSION
@@ -1614,27 +1614,29 @@ function sendDERInline(){
   if(btn){ btn.disabled=true; btn.textContent="⏳ Sending…"; }
   if(alrt){ alrt.style.display="none"; }
 
-  apiPost({ action:"send_der", date:dashDate }).then(function(res){
+  // DER email → Apps Script directly (Gmail sender)
+  var AS_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+  fetch(AS_URL, {
+    method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({ action:"send_der", date:dashDate, token: SESSION ? SESSION.token : "" })
+  }).then(function(r){ return r.text().then(function(t){ try{return JSON.parse(t);}catch(e){return {ok:false,error:"Server error"};} }); })
+  .then(function(res){
     if(btn){ btn.disabled=false; btn.innerHTML="📧 Send DER Email"; }
     if(alrt){
       alrt.style.display="block";
       if(res.ok){
-        alrt.style.background="var(--green-l)";
-        alrt.style.color="var(--green)";
+        alrt.style.background="var(--green-l)"; alrt.style.color="var(--green)";
         alrt.textContent="✓ " + (res.message||"DER sent successfully!");
       } else {
-        alrt.style.background="var(--crimson-l)";
-        alrt.style.color="var(--crimson)";
-        alrt.textContent="✗ " + (res.error||"Failed to send DER. Check Admin → Settings for DER email.");
+        alrt.style.background="var(--crimson-l)"; alrt.style.color="var(--crimson)";
+        alrt.textContent="✗ " + (res.error||"Failed to send DER.");
       }
       setTimeout(function(){ alrt.style.display="none"; }, 7000);
     }
   }).catch(function(e){
     if(btn){ btn.disabled=false; btn.innerHTML="📧 Send DER Email"; }
     if(alrt){
-      alrt.style.display="block";
-      alrt.style.background="var(--crimson-l)";
-      alrt.style.color="var(--crimson)";
+      alrt.style.display="block"; alrt.style.background="var(--crimson-l)"; alrt.style.color="var(--crimson)";
       alrt.textContent="Connection error: " + e.message;
     }
   });

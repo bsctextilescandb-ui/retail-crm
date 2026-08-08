@@ -290,6 +290,21 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
   .health-row{page-break-inside:avoid!important;break-inside:avoid!important}
 }
 </style>
+<script>
+function checkPW(){
+  var val=(document.getElementById("pwInput").value||"").trim();
+  if(val==="BSCCANDB"){
+    try{localStorage.setItem("bsc_mrm_unlocked","1");}catch(e){}
+    document.getElementById("pwScreen").style.display="none";
+    showDateScreen();
+  } else {
+    var wrap=document.getElementById("pwInputWrap");
+    if(wrap){wrap.classList.add("shake");setTimeout(function(){wrap.classList.remove("shake");},400);}
+    document.getElementById("pwError").textContent="Incorrect password. Try again.";
+    document.getElementById("pwInput").value="";
+  }
+}
+</script>
 </head>
 <body>
 
@@ -303,7 +318,7 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
   <div class="pw-label">Enter Password</div>
   <div id="pwInputWrap">
     <input class="pw-input" type="password" id="pwInput"
-      placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPW()"/>
+      placeholder="Enter password" onkeydown="if(event.key==='Enter')window.checkPW&&window.checkPW()"/>
   </div>
   <button class="pw-btn" onclick="checkPW()">Access Report</button>
   <div class="pw-error" id="pwError"></div>
@@ -341,7 +356,7 @@ html,body{min-height:100vh;background:var(--ivory);color:var(--ink)}
 
 <script>
 /* ── Config ── */
-var API_URL = "https://script.google.com/macros/s/AKfycbzDRanjpBdGYQzXNg87nVgd7H_WuyQYun7YM4yH_FEYSHriw3jwiv3DiWBsQbM5_Iy_6g/exec";
+var API_URL = "https://bsc-crm.bsctextiles-candb.workers.dev/";
 var PASSWORD  = "BSCCANDB";
 var PW_KEY    = "bsc_mrm_unlocked";
 
@@ -464,12 +479,14 @@ function generateReport(skipFilter){
     apiWithFallback({action:"get_feedback"}),
     apiWithFallback({action:"get_diverts"}),
     apiWithFallback({action:"get_feedback_questions"}),
+    apiWithFallback({action:"get_call_log"}),
   ]).then(function(res){
     DATA.footfall  = res[0].entries    || [];
     DATA.daily     = res[0].daily_all  || [];
     DATA.feedback  = res[1].feedback   || [];
     DATA.diverts   = res[2].diverts    || [];
     DATA.questions = res[3].questions  || [];
+    DATA.callLog   = res[4].call_log   || [];
     renderReport();
   }).catch(function(e){
     document.getElementById("report").innerHTML =
@@ -761,8 +778,88 @@ function renderReport(){
     funnelSection(totalFall, totalB, cv)
   );
 
-  // PAGE 4 — Customer Satisfaction
-  html += page("Customer Satisfaction", "04",
+
+  // PAGE 4 — Customer Sentiment Overview (overall_quick_rating based)
+  var qrData      = fbData.filter(function(f){ return f.overall_quick_rating && f.overall_quick_rating.trim(); });
+  console.log("fbData total:", fbData.length, "qrData:", qrData.length, "sample:", fbData.slice(-3).map(function(f){return {date:f.date,oqr:f.overall_quick_rating};}));
+  var qrTotal     = qrData.length;
+  var qrApprec    = qrData.filter(function(f){ return f.overall_quick_rating==="appreciation"; });
+  var qrFeedback  = qrData.filter(function(f){ return f.overall_quick_rating==="feedback"; });
+  var qrConcern   = qrData.filter(function(f){ return f.overall_quick_rating==="concern"; });
+
+  // Voices by type — exclude feedback_ids already shown in Page 5 (posVoices + negVoices)
+  var shownIds = posVoices.concat(negVoices).map(function(v){ return v.feedback_id; });
+
+  function sentimentVoices(group, minWords) {
+    return group
+      .filter(function(f){
+        var txt = String(f.your_voice||"").trim();
+        return txt && txt.split(/\s+/).length > minWords && shownIds.indexOf(f.feedback_id)===-1;
+      })
+      .sort(function(a,b){ return b.your_voice.split(/\s+/).length - a.your_voice.split(/\s+/).length; })
+      .slice(0,3);
+  }
+
+  var svApprec   = sentimentVoices(qrApprec,  5);
+  var svFeedback = sentimentVoices(qrFeedback, 5);
+  var svConcern  = sentimentVoices(qrConcern,  5);
+
+  function sentimentVoiceHtml(voices, cls, icon, label) {
+    if(voices.length===0) return '<div style="color:var(--ink-60);font-size:13px;margin-bottom:12px">No '+label+' voices with detailed feedback.</div>';
+    var html = '';
+    voices.forEach(function(v,i){
+      html += '<div class="'+cls+'">' +
+        '<div class="vq-num">'+icon+' Voice '+(i+1)+'</div>' +
+        '<div class="vq-text full">"'+esc(String(v.your_voice||"").trim())+'"</div>' +
+        '<div class="vq-meta">' +
+          (v.area?'<span>'+esc(v.area)+'</span><span class="vq-meta-dot">·</span>':'') +
+          (v.date?'<span>'+esc(v.date)+'</span><span class="vq-meta-dot">·</span>':'') +
+          (v.cust_name?'<span style="font-weight:600">'+esc(v.cust_name)+'</span>':'') +
+        '</div>' +
+      '</div>';
+    });
+    return html;
+  }
+
+  html += page("Customer Sentiment Overview", "04",
+    // Stat cards
+    '<div class="section-title">Experience Breakdown</div>' +
+    '<div class="stat-grid-3" style="margin-bottom:20px">' +
+      '<div class="stat-card green" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">' +
+        '<div class="sc-label">🌟 Appreciation</div>' +
+        '<div class="sc-value">'+qrApprec.length+'</div>' +
+        '<div class="sc-change up">'+( qrTotal>0?Math.round((qrApprec.length/qrTotal)*100):0 )+'% of responses</div>' +
+      '</div>' +
+      '<div class="stat-card gold" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">' +
+        '<div class="sc-label">💬 Feedback</div>' +
+        '<div class="sc-value">'+qrFeedback.length+'</div>' +
+        '<div class="sc-change neutral">'+( qrTotal>0?Math.round((qrFeedback.length/qrTotal)*100):0 )+'% of responses</div>' +
+      '</div>' +
+      '<div class="stat-card crimson" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">' +
+        '<div class="sc-label">⚠️ Concern</div>' +
+        '<div class="sc-value">'+qrConcern.length+'</div>' +
+        '<div class="sc-change down">'+( qrTotal>0?Math.round((qrConcern.length/qrTotal)*100):0 )+'% of responses</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--ink-60);text-align:center;margin-bottom:20px">Based on '+qrTotal+' responses with Experience rating out of '+fbData.length+' total feedbacks</div>' +
+
+    // Appreciation voices
+    '<div class="section-title">🌟 Appreciation Voices</div>' +
+    sentimentVoiceHtml(svApprec, 'voice-quote', '🌟', 'Appreciation') +
+
+    // Feedback voices
+    '<div class="section-title" style="margin-top:16px">💬 Feedback Voices</div>' +
+    sentimentVoiceHtml(svFeedback, 'voice-quote', '💬', 'Feedback') +
+
+    // Concern voices
+    '<div class="section-title" style="margin-top:16px">⚠️ Concern Voices</div>' +
+    sentimentVoiceHtml(svConcern, 'concern-quote', '⚠️', 'Concern') +
+
+    (qrTotal===0?'<div style="text-align:center;padding:24px;color:var(--ink-60)">No Experience ratings collected in this period.<br/>This data comes from the new Tell us about your Experience question added to the feedback form.</div>':'')
+  );
+
+  // PAGE 5 — Customer Satisfaction
+  html += page("Customer Satisfaction", "05",
     '<div class="stat-grid-3">' +
       statCard("CSI Score",    csi.score!==null?csi.score+"%":"—", csi.score>=80?"green":"crimson", csi.count+" responses") +
       statCard("NPS Score",    nps.score!==null?nps.score:"—",     nps.score>=95?"green":"gold",    "Promoters: "+nps.promoters) +
@@ -774,8 +871,8 @@ function renderReport(){
     npsBreakdown(nps)
   );
 
-  // PAGE 5 — Voice of Customer (continuous, no page breaks)
-  html += page("Voice of Customer", "05",
+  // PAGE 6 — Voice of Customer (continuous, no page breaks)
+  html += page("Voice of Customer", "06",
     '<div class="section-title">Recurring Themes This Period</div>' +
     themeSection(themes) +
     '<div class="section-title" style="margin-top:20px">Top Positive Voices</div>' +
@@ -788,14 +885,14 @@ function renderReport(){
     '</div>'
   );
 
-  // PAGE 6 — Feedback Journey
-  html += page("Feedback Journey", "06",
+  // PAGE 7 — Feedback Journey
+  html += page("Feedback Journey", "07",
     '<div class="section-title">Negative to Positive Journey</div>' +
     feedbackJourney(fbData, negFB, posFB)
   );
 
-  // PAGE 7 — Divert Analysis
-  html += page("Divert Analysis", "07",
+  // PAGE 8 — Divert Analysis
+  html += page("Divert Analysis", "08",
     '<div class="stat-grid">' +
       statCard("Total Diverts",  divData.length, "",                "") +
       statCard("Divert Rate",    dr+"%",          dr<=5?"green":"crimson", "Target < 5%") +
@@ -808,22 +905,22 @@ function renderReport(){
     divertStatus(divData)
   );
 
-  // PAGE 8 — Team Performance
-  html += page("Team Performance", "08",
+  // PAGE 9 — Team Performance
+  html += page("Team Performance", "09",
     '<div class="section-title">Operational Metrics</div>' +
     teamTable(ffData, fbData, divData)
   );
 
-  // PAGE 9 — Highlights & Actions
-  html += page("Highlights & Action Items", "09",
+  // PAGE 10 — Highlights & Actions
+  html += page("Highlights & Action Items", "10",
     '<div class="section-title">This Period\'s Wins</div>' +
     periodWins(cv, csi.score, nps.score, dr) +
     '<div style="margin-top:20px" class="section-title">Action Items for Next Period</div>' +
     actionItems(cv, csi.score, nps.score, dr, negFB, themes)
   );
 
-  // PAGE 10 — Next Period Targets
-  html += page("Next Period Targets", "10",
+  // PAGE 11 — Next Period Targets
+  html += page("Next Period Targets", "11",
     '<div class="section-title">Carry Forward Targets</div>' +
     targetTable(cv, csi.score, nps.score, dr, fbData.length, totalFall)
   );
@@ -1003,14 +1100,83 @@ function voiceQuotes(voices, type){
 }
 
 function feedbackJourney(all, neg, pos){
-  var negMobile  = neg.filter(function(f){return String(f.cust_mobile||"").length>=10;});
+  var negMobile = neg.filter(function(f){return String(f.cust_mobile||"").length>=10;});
+  var callData  = DATA.callLog || [];
+
+  // Get latest call status per feedback_id from call_log
+  var latestCallMap = {};
+  callData.forEach(function(l){
+    var fid = l.feedback_id;
+    if(!latestCallMap[fid]) latestCallMap[fid] = l;
+    else {
+      // Keep latest by call_at timestamp
+      if((l.call_at||"") > (latestCallMap[fid].call_at||"")) latestCallMap[fid] = l;
+    }
+  });
+
+  // Negative feedback with mobile
+  var negMobileIds = negMobile.map(function(f){return f.feedback_id;});
+
+  // Count by latest status
+  var resolved=0, willVisit=0, noAnswer=0, notReachable=0, notSatisfied=0, pending=0;
+  negMobile.forEach(function(f){
+    var latest = latestCallMap[f.feedback_id];
+    if(!latest){
+      pending++;
+    } else {
+      var s = latest.call_status||"";
+      if(s==="issue_resolved")                                   resolved++;
+      else if(s==="will_visit")                                  willVisit++;
+      else if(s==="closed_no_response"||s==="no_answer")         noAnswer++;
+      else if(s==="closed_not_reachable"||s==="not_reachable")   notReachable++;
+      else if(s==="not_satisfied")                               notSatisfied++;
+      else                                                        pending++;
+    }
+  });
+
+  // Thanked — positive feedback called
+  var thanked = pos.filter(function(f){ var l=latestCallMap[f.feedback_id]; return l&&l.call_status==="thanked"; }).length;
+  var posPending = pos.filter(function(f){ return !latestCallMap[f.feedback_id]; }).length;
+
+  var recoveryRate = negMobile.length>0 ? Math.round(((resolved+willVisit)/negMobile.length)*100) : 0;
+
   var html="";
+
+  // Total
   html+='<div class="funnel-row"><div class="fn-label">📋 Total Feedbacks</div><div class="fn-val">'+all.length+'</div><div class="fn-pct">100%</div></div>';
   html+='<div style="text-align:center;font-size:18px;color:var(--ink-30);margin:4px 0">↓</div>';
+
+  // Negative
   html+='<div class="funnel-row" style="background:var(--crimson-l)"><div class="fn-label">🔴 Negative Feedbacks</div><div class="fn-val" style="color:var(--crimson)">'+neg.length+'</div><div class="fn-pct">'+Math.round((neg.length/(all.length||1))*100)+'%</div></div>';
   html+='<div class="funnel-row" style="margin-left:20px"><div class="fn-label">📞 With Mobile (Callable)</div><div class="fn-val">'+negMobile.length+'</div><div class="fn-pct">'+Math.round((negMobile.length/(neg.length||1))*100)+'%</div></div>';
+
+  // Call outcomes
+  html+='<div style="margin-left:40px">';
+  html+='<div class="funnel-row" style="background:var(--green-l);margin-bottom:4px"><div class="fn-label">✅ Issue Resolved</div><div class="fn-val" style="color:var(--green)">'+resolved+'</div><div class="fn-pct">'+Math.round((resolved/(negMobile.length||1))*100)+'%</div></div>';
+  html+='<div class="funnel-row" style="background:var(--navy-l);margin-bottom:4px"><div class="fn-label">🔵 Will Visit Again</div><div class="fn-val" style="color:var(--navy)">'+willVisit+'</div><div class="fn-pct">'+Math.round((willVisit/(negMobile.length||1))*100)+'%</div></div>';
+  html+='<div class="funnel-row" style="background:var(--gold-l);margin-bottom:4px"><div class="fn-label">📵 No Answer / Closed</div><div class="fn-val" style="color:var(--gold)">'+noAnswer+'</div><div class="fn-pct">'+Math.round((noAnswer/(negMobile.length||1))*100)+'%</div></div>';
+  html+='<div class="funnel-row" style="background:var(--surface);margin-bottom:4px"><div class="fn-label">📵 Not Reachable</div><div class="fn-val">'+notReachable+'</div><div class="fn-pct">'+Math.round((notReachable/(negMobile.length||1))*100)+'%</div></div>';
+  if(notSatisfied>0)
+    html+='<div class="funnel-row" style="background:var(--crimson-l);margin-bottom:4px"><div class="fn-label">⚠️ Still Not Satisfied</div><div class="fn-val" style="color:var(--crimson)">'+notSatisfied+'</div><div class="fn-pct">'+Math.round((notSatisfied/(negMobile.length||1))*100)+'%</div></div>';
+  html+='<div class="funnel-row" style="background:var(--surface);margin-bottom:4px"><div class="fn-label">⏳ Pending Call</div><div class="fn-val" style="color:var(--ink-60)">'+pending+'</div><div class="fn-pct">'+Math.round((pending/(negMobile.length||1))*100)+'%</div></div>';
+  html+='</div>';
+
+  // Recovery rate
+  var rrColor = recoveryRate>=60?"var(--green)":recoveryRate>=40?"var(--gold)":"var(--crimson)";
+  html+='<div style="margin:8px 0 4px;padding:12px 16px;border-radius:8px;background:'+rrColor+'22;border-left:4px solid '+rrColor+'">' +
+    '<div style="font-size:13px;font-weight:700;color:'+rrColor+'">Recovery Rate: '+recoveryRate+'%</div>' +
+    '<div style="font-size:11px;color:var(--ink-60);margin-top:2px">'+(resolved+willVisit)+' of '+negMobile.length+' negative customers resolved or will revisit</div>' +
+  '</div>';
+
   html+='<div style="text-align:center;font-size:18px;color:var(--ink-30);margin:4px 0">↓</div>';
+
+  // Positive
   html+='<div class="funnel-row" style="background:var(--green-l)"><div class="fn-label">🟢 Positive Feedbacks</div><div class="fn-val" style="color:var(--green)">'+pos.length+'</div><div class="fn-pct">'+Math.round((pos.length/(all.length||1))*100)+'%</div></div>';
+  if(thanked>0)
+    html+='<div class="funnel-row" style="margin-left:20px;background:var(--green-l)"><div class="fn-label">✅ Thanked</div><div class="fn-val" style="color:var(--green)">'+thanked+'</div><div class="fn-pct">'+Math.round((thanked/(pos.length||1))*100)+'%</div></div>';
+  if(posPending>0)
+    html+='<div class="funnel-row" style="margin-left:20px"><div class="fn-label">⏳ Pending Thank You Call</div><div class="fn-val" style="color:var(--ink-60)">'+posPending+'</div><div class="fn-pct">'+Math.round((posPending/(pos.length||1))*100)+'%</div></div>';
+
   return html;
 }
 
